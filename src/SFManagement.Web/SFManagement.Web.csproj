@@ -20,4 +20,16 @@
     <InternalsVisibleTo Include="SFManagement.E2ETests" />
   </ItemGroup>
 
+  <Target Name="BuildTailwindCss" BeforeTargets="ResolveStaticWebAssetsInputs">
+    <MakeDir Directories="wwwroot;wwwroot\css" Condition="!Exists('wwwroot\css')" />
+    <Exec Command="npm run build:css" ContinueOnError="true" />
+  </Target>
+
+  <Target Name="CopyWwwrootToOutput" AfterTargets="Build">
+    <ItemGroup>
+      <WwwrootFiles Include="wwwroot\**" />
+    </ItemGroup>
+    <Copy SourceFiles="@(WwwrootFiles)" DestinationFolder="$(OutputPath)wwwroot\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

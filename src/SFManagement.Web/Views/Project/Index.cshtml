@@ -1,9 +1,9 @@
 @model IReadOnlyList<ProjectDto>
 
 <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold">Projects</h1>
+    <h1 class="text-2xl font-bold dark:text-white">Projects</h1>
     <a href="/Project/Create"
-       class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+       class="bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600">
         + New Project
     </a>
 </div>
@@ -11,11 +11,11 @@
 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
     @foreach (var project in Model)
     {
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow">
-            <h2 class="text-lg font-semibold text-gray-900">@project.Name</h2>
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@project.Name</h2>
             @if (!string.IsNullOrEmpty(project.DescriptionMd))
             {
-                <p class="text-xs text-gray-400 mt-1 line-clamp-2">@project.DescriptionMd[..Math.Min(project.DescriptionMd.Length, 120)]</p>
+                <p class="text-xs text-gray-400 mt-1 line-clamp-2 dark:text-gray-400">@project.DescriptionMd[..Math.Min(project.DescriptionMd.Length, 120)]</p>
             }
             <div class="flex gap-2 mt-4">
                 <a href="/Dashboard/Index?projectId=@project.Id"
@@ -23,11 +23,11 @@
                     Dashboard
                 </a>
                 <a href="/Project/Detail?projectId=@project.Id"
-                   class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50">
+                   class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                     Details
                 </a>
                 <a href="/Task/Create?projectId=@project.Id"
-                   class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50">
+                   class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                     + Task
                 </a>
             </div>
@@ -38,7 +38,7 @@
 @if (Model.Count == 0)
 {
     <div class="text-center py-12">
-        <p class="text-gray-400 mb-4">No projects yet.</p>
+        <p class="text-gray-400 mb-4 dark:text-gray-500">No projects yet.</p>
         <a href="/Project/Create"
            class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
             Create your first project

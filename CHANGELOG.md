@@ -5,6 +5,135 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-06-28
+
+### Added
+
+- **Task creation skill validation:**
+  - Server-side validation in `CreateTaskCommandHandler` (`src/SFManagement.Infrastructure/Handlers/Commands/CreateTaskCommandHandler.cs`): throws `InvalidOperationException` if `RequiredSkillsVector` contains no non-zero entries.
+  - Client-side validation in `Task/Create.cshtml`: prevents form submission and shows toast if no skill is selected.
+- **Dashboard task skills display:**
+  - New `TaskSkillDto` record (`SkillName`, `SkillPosition`, `RequiredLevel`) in `TaskDto.cs` (`src/SFManagement.Application/DTOs/TaskDto.cs`).
+  - `TaskDto` extended with optional `IReadOnlyList<TaskSkillDto>? Skills` property.
+  - `TaskCardDto` (`DashboardViewModel.cs`) extended with optional `Skills` list.
+  - `GetDashboardTasksQueryHandler` (`src/SFManagement.Infrastructure/Handlers/Queries/GetDashboardTasksQueryHandler.cs`): loads skills catalogue and decodes `required_skills_vector` into named skill pills.
+  - `Dashboard/Index.cshtml`: renders skill pills on each kanban task card (indigo badges with tooltip).
+- **Evaluation scope reduced to task skills:**
+  - `DashboardController.EvaluationPopup` (`src/SFManagement.Web/Controllers/DashboardController.cs`): now uses `task.Skills` (from decoded vector) instead of loading all skills; `IGetAllSkillsQueryHandler` dependency removed.
+  - `EvaluateTaskCommandHandler` (`src/SFManagement.Infrastructure/Handlers/Commands/EvaluateTaskCommandHandler.cs`): only processes evaluations for skill positions present in the task's `required_skills_vector`; skips `performance_evaluations` insert if `newLevel == previousLevel` (within 0.001 tolerance); only updates worker vector if at least one skill actually changed.
+
+### Changed
+
+- `MapToCard` in `DashboardController` now passes `t.Skills` to `TaskCardDto`.
+
+### Fixed
+
+- **Worker/Index: "show more skills" visual consistency:**
+  - Expanded skill rows now properly toggle the `hidden` class instead of setting inline `display: flex`, avoiding broken block layout for extra skills.
+  - Skill row layout restructured to single line: name (truncated) | progress bar | score (bold, right-aligned) — all on the same row.
+- **Worker/Edit: skills not loading for editing:**
+  - `WorkerController.Edit` GET now computes active skills from `worker.SkillsVector`, serializes them to JSON, and passes via `ViewBag.WorkerSkillsJson`.
+  - `Edit.cshtml` sets `window.__workerSkills` from the ViewBag and dispatches `change` events so the skill-selector JS properly stores the actual level values in its internal map.
+- **Skill selector pills not rendering:**
+  - `_SkillSelector.cshtml`: JSON serialization now uses explicit camelCase property names (`id`, `name`, `vectorPosition`, `isActive`) to match JS expectations, fixing the empty pills display in Task/Create and Worker/Edit forms.
+
+### Added
+
+- **Multiple workers per task:**
+  - Database: removed `UNIQUE (task_id)` constraint from `task_assignments` to allow multiple workers per task.
+  - New `AssignedWorkerDto` record (`WorkerId`, `WorkerName`) in `TaskDto.cs`.
+  - `TaskDto` and `TaskCardDto` now use `IReadOnlyList<AssignedWorkerDto>? AssignedWorkers` (replacing single `AssignedWorkerId`/`AssignedWorkerName`).
+  - New `RemoveWorkerFromTaskCommand` + `RemoveWorkerFromTaskCommandHandler` (`DELETE FROM task_assignments WHERE task_id = $1 AND worker_id = $2`).
+  - New `GetWorkerTasksQuery` + `GetWorkerTasksQueryHandler`: returns tasks assigned to a worker with project names.
+  - `AssignWorkerCommandHandler`: changed from `ON CONFLICT ... DO UPDATE` to simple `INSERT` (no conflict clause).
+  - `GetDashboardTasksQueryHandler` and `GetAllTasksQueryHandler`: now aggregate multiple assigned workers per task via a second query with `= ANY($1)`.
+  - `GetRecommendedWorkersQueryHandler`: excludes workers already assigned to the task (`NOT IN (SELECT worker_id FROM task_assignments WHERE task_id = $3)`).
+  - `EvaluateTaskCommand` now includes `WorkerId`; handler filters assignment by both `taskId` and `workerId`.
+- **Dashboard: worker pills with remove button:**
+  - `Dashboard/Index.cshtml`: shows each assigned worker as an indigo pill with an `×` button (hidden for finished tasks).
+  - `kanban.js`: new `removeWorker(taskId, workerId, btn)` function calls `/Dashboard/RemoveWorker` and removes the pill from the card.
+  - `DashboardController`: new `RemoveWorker` POST action.
+- **Evaluation modal: worker selector:**
+  - `EvaluationPopup` passes `AssignedWorkers` to the view model.
+  - `_EvaluationModal.cshtml`: shows a `<select>` dropdown when multiple workers are assigned; otherwise a hidden input with the single worker's ID.
+- **Worker detail page: assigned tasks grid:**
+  - `WorkerController.Detail` loads assigned tasks via `IGetWorkerTasksQueryHandler`.
+  - `WorkerHistoryViewModel` extended with optional `AssignedTasks` list.
+  - `Worker/Detail.cshtml`: renders assigned tasks as a responsive card grid with project name and task title, linking to the dashboard board.
+
+## [0.5.0] - 2026-06-28
+
+### Added
+
+- **Fase 5 — UI/UX Polish + Frontend Security**
+  - **5.6 Toast Notifications** (`wwwroot/js/toast.js`):
+    - `ToastManager` singleton con soporte para `success`, `error`, `info`, `warning`
+    - Auto-dismiss tras 3s con animación slide-in/out
+    - Integrado en `_Layout.cshtml` via `#toast-container` y función global `window.showToast()`
+    - Activado en todas las acciones asíncronas del kanban (assign, change status, evaluate)
+  - **5.7 Breadcrumb Navigation** (`_Breadcrumb.cshtml`):
+    - Partial compartido renderizado en todas las páginas
+    - `ViewBag.Breadcrumbs` como `List<KeyValuePair<string, string>>` (label, url)
+    - Último item sin url indica página actual
+    - Estilos responsivos con Tailwind
+  - **5.9 Tooltips/Hover Cards** (`wwwroot/js/tooltips.js`):
+    - Tooltips CSS vía atributo `data-tooltip` en elementos
+    - Posicionamiento automático (evita bordes de viewport)
+    - Añadido a skill-pills, botones de asignar/evaluar, y theme toggle
+  - **5.5 Loading Skeletons/Spinners** (`wwwroot/css/loaders.css`):
+    - Animación shimmer para skeletons (`@keyframes shimmer`)
+    - Spinner circular para botones en estado loading
+    - Kanban.js: skeleton placeholder mientras carga AssignPopup/EvaluationPopup
+  - **5.4 Dark Mode** (`wwwroot/js/theme.js`):
+    - Persistencia en `localStorage('sfm-theme')`
+    - Detecta `prefers-color-scheme` en primera visita
+    - Toggle via botón en sidebar con icono luna/sol SVG
+    - Clase `dark` en `<html>` + Tailwind `dark:` variants en todas las vistas
+  - **5.3 Responsive Mobile-First**:
+    - Kanban: `sm:grid-cols-1` → vertical stack en móvil
+    - Tablas: `overflow-x-auto` con scroll horizontal
+    - Formularios: `w-full` inputs, paddings responsivos `p-4 sm:p-6`
+    - Sidebar: ancho fijo 56 con diseño compacto
+  - **5.1 UI/UX Polish**:
+    - Sombras consistentes: `shadow-sm` en cards, `shadow-md` en hover
+    - Hover states: `hover:bg-gray-50` en filas de tabla, `hover:shadow-md` en cards
+    - Focus rings: `focus:ring-2 focus:ring-indigo-500` en todos los inputs
+    - Badges uniformes: `px-2 py-0.5 rounded-full text-xs font-medium`
+    - Empty states con iconos y CTA
+    - Transiciones suaves en modales (scale+opacity), sidebar links, skill pills
+  - **Nuevos archivos creados**:
+    - `wwwroot/js/toast.js`, `wwwroot/js/tooltips.js`, `wwwroot/js/theme.js`
+    - `wwwroot/css/loaders.css`
+    - `Views/Shared/_Breadcrumb.cshtml`
+  - **Todos los controladores actualizados**: `ViewBag.PageTitle` y `ViewBag.Breadcrumbs` en cada acción GET
+  - **Todas las vistas actualizadas**: dark mode classes, tooltips, breadcrumbs, consistencia visual
+  - **Build**: 0 errores, 0 warnings
+  - **Tests**: 53/53 verdes (31 unit + 14 integration + 8 E2E)
+  - **5.11 Sidebar colapsable en mobile**:
+    - Sidebar cambia a `fixed` overlay con slide-in/out en móvil (<1024px), se mantiene `static` en desktop
+    - Botón hamburguesa en `<header>` con SVG icono, oculto en desktop (`lg:hidden`)
+    - Backdrop semitransparente al abrir sidebar en mobile, cierra al hacer clic
+    - Tecla Escape cierra la sidebar
+    - `overflow: hidden` en body mientras sidebar abierta en mobile
+
+### Fixed
+
+- **Static files empty in browser**: Reemplazado `MapStaticAssets()` + `.WithStaticAssets()` por `UseStaticFiles()` para evitar los warnings `StaticFileMiddleware[16]` (WebRootPath no encontrado) y `StaticAssetsInvoker[17]` (Static Web Assets no habilitados en development). `UseStaticFiles()` sirve archivos directamente desde el wwwroot físico sin depender del manifest.
+- **HTTPS redirect warning**: Movido `UseHttpsRedirection()` dentro del bloque `if (!app.Environment.IsDevelopment())` para eliminar el warning `HttpsRedirectionMiddleware[3]` (puerto HTTPS no determinado) al usar el perfil HTTP.
+
+### Changed
+
+- **Tailwind CSS**: Reestructurada la integración local:
+  - `input.css` movido de `wwwroot/css/input.css` a `styles/input.css` (fuera de wwwroot) para evitar que el SDK lo trate como activo estático servible
+  - `package.json`: scripts `build:css`/`watch:css` apuntan a `./styles/input.css` → `./wwwroot/css/tailwind.css`
+  - `tailwind.config.js`: `content` ampliado con `./Pages/**/*.cshtml` y `./**/*.html`
+  - `SFManagement.Web.csproj`:
+    - Target `BuildTailwindCss` con `MakeDir` que crea `wwwroot` + `wwwroot\css` si no existen, antes de ejecutar `npm run build:css`
+    - Nuevo target `CopyWwwrootToOutput` (after Build) que copia `wwwroot\**` completo a `$(OutputPath)wwwroot` con `SkipUnchangedFiles=true`, garantizando que los archivos están disponibles incluso si el content root apunta al directorio de salida
+  - `Program.cs`: `WebApplicationOptions` con `ContentRootPath` y `WebRootPath` explícitos para evitar el warning `StaticFileMiddleware[16]` (WebRootPath no encontrado)
+  - Eliminado `wwwroot/css/input.css` (source) del directorio servido
+  - `wwwroot/css/tailwind.css` (generado) permanece en `.gitignore`
+
 ## [0.4.0] - 2026-06-28
 
 ### Added

@@ -1,35 +1,36 @@
 @model WorkerHistoryViewModel
 
-<h1 class="text-2xl font-bold mb-6">Edit Worker</h1>
+<h1 class="text-2xl font-bold mb-6 dark:text-white">Edit Worker</h1>
 
-<form method="post" class="max-w-2xl space-y-4">
+<form method="post" class="max-w-2xl space-y-4 dark:text-gray-100">
     <input type="hidden" name="workerId" value="@Model.WorkerId">
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Name</label>
         <input type="text" name="name" value="@Model.WorkerName" required
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Role</label>
         <input type="text" name="role" value="@(ViewBag.WorkerRole ?? "")"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
                placeholder="e.g. Frontend Engineer - Senior">
     </div>
 
     <fieldset>
-        <legend class="text-sm font-medium text-gray-700 mb-2">Skills</legend>
+        <legend class="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Skills</legend>
         @await Html.PartialAsync("_SkillSelector", (IReadOnlyList<SkillDto>)ViewBag.AllSkills)
     </fieldset>
 
     <button type="submit"
-            class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+            class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
         Save Changes
     </button>
 </form>
 
 <script>
+    window.__workerSkills = @Html.Raw(ViewBag.WorkerSkillsJson ?? "[]");
     document.addEventListener('DOMContentLoaded', function () {
         var container = document.querySelector('.skill-selector');
         if (!container || !window.__workerSkills) return;
@@ -37,7 +38,10 @@
             var pill = container.querySelector('.skill-pill[data-pos="' + s.pos + '"]');
             if (pill) pill.click();
             var input = container.querySelector('.skill-selected-item[data-pos="' + s.pos + '"] .skill-level');
-            if (input) input.value = s.level;
+            if (input) {
+                input.value = s.level;
+                input.dispatchEvent(new Event('change'));
+            }
         });
     });
 </script>

@@ -20,7 +20,7 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
         skills.forEach(function (s) {
             if (selected.has(s.vectorPosition)) return;
             if (filter && !s.name.toLowerCase().includes(filter)) return;
-            unselectedHtml += '<span class="skill-pill cursor-pointer px-3 py-1 rounded-full text-xs font-medium bg-white border border-gray-300 hover:border-indigo-400 hover:text-indigo-600 transition-colors" data-pos="' + s.vectorPosition + '" data-name="' + s.name.replace(/'/g, '&apos;') + '">' + s.name + '</span>';
+            unselectedHtml += '<span class="skill-pill cursor-pointer px-3 py-1 rounded-full text-xs font-medium bg-white border border-gray-300 hover:border-indigo-400 hover:text-indigo-600 transition-colors" data-pos="' + s.vectorPosition + '" data-name="' + s.name.replace(/'/g, '&apos;') + '" data-tooltip="' + s.name + ': click to add">' + s.name + '</span>';
         });
         unselectedBox.innerHTML = unselectedHtml;
 

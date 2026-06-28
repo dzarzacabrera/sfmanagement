@@ -68,14 +68,18 @@ CREATE TABLE IF NOT EXISTS tasks (
     required_skills_vector vector(1024) NOT NULL
 );
 
--- 2.6 Task Assignments (one worker per task at a time)
+-- 2.6 Task Assignments (multiple workers per task, unique per worker)
 CREATE TABLE IF NOT EXISTS task_assignments (
     id          INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     task_id     INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
     worker_id   INT NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
-    assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE (task_id)
+    assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE task_assignments DROP CONSTRAINT IF EXISTS task_assignments_task_id_key;
+DO $$ BEGIN
+    ALTER TABLE task_assignments ADD CONSTRAINT task_assignments_task_worker_key UNIQUE (task_id, worker_id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 2.7 Performance Evaluations (immutable audit trail)
 CREATE TABLE IF NOT EXISTS performance_evaluations (

@@ -17,7 +17,7 @@ public sealed class PerformanceEvaluationTests(SfManagementFixture fixture)
         var (_, taskId) = await CreateFinishedTaskAsync(sp);
 
         var evalHandler = sp.GetRequiredService<ICommandHandler<EvaluateTaskCommand>>();
-        var evalCommand = new EvaluateTaskCommand(taskId,
+        var evalCommand = new EvaluateTaskCommand(taskId, 1,
             [new SkillEvaluation(0, PerformanceRating.Excellent)]);
         await evalHandler.HandleAsync(evalCommand);
     }
@@ -30,7 +30,7 @@ public sealed class PerformanceEvaluationTests(SfManagementFixture fixture)
         var (_, taskId) = await CreateInProgressTaskAsync(sp);
 
         var evalHandler = sp.GetRequiredService<ICommandHandler<EvaluateTaskCommand>>();
-        var evalCommand = new EvaluateTaskCommand(taskId,
+        var evalCommand = new EvaluateTaskCommand(taskId, 1,
             [new SkillEvaluation(0, PerformanceRating.Average)]);
 
         await FluentActions.Invoking(() => evalHandler.HandleAsync(evalCommand))

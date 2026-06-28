@@ -1,10 +1,10 @@
 @model IReadOnlyList<TaskDto>
 
 <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold">Tasks</h1>
+    <h1 class="text-2xl font-bold dark:text-white">Tasks</h1>
     <div class="flex gap-2">
         <a href="/Task/Create?projectId=1"
-           class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+           class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
             + New Task
         </a>
     </div>
@@ -13,23 +13,23 @@
 <div class="overflow-x-auto">
     <table class="w-full text-sm border-collapse">
         <thead>
-            <tr class="bg-gray-100 text-left">
-                <th class="px-4 py-2 font-medium text-gray-600">ID</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Title</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Project</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Status</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Criticality</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Assigned</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Actions</th>
+            <tr class="bg-gray-100 text-left dark:bg-gray-800">
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">ID</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Title</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Project</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Status</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Criticality</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Assigned</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var task in Model)
             {
-                <tr class="border-t border-gray-200 hover:bg-gray-50">
-                    <td class="px-4 py-2 text-gray-500">@task.Id</td>
-                    <td class="px-4 py-2 font-medium">@task.Title</td>
-                    <td class="px-4 py-2">Project #@task.ProjectId</td>
+                <tr class="border-t border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+                    <td class="px-4 py-2 text-gray-500 dark:text-gray-400">@task.Id</td>
+                    <td class="px-4 py-2 font-medium dark:text-gray-300">@task.Title</td>
+                    <td class="px-4 py-2 dark:text-gray-300">Project #@task.ProjectId</td>
                     <td class="px-4 py-2">
                         <span class="px-2 py-0.5 rounded-full text-xs font-medium
                             @(task.Status == ProjectTaskStatus.InProgress ? "bg-amber-100 text-amber-700" :
@@ -48,10 +48,19 @@
                             @task.Criticality
                         </span>
                     </td>
-                    <td class="px-4 py-2 text-gray-500">@(task.AssignedWorkerName ?? "—")</td>
+                    <td class="px-4 py-2 text-gray-500 dark:text-gray-300">
+                        @if (task.AssignedWorkers?.Count > 0)
+                        {
+                            @string.Join(", ", task.AssignedWorkers.Select(w => w.WorkerName))
+                        }
+                        else
+                        {
+                            <text>—</text>
+                        }
+                    </td>
                     <td class="px-4 py-2">
                         <a href="/Dashboard/Index?projectId=@task.ProjectId"
-                           class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Board</a>
+                           class="text-indigo-600 hover:text-indigo-800 text-xs font-medium dark:text-indigo-400 dark:hover:text-indigo-300">Board</a>
                     </td>
                 </tr>
             }
@@ -62,9 +71,9 @@
 @if (Model.Count == 0)
 {
     <div class="text-center py-12">
-        <p class="text-gray-400 mb-4">No tasks yet.</p>
+        <p class="text-gray-400 mb-4 dark:text-gray-400">No tasks yet.</p>
         <a href="/Task/Create?projectId=1"
-           class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+           class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 dark:bg-indigo-500">
             Create your first task
         </a>
     </div>

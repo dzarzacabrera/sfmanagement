@@ -10,6 +10,9 @@ internal sealed class CreateTaskCommandHandler(INpgsqlConnectionFactory connecti
 {
     public async Task HandleAsync(CreateTaskCommand command)
     {
+        if (!command.RequiredSkillsVector.Any(v => v > 0))
+            throw new InvalidOperationException("At least one required skill must be specified.");
+
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
         await using var cmd = new NpgsqlCommand(
             "INSERT INTO tasks (project_id, title, description, criticality, required_skills_vector) " +

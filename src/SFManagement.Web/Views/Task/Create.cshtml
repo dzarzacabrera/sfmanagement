@@ -1,24 +1,24 @@
 @model CreateTaskViewModel
 
-<h1 class="text-2xl font-bold mb-6">Create New Task</h1>
+<h1 class="text-2xl font-bold mb-6 dark:text-white">Create New Task</h1>
 
 <form method="post" class="max-w-lg space-y-4">
     <input type="hidden" name="projectId" value="@Model.ProjectId">
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Title</label>
         <input type="text" name="title" required
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
     </div>
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Description</label>
         <textarea name="description" rows="4"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"></textarea>
     </div>
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Criticality</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Criticality</label>
         <select name="criticality"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
             @foreach (var opt in Model.Criticalities)
             {
                 <option value="@opt.Value">@opt.Label</option>
@@ -26,11 +26,20 @@
         </select>
     </div>
     <fieldset>
-        <legend class="text-sm font-medium text-gray-700 mb-2">Required Skills</legend>
+        <legend class="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Required Skills</legend>
         @await Html.PartialAsync("_SkillSelector", (IReadOnlyList<SkillDto>)ViewBag.AllSkills)
     </fieldset>
     <button type="submit"
-            class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+            class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
         Create Task
     </button>
 </form>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (this.querySelectorAll('input[name="skillPositions"]').length === 0) {
+            e.preventDefault();
+            window.showToast('error', 'Please select at least one required skill.');
+        }
+    });
+</script>

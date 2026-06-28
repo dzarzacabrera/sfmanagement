@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
@@ -13,12 +14,16 @@ public class SkillController : Controller
         [FromServices] IGetAllSkillsQueryHandler handler)
     {
         var skills = await handler.HandleAsync(new GetAllSkillsQuery(IncludeInactive: true));
+        ViewBag.PageTitle = "Skills Catalogue";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Skills", "") };
         return View(skills);
     }
 
     [HttpGet]
     public IActionResult Create()
     {
+        ViewBag.PageTitle = "Add Skill";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Skills", "/Skill/Index"), new("Add Skill", "") };
         return View();
     }
 
@@ -39,6 +44,8 @@ public class SkillController : Controller
         var skills = await handler.HandleAsync(new GetAllSkillsQuery(IncludeInactive: true));
         var skill = skills.FirstOrDefault(s => s.Id == skillId);
         if (skill is null) return NotFound();
+        ViewBag.PageTitle = "Edit Skill";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Skills", "/Skill/Index"), new("Edit", "") };
         return View(skill);
     }
 

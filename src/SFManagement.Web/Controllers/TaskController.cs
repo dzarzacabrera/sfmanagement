@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
@@ -14,6 +15,8 @@ public class TaskController : Controller
         [FromServices] IGetAllTasksQueryHandler handler)
     {
         var tasks = await handler.HandleAsync(new GetAllTasksQuery());
+        ViewBag.PageTitle = "Tasks";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "") };
         return View(tasks);
     }
 
@@ -32,6 +35,8 @@ public class TaskController : Controller
         };
 
         ViewBag.AllSkills = skills;
+        ViewBag.PageTitle = "Create Task";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "/Task/Index"), new("Create Task", "") };
 
         return View(new CreateTaskViewModel(projectId, skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition)).ToList(), criticalities));
     }

@@ -1,10 +1,10 @@
 @model List<SkillDto>
 
-<h1 class="text-2xl font-bold mb-6">Skills Catalogue</h1>
+<h1 class="text-2xl font-bold mb-6 dark:text-white">Skills Catalogue</h1>
 
 <div class="mb-4">
     <a href="/Skill/Create"
-       class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+       class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
         Add New Skill
     </a>
 </div>
@@ -12,21 +12,21 @@
 <div class="overflow-x-auto">
     <table class="w-full text-sm border-collapse">
         <thead>
-            <tr class="bg-gray-100 text-left">
-                <th class="px-4 py-2 font-medium text-gray-600">ID</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Name</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Position</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Status</th>
-                <th class="px-4 py-2 font-medium text-gray-600">Actions</th>
+            <tr class="bg-gray-100 text-left dark:bg-gray-800">
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">ID</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Name</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Position</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Status</th>
+                <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var skill in Model)
             {
-                <tr class="border-t border-gray-200 hover:bg-gray-50">
-                    <td class="px-4 py-2 text-gray-500">@skill.Id</td>
-                    <td class="px-4 py-2">@skill.Name</td>
-                    <td class="px-4 py-2 text-center font-mono">@skill.VectorPosition</td>
+                <tr class="border-t border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+                    <td class="px-4 py-2 text-gray-500 dark:text-gray-300">@skill.Id</td>
+                    <td class="px-4 py-2 dark:text-gray-300">@skill.Name</td>
+                    <td class="px-4 py-2 text-center font-mono dark:text-gray-300">@skill.VectorPosition</td>
                     <td class="px-4 py-2">
                         @if (skill.IsActive)
                         {
@@ -39,11 +39,11 @@
                     </td>
                     <td class="px-4 py-2 flex gap-2">
                         <a href="/Skill/Edit?skillId=@skill.Id"
-                           class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Edit</a>
+                           class="text-indigo-600 hover:text-indigo-800 text-xs font-medium dark:text-indigo-400 dark:hover:text-indigo-300">Edit</a>
                         <form method="post" action="/Skill/ToggleActive" class="inline">
                             <input type="hidden" name="skillId" value="@skill.Id">
                             <button type="submit"
-                                    class="text-xs font-medium hover:underline @(skill.IsActive ? "text-red-600 hover:text-red-800" : "text-green-600 hover:text-green-800")">
+                                    class="text-xs font-medium hover:underline @(skill.IsActive ? "text-red-600 hover:text-red-800" : "text-green-600 hover:text-green-800") @(skill.IsActive ? "dark:hover:text-indigo-300" : "dark:hover:text-indigo-300")">
                                 @(skill.IsActive ? "Deactivate" : "Activate")
                             </button>
                         </form>
