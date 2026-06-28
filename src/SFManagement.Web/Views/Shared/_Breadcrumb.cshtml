@@ -3,13 +3,13 @@
     if (crumbs is not null && crumbs.Count > 0)
     {
         <nav class="text-xs text-gray-400 mb-4 flex items-center gap-1.5 flex-wrap">
-            <a href="/" class="hover:text-indigo-600 transition-colors">Home</a>
+            <a href="/" class="hover:text-brand transition-colors">Home</a>
             @foreach (var crumb in crumbs)
             {
                 <span class="text-gray-300">/</span>
                 if (!string.IsNullOrEmpty(crumb.Value))
                 {
-                    <a href="@crumb.Value" class="hover:text-indigo-600 transition-colors">@crumb.Key</a>
+                    <a href="@crumb.Value" class="hover:text-brand transition-colors">@crumb.Key</a>
                 }
                 else
                 {

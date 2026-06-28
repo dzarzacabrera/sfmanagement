@@ -13,20 +13,20 @@
         .task-card { transition: box-shadow 0.15s ease; }
         .task-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .skill-pill { cursor: pointer; transition: all 0.15s ease; }
-        .skill-pill:hover { border-color: #6366f1; color: #6366f1; }
+        .skill-pill:hover { border-color: #21668f; color: #21668f; }
         .skill-selected-item { transition: all 0.2s ease; }
         .modal-enter { opacity: 0; transform: scale(0.95); }
         .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 0.2s ease, transform 0.2s ease; }
         .modal-exit { opacity: 1; transform: scale(1); }
         .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 0.15s ease, transform 0.15s ease; }
         .sidebar-link { transition: all 0.15s ease; border-left: 3px solid transparent; }
-        .sidebar-link:hover { background: rgba(99,102,241,0.08); border-left-color: #6366f1; color: #6366f1; }
-        .sidebar-link.active { background: rgba(99,102,241,0.1); border-left-color: #6366f1; color: #6366f1; font-weight: 600; }
+        .sidebar-link:hover { background: rgba(33,102,143,0.08); border-left-color: #21668f; color: #21668f; }
+        .sidebar-link.active { background: rgba(33,102,143,0.1); border-left-color: #21668f; color: #21668f; font-weight: 600; }
         .dark .glass-panel { background: rgba(30,30,40,0.85); }
         .dark .kanban-column { background: #1e1e2a; }
         .dark .task-card { background: #262636; border-color: #333350; }
-        .dark .sidebar-link:hover { background: rgba(99,102,241,0.15); }
-        .dark .sidebar-link.active { background: rgba(99,102,241,0.2); }
+        .dark .sidebar-link:hover { background: rgba(33,102,143,0.15); }
+        .dark .sidebar-link.active { background: rgba(33,102,143,0.2); }
         .dark .modal-backdrop { background: rgba(0,0,0,0.6); }
         @@media (max-width: 1023px) {
             #sidebar { transition: transform 0.3s ease-in-out; }
@@ -44,7 +44,7 @@
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-56 -translate-x-full bg-white border-r border-gray-200 shadow-sm flex flex-col dark:bg-gray-900 dark:border-gray-800 lg:static lg:z-auto lg:translate-x-0 lg:shrink-0">
         <div class="px-4 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <div>
-                <a href="/" class="text-lg font-bold tracking-tight text-indigo-700 dark:text-indigo-400">SFManagement</a>
+                <a href="/" class="text-lg font-bold tracking-tight text-brand dark:text-brand">SFManagement</a>
                 <p class="text-xs text-gray-400 mt-0.5 dark:text-gray-500">Skill Forge</p>
             </div>
             <button onclick="toggleSidebar()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden" aria-label="Close menu">
@@ -97,11 +97,11 @@
             </div>
             <div class="flex gap-2 sm:gap-3">
                 <a href="/Worker/Create"
-                   class="bg-indigo-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors">+ Worker</a>
+                   class="bg-brand text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep transition-colors">+ Worker</a>
                 <a href="/Project/Create"
-                   class="bg-indigo-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors">+ Project</a>
+                   class="bg-brand text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep transition-colors">+ Project</a>
                 <a href="/Task/Create?projectId=1"
-                   class="bg-indigo-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors">+ Task</a>
+                   class="bg-brand text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep transition-colors">+ Task</a>
             </div>
         </header>
 

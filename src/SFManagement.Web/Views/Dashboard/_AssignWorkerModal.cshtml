@@ -8,8 +8,8 @@
     <div class="space-y-2 max-h-60 overflow-y-auto">
         @foreach (var worker in Model.Workers)
         {
-            <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-indigo-50 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-300 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
-                <input type="radio" name="workerId" value="@worker.Id" class="accent-indigo-600">
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-brand-light/20 has-[:checked]:bg-brand-light/20 has-[:checked]:border-brand-dark/50 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
+                <input type="radio" name="workerId" value="@worker.Id" class="accent-brand">
                 <div>
                     <div class="text-sm font-medium dark:text-gray-200">@worker.Name</div>
                     <div class="text-xs text-gray-400 dark:text-gray-400">Compatibility: @worker.CompatibilityScore.ToString("0.00")</div>
@@ -23,7 +23,7 @@
             Cancel
         </button>
         <button type="submit"
-                class="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
+                class="px-4 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep">
             Assign
         </button>
     </div>
