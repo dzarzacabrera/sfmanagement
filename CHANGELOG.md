@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-06-28
+
+### Added
+
+- **Fase 3: Infraestructura ADO.NET, Handlers PostgreSQL e Integration Tests**
+  - **Connection Factory:** `INpgsqlConnectionFactory` / `NpgsqlConnectionFactory` con `NpgsqlDataSource` + `UseVector()` para pgvector.
+  - **DataReaderMapper:** Helper interno con métodos tipados (`GetInt32`, `GetString`, `GetVector`, `GetEnum`) para hidratación manual desde `NpgsqlDataReader`.
+  - **9 Command Handlers ADO.NET:**
+    - `CreateProjectCommandHandler` (INSERT RETURNING id)
+    - `CreateTaskCommandHandler` (INSERT con vector)
+    - `AssignWorkerCommandHandler` (INSERT con ON CONFLICT DO UPDATE)
+    - `ChangeTaskStatusCommandHandler` (carga entidad, valida transición vía dominio, UPDATE)
+    - `EvaluateTaskCommandHandler` (INSERT evaluations + UPDATE skills_vector con clamping)
+    - `UpdateProjectCommandHandler` (UPDATE projects)
+    - `UpdateTaskCommandHandler` (carga entidad, valida solo Queued, UPDATE)
+    - `UpdateWorkerCommandHandler` (UPDATE workers)
+    - `UpdateSkillCatalogueCommandHandler` (UPDATE skills_catalogue)
+  - **4 Query Handlers ADO.NET:**
+    - `GetDashboardTasksQueryHandler` (SELECT con LEFT JOIN task_assignments + workers)
+    - `GetRecommendedWorkersQueryHandler` (SELECT con producto escalar `<#>` de pgvector, restringido por project_workers)
+    - `GetWorkerHistoryQueryHandler` (SELECT performance_evaluations JOIN tasks)
+    - `GetWorkersByProjectQueryHandler` (SELECT workers JOIN project_workers)
+  - **DI Registration:** Método de extensión `AddInfrastructure()` que registra DataSource, ConnectionFactory, y todos los handlers.
+  - **Integration Tests (14 tests):**
+    - `ProjectLifecycleTests`: crear y actualizar proyecto.
+    - `WorkerAssignmentTests`: asignar worker, recomendados por `<#>` ordenados, workers por proyecto.
+    - `PerformanceEvaluationTests`: evaluación completa con actualización de skill, evaluar tarea no-finalizada lanza error.
+    - `TaskStatusTransitionTests`: Queued→InProgress→Finish, Queued→Finish inválido, Finish→Any inválido, Blocked→Queued.
+    - `TaskEditRestrictionTests`: editar Queued OK, editar InProgress/Finish lanza error.
+  - ADR 004 (Implementación ADO.NET Puro con Npgsql y Pgvector).
+
+### Fixed
+
+- Database `init.sql`: se agregó `OVERRIDING SYSTEM VALUE` y `ALTER TABLE ... RESTART WITH` para compatibilidad con `GENERATED ALWAYS AS IDENTITY` en tests de integración.
+- `DataReaderMapper.GetEnum`: cambiado a `ignoreCase: true` para mapear valores en minúscula de la BD (`'low'`, `'medium'`) a enums PascalCase de C#.
+- Lectura/escritura del tipo `vector`: corregido el mapeo mediante `Pgvector.Vector` (no `float[]` directo).
+
 ## [0.1.0] - 2026-06-28
 
 ### Added
@@ -23,9 +60,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Value Object:** `SkillVector` con clamping 0–10, `ApplyImpact()`, `CalculateCriticalityMultiplier()`.
   - **Entidades:** `SkillCatalogue`, `Worker`, `Project`, `ProjectTask` (con `ChangeStatus()` y `UpdateDetails()`), `TaskAssignment`, `PerformanceEvaluation`.
   - **CQRS Manual:** Interfaces `ICommandHandler<T>` y `IQueryHandler<T,R>`.
-  - **Commands:** `CreateProjectCommand`, `CreateTaskCommand`, `AssignWorkerToTaskCommand`, `UnassignWorkerFromTaskCommand`, `ChangeTaskStatusCommand`, `CompleteTaskCommand`, `RegisterEvaluationCommand`, `UpdateProjectDetailsCommand`, `UpdateTaskDetailsCommand`.
-  - **Queries:** `GetProjectTasksQuery`, `GetRecommendedWorkersQuery` (vector match), `GetWorkerSkillsQuery`, `GetProjectDetailsQuery`.
-  - **DTOs:** `TaskDto`, `WorkerDto`, `ProjectDto`, `WorkerSkillDto`.
+  - **Commands:** `CreateProjectCommand`, `CreateTaskCommand`, `AssignWorkerCommand`, `ChangeTaskStatusCommand`, `EvaluateTaskCommand`, `UpdateProjectCommand`, `UpdateTaskCommand`, `UpdateWorkerCommand`, `UpdateSkillCatalogueCommand`.
+  - **Queries:** `GetDashboardTasksQuery`, `GetRecommendedWorkersQuery` (vector match `<#>`), `GetWorkerHistoryQuery`, `GetWorkersByProjectQuery`.
+  - **DTOs:** `TaskDto`, `WorkerDto`, `WorkerScoreDto`, `EvaluationHistoryDto`.
   - **Tests Unitarios (31 tests):**
     - `SkillVectorTests`: creación, clamping superior/inferior, ApplyImpact (Poor+High, Excellent+Critical, Poor+Critical, Average+Medium), equals.
     - `XpCalculationTests`: multiplicadores de criticalidad, ToBasePoints, impacto combinado.

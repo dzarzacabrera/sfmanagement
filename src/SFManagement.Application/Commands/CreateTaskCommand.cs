@@ -7,4 +7,7 @@ public record CreateTaskCommand(
     string Title,
     string? Description,
     Criticality Criticality,
-    float[] RequiredSkillsVector);
+    float[] RequiredSkillsVector)
+{
+    public int CreatedId { get; set; }
+}
