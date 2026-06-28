@@ -1,0 +1,58 @@
+@model WorkerHistoryViewModel
+
+<h1 class="text-2xl font-bold mb-6">
+    @Model.WorkerName
+    <a href="/Worker/Edit?workerId=@Model.WorkerId"
+       class="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-800">
+        Edit
+    </a>
+</h1>
+
+@if (Model.Evaluations.Count == 0)
+{
+    <p class="text-gray-500">No evaluations recorded yet.</p>
+}
+else
+{
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+            <thead>
+                <tr class="bg-gray-100 text-left">
+                    <th class="px-4 py-2 font-medium text-gray-600">Date</th>
+                    <th class="px-4 py-2 font-medium text-gray-600">Task</th>
+                    <th class="px-4 py-2 font-medium text-gray-600">Skill Position</th>
+                    <th class="px-4 py-2 font-medium text-gray-600">Rating</th>
+                    <th class="px-4 py-2 font-medium text-gray-600">Criticality</th>
+                    <th class="px-4 py-2 font-medium text-gray-600">Impact</th>
+                    <th class="px-4 py-2 font-medium text-gray-600">Previous</th>
+                    <th class="px-4 py-2 font-medium text-gray-600">New</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var eval in Model.Evaluations)
+                {
+                    <tr class="border-t border-gray-200 hover:bg-gray-50">
+                        <td class="px-4 py-2 text-gray-500">@eval.CreatedAt.ToString("g")</td>
+                        <td class="px-4 py-2">@eval.TaskTitle</td>
+                        <td class="px-4 py-2 text-center">@eval.SkillPosition</td>
+                        <td class="px-4 py-2">
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                                @(eval.Rating == PerformanceRating.Excellent ? "bg-green-100 text-green-700" :
+                                  eval.Rating == PerformanceRating.Good ? "bg-blue-100 text-blue-700" :
+                                  eval.Rating == PerformanceRating.Average ? "bg-gray-100 text-gray-600" :
+                                  "bg-red-100 text-red-700")">
+                                @eval.Rating
+                            </span>
+                        </td>
+                        <td class="px-4 py-2">@eval.Criticality</td>
+                        <td class="px-4 py-2 font-mono @(eval.Impact >= 0 ? "text-green-600" : "text-red-600")">
+                            @eval.Impact.ToString("+0.00;-0.00")
+                        </td>
+                        <td class="px-4 py-2 font-mono">@eval.PreviousLevel.ToString("0.0")</td>
+                        <td class="px-4 py-2 font-mono">@eval.NewLevel.ToString("0.0")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

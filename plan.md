@@ -50,11 +50,11 @@
 
 | # | Tarea | Archivo / Ruta |
 |---|-------|----------------|
-| 2.1 | Enum `TaskStatus` (Queued, InProgress, Blocked, Finish) | `Domain/Enums/TaskStatus.cs` |
+| 2.1 | Enum `ProjectTaskStatus` (Queued, InProgress, Blocked, Finish) | `Domain/Enums/ProjectTaskStatus.cs` |
 | 2.2 | Enum `Criticality` (low, medium, high, critical) | `Domain/Enums/Criticality.cs` |
 | 2.3 | Enum `PerformanceRating` (Poor, Average, Good, Excellent) con método `ToBasePoints()` → -0.5, 0.0, +0.2, +0.5 | `Domain/Enums/PerformanceRating.cs` |
 | 2.4 | Value Object `SkillVector` con: constructor desde `float[]`, clamping `[0.0, 10.0]`, método `ApplyImpact(basePoints, criticalityMultiplier)`, indexador `[position]` | `Domain/ValueObjects/SkillVector.cs` |
-| 2.5 | Entidad `SkillCatalogue` (Id, Name, VectorPosition) | `Domain/Entities/SkillCatalogue.cs` |
+| 2.5 | Entidad `SkillCatalogue` (Id, Name, VectorPosition, IsActive) | `Domain/Entities/SkillCatalogue.cs` |
 | 2.6 | Entidad `Worker` (Id, Name, SkillsVector) | `Domain/Entities/Worker.cs` |
 | 2.7 | Entidad `Project` (Id, Name, DescriptionMd) | `Domain/Entities/Project.cs` |
 | 2.8 | Entidad `ProjectTask` (Id, ProjectId, Title, Description, Criticality, Status, RequiredSkillsVector) | `Domain/Entities/ProjectTask.cs` |
@@ -69,18 +69,19 @@
 | 2.17 | Command `ChangeTaskStatusCommand` (TaskId, NewStatus) | `Application/Commands/ChangeTaskStatusCommand.cs` |
 | 2.18 | Command `UpdateProjectCommand` (ProjectId, Name, DescriptionMd) | `Application/Commands/UpdateProjectCommand.cs` |
 | 2.19 | Command `UpdateTaskCommand` (TaskId, Title, Description, Criticality, RequiredSkillsVector) — solo válido si status es Queued | `Application/Commands/UpdateTaskCommand.cs` |
-| 2.20 | Command `UpdateWorkerCommand` (WorkerId, Name) | `Application/Commands/UpdateWorkerCommand.cs` |
+| 2.20 | Command `UpdateWorkerCommand` (WorkerId, Name, SkillsVector) — SkillsVector opcional, si se envía se actualiza | `Application/Commands/UpdateWorkerCommand.cs` |
 | 2.21 | Command `UpdateSkillCatalogueCommand` (SkillId, Name) — vector_position inmutable | `Application/Commands/UpdateSkillCatalogueCommand.cs` |
 | 2.22 | Query `GetDashboardTasksQuery` (ProjectId) → List<TaskDto> | `Application/Queries/GetDashboardTasksQuery.cs` |
 | 2.23 | Query `GetRecommendedWorkersQuery` (ProjectId, TaskId) → List<WorkerScoreDto> | `Application/Queries/GetRecommendedWorkersQuery.cs` |
 | 2.24 | Query `GetWorkerHistoryQuery` (WorkerId) → List<EvaluationHistoryDto> | `Application/Queries/GetWorkerHistoryQuery.cs` |
 | 2.25 | Query `GetWorkersByProjectQuery` (ProjectId) → List<WorkerDto> | `Application/Queries/GetWorkersByProjectQuery.cs` |
-| 2.26 | DTOs: `TaskDto`, `WorkerScoreDto`, `EvaluationHistoryDto`, `WorkerDto` | `Application/DTOs/` |
-| 2.27 | Test: `SkillVectorTests` — creación, clamping superior 10.0, clamping inferior 0.0, ApplyImpact (todas las combinaciones criticality × rating) | `tests/SFManagement.UnitTests/SkillVectorTests.cs` |
-| 2.28 | Test: `XpCalculationTests` — verificar multiplicadores criticalidad × puntos base | `tests/SFManagement.UnitTests/XpCalculationTests.cs` |
-| 2.29 | Test: `DomainValidationTests` — validar estados Kanban, enums, reglas de edición | `tests/SFManagement.UnitTests/DomainValidationTests.cs` |
-| 2.30 | ADR 003: documentar diseño de SkillVector y algoritmo XP | `docs/003-decision-skill-vector-xp.md` |
-| 2.31 | Actualizar CHANGELOG.md con v0.1.0 | `CHANGELOG.md` |
+| 2.26 | Query `GetAllSkillsQuery` → List<SkillDto> | `Application/Queries/GetAllSkillsQuery.cs` |
+| 2.27 | DTOs: `TaskDto`, `WorkerScoreDto`, `EvaluationHistoryDto`, `WorkerDto`, `SkillDto` | `Application/DTOs/` |
+| 2.28 | Test: `SkillVectorTests` — creación, clamping superior 10.0, clamping inferior 0.0, ApplyImpact (todas las combinaciones criticality × rating) | `tests/SFManagement.UnitTests/SkillVectorTests.cs` |
+| 2.29 | Test: `XpCalculationTests` — verificar multiplicadores criticalidad × puntos base | `tests/SFManagement.UnitTests/XpCalculationTests.cs` |
+| 2.30 | Test: `DomainValidationTests` — validar estados Kanban, enums, reglas de edición | `tests/SFManagement.UnitTests/DomainValidationTests.cs` |
+| 2.31 | ADR 003: documentar diseño de SkillVector y algoritmo XP | `docs/003-decision-skill-vector-xp.md` |
+| 2.32 | Actualizar CHANGELOG.md con v0.1.0 | `CHANGELOG.md` |
 
 ---
 
@@ -116,43 +117,79 @@
 
 ---
 
-## 🔷 FASE 4 — Frontend: Vistas Razor, Kanban, Vanilla JS y E2E Tests
+## 🔷 FASE 4 — Frontend: Vistas Razor, Kanban, Vanilla JS, Skill Selector Pills, Skills CRUD y E2E Tests
 
-| # | Tarea | Archivo / Ruta |
-|---|-------|----------------|
-| 4.1 | Layout principal con Tailwind CSS (CDN v3), meta viewport, fuente sistema | `Web/Views/Shared/_Layout.cshtml` |
-| 4.2 | `DashboardController` (Index: carga tareas del proyecto, AssignPopup: GET workers recomendados) | `Web/Controllers/DashboardController.cs` |
-| 4.3 | Vista Dashboard Kanban: 4 columnas responsivas (Queued, In Progress, Blocked, Finish) | `Web/Views/Dashboard/Index.cshtml` |
-| 4.4 | `ProjectController` (Create, Detail) | `Web/Controllers/ProjectController.cs` |
-| 4.5 | Vista Create Project: formulario con nombre + subida archivo .md | `Web/Views/Project/Create.cshtml` |
-| 4.6 | `TaskController` (Create, ChangeStatus) | `Web/Controllers/TaskController.cs` |
-| 4.7 | Vista Create Task: dropdown skills desde catálogo cerrado (posiciones fijas 0-11), selector criticalidad | `Web/Views/Task/Create.cshtml` |
-| 4.8 | `WorkerController` (Detail con historial) | `Web/Controllers/WorkerController.cs` |
-| 4.9 | Vista Worker Detail: tabla cronológica inversa de evaluaciones | `Web/Views/Worker/Detail.cshtml` |
-| 4.10 | Partial View: Popup asignación worker (glassmorphism backdrop-blur-sm, hoja inferior móvil, centrado escritorio) | `Web/Views/Dashboard/_AssignWorkerModal.cshtml` |
-| 4.11 | Partial View: Modal evaluación desempeño (rating por skill involucrada, 4 opciones cualitativas) | `Web/Views/Dashboard/_EvaluationModal.cshtml` |
-| 4.12 | ViewModels: `DashboardViewModel`, `TaskViewModel`, `AssignWorkerViewModel`, `EvaluationViewModel`, `WorkerHistoryViewModel` | `Web/ViewModels/` |
-| 4.13 | **Vanilla JS — kanban.js**: fetch asíncrono para cambiar estado tarea, actualizar columna sin recargar | `Web/wwwroot/js/kanban.js` |
-| 4.14 | **Vanilla JS — modal.js**: abrir/cerrar popup, focus trap, animación entrada/salida, click outside para cerrar | `Web/wwwroot/js/modal.js` |
-| 4.15 | **Vanilla JS — evaluation.js**: submit evaluación asíncrono, mostrar resultado | `Web/wwwroot/js/evaluation.js` |
-| 4.16 | E2E Test: navegar a Dashboard, cambiar estado tarea | `tests/E2E/KanbanStateChangeTests.cs` |
-| 4.17 | E2E Test: abrir popup asignación, seleccionar worker, confirmar | `tests/E2E/WorkerAssignmentFlowTests.cs` |
-| 4.18 | E2E Test: completar tarea, rellenar evaluación, verificar redirección | `tests/E2E/PerformanceEvaluationFlowTests.cs` |
-| 4.19 | Actualizar CHANGELOG.md con v0.3.0 | `CHANGELOG.md` |
+| # | Tarea | Archivo / Ruta | Estado |
+|---|-------|----------------|--------|
+| 4.1 | Layout principal con Tailwind CSS (CDN v3), meta viewport, fuente sistema | `Web/Views/Shared/_Layout.cshtml` | ✅ |
+| 4.2 | `DashboardController` (Index, AssignPopup, EvaluationPopup, POST actions) | `Web/Controllers/DashboardController.cs` | ✅ |
+| 4.3 | Vista Dashboard Kanban: 4 columnas responsivas (Queued, In Progress, Blocked, Finish) | `Web/Views/Dashboard/Index.cshtml` | ✅ |
+| 4.4 | `ProjectController` — añadir acción `Detail` GET + vista con info del proyecto y tareas vinculadas | `Web/Controllers/ProjectController.cs`, `Web/Views/Project/Detail.cshtml` | ✅ |
+| 4.5 | Vista Create Project — reemplazar textarea por `<input type="file" accept=".md">` + procesar contenido en POST | `Web/Views/Project/Create.cshtml`, `ProjectController.Create POST` | ✅ |
+| 4.6 | `TaskController` (Create GET/POST, ChangeStatus) | `Web/Controllers/TaskController.cs` | ✅ |
+| 4.7 | Vista Create Task — reemplazar inputs numéricos por **Skill Pills Selector** (búsqueda + pills + nivel numérico en zona seleccionadas) | `Web/Views/Task/Create.cshtml`, `Web/Views/Shared/_SkillSelector.cshtml` | ✅ |
+| 4.8 | `WorkerController` — añadir acción `Edit` GET/POST + vista con nombre + Skill Pills Selector pre-cargado | `Web/Controllers/WorkerController.cs`, `Web/Views/Worker/Edit.cshtml` | ✅ |
+| 4.9 | Vista Worker Detail: tabla cronológica inversa de evaluaciones + enlace "Editar" | `Web/Views/Worker/Detail.cshtml` | ✅ |
+| 4.10 | Partial View: Popup asignación worker (glassmorphism backdrop-blur-sm) | `Web/Views/Dashboard/_AssignWorkerModal.cshtml` | ✅ |
+| 4.11 | Partial View: Modal evaluación desempeño (rating por skill, carga skills desde BD) | `Web/Views/Dashboard/_EvaluationModal.cshtml` | ✅ |
+| 4.12 | ViewModels: `DashboardViewModel`, `AssignWorkerViewModel`, `EvaluationViewModel`, `WorkerHistoryViewModel` | `Web/ViewModels/` | ✅ |
+| 4.13 | **kanban.js** — cambiar estado tarea vía fetch + mover card entre columnas **sin recargar** (DOM in-place) | `Web/wwwroot/js/kanban.js` | ✅ |
+| 4.14 | **modal.js** — focus trap, animación CSS entrada/salida (opacity/transform), click outside, Escape key | `Web/wwwroot/js/modal.js` | ✅ |
+| 4.15 | **skill-selector.js** — componente Vanilla JS: input búsqueda, pills no-seleccionadas filtrables, pills seleccionadas con input nivel (0-10), siempre visibles | `Web/wwwroot/js/skill-selector.js` | ✅ |
+| 4.16 | `SkillController` — CRUD skills catálogo (Index, Create, Edit, ToggleActive) | `Web/Controllers/SkillController.cs` | ✅ |
+| 4.17 | Vistas Skill: `Index.cshtml` (tabla skills activas/inactivas + toggle), `Create.cshtml` (solo nombre), `Edit.cshtml` (solo nombre) | `Web/Views/Skill/` | ✅ |
+| 4.18 | **Query** `GetAllSkillsQueryHandler` — SELECT skills activas desde BD | `Infrastructure/Handlers/Queries/GetAllSkillsQueryHandler.cs` | ✅ |
+| 4.19 | **Command** `ToggleSkillActiveCommand` con Handler — soft-delete / reactivar skill | `Application/Commands/ToggleSkillActiveCommand.cs`, `Infrastructure/Handlers/Commands/ToggleSkillActiveCommandHandler.cs` | ✅ |
+| 4.20 | **Database**: `vector(12)` → `vector(1024)`, columna `is_active` en skills_catalogue, stored procedure `sp_add_skill`, función `util_pad_vector()` para seed | `database/init.sql`, `database/stored_procedures.sql` | ✅ |
+| 4.21 | **E2E Test** — Skills CRUD (crear → listar → desactivar → reactivar) | `tests/SFManagement.E2ETests/SkillsCrudTests.cs` | ✅ |
+| 4.22 | **E2E Test** — Worker Edit (editar nombre + skills) | `tests/SFManagement.E2ETests/WorkerEditFlowTests.cs` | ✅ |
+| 4.23 | Actualizar CHANGELOG.md con v0.4.0 | `CHANGELOG.md` | ✅ |
+
+### Detalle Skill Pills Selector (tareas 4.7, 4.8, 4.15)
+
+**Comportamiento:**
+1. Carga skills desde ViewBag (lista `SkillDto` con id, name, vector_position)
+2. `<input type="text" placeholder="🔍 Filtrar skills...">` filtra por nombre solo las pills **no seleccionadas**
+3. Pills no seleccionadas se muestran como `<span class="pill">` clickeables
+4. Click en pill → se mueve a zona "Seleccionadas" + aparece `<input type="number" min="0" max="10" step="0.5">` con label "Nivel"
+5. Click en ✕ → vuelve a zona no seleccionada, se limpia nivel y posición
+6. Las seleccionadas **siempre visibles** (el filtro no las afecta)
+7. POST envía: `skillPositions[]` (vector_position) + `skillLevels[]` (nivel numérico)
+8. El handler construye un `float[1024]` con ceros y setea las posiciones indicadas
+
+**Partial View:** `_SkillSelector.cshtml`
+**JS:** `skill-selector.js`
 
 ---
 
-## 🔷 FASE 5 — Validación Extrema de XP, Auditoría OWASP y Cierre
+## 🔷 FASE 5 — UI/UX Polish y Frontend Security
 
 | # | Tarea | Archivo / Ruta |
 |---|-------|----------------|
-| 5.1 | Test extremo: worker con skill en 6.0, recibe evaluación "mal" con criticidad "high" (×1.5), debe bajar a 5.25 (6.0 + (-0.5 × 1.5) = 5.25) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
-| 5.2 | Test extremo: worker con skill en 0.0, recibe evaluación "mal" con criticidad "critical" (×2.0), debe quedar en 0.0 (clamping inferior) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
-| 5.3 | Test extremo: worker con skill en 9.5, recibe "muy_bien" con criticidad "critical" (×2.0), debe quedar en 10.0 (clamping superior: 9.5 + 0.5×2.0 = 10.5 → clamp a 10.0) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
-| 5.4 | ADR 005: documentar algoritmo de cálculo de XP con fórmula, multiplicadores y clamping | `docs/005-decision-xp-calculation-algorithm.md` |
-| 5.5 | Auditoría OWASP: revisar inyección SQL (parametrización), XSS en Razor (Html.Encode), saneamiento subida .md, cabeceras HTTP security | `docs/006-owasp-security-audit.md` |
-| 5.6 | Actualizar `CHANGELOG.md` con v1.0.0 (Added: todas las fases, Fixed: clamping edge cases, Security: OWASP mitigaciones) | `CHANGELOG.md` |
-| 5.7 | Actualizar `README.md` con descripción técnica, instrucciones de despliegue (docker-compose up), y enlaces a ADRs | `README.md` |
+| 5.1 | **UI/UX Polish**: aplicar estilos consistentes a todas las vistas (Tailwind) — card shadows, button hover states, form focus rings, responsive gaps, empty-state illustrations, status badge uniformity, animations sutiles, tipografía consistente | `Web/Views/*/*.cshtml`, `Web/wwwroot/css/` |
+| 5.2 | **ID Encryption**: encriptar/empaquetar todos los IDs expuestos en URLs y formularios del frontend (`workerId`, `projectId`, `taskId`, `skillId`) usando un cifrado simétrico server-side (e.g. AES con clave en configuración); los controladores descifran automáticamente los IDs entrantes vía model binder o action filter | `Web/Infrastructure/EncryptedIdHandler.cs`, `Web/Controllers/*.cs` |
+| 5.3 | **Responsive Mobile-First**: probar y ajustar todas las vistas en viewports <768px — menú colapsable, tablas con scroll horizontal, cards apiladas, formularios de ancho completo, kanban vertical en móvil | `Web/Views/*/*.cshtml`, `Web/wwwroot/css/responsive.css` |
+| 5.4 | **Dark Mode / Theme Toggle**: implementar modo oscuro con Tailwind (`dark:` variant), persistencia en `localStorage`, toggle en la sidebar, transición suave entre temas | `Web/Views/Shared/_Layout.cshtml`, `Web/wwwroot/js/theme.js` |
+| 5.5 | **Loading Skeletons / Spinners**: mostrar indicadores de carga durante operaciones fetch (Assign, ChangeStatus, SubmitEvaluation) — spinners en botones, skeleton cards en kanban, estado "Cargando..." en modales | `Web/wwwroot/js/kanban.js`, `Web/wwwroot/js/modal.js`, `Web/wwwroot/css/loaders.css` |
+| 5.6 | **Toast Notifications**: sistema de notificaciones no-bloqueantes para feedback de acciones (guardado exitoso, error, skill añadida) — auto-dismiss después de 3s, stack de toasts, animación slide-in/out | `Web/wwwroot/js/toast.js`, `Web/Views/Shared/_Layout.cshtml` |
+| 5.7 | **Breadcrumb Navigation**: migas de pan en todas las páginas mostrando la jerarquía (ej: Workers > Edit Worker #1), generadas desde el controlador o routing | `Web/Views/Shared/_Breadcrumb.cshtml`, `Web/Controllers/*.cs` |
+| 5.8 | **Paginación en Listas Largas**: añadir paginación server-side con `OFFSET`/`LIMIT` en queries de Workers, Tasks y Skills — número de página, total de páginas, navegación | `Web/Controllers/*.cs`, `Infrastructure/Handlers/Queries/*.cs`, `Web/Views/*/Index.cshtml` |
+| 5.9 | **Tooltips / Hover Cards**: tooltips en elementos del Dashboard (nombre de skill al hover sobre badge, score de recomendación en cards de asignación, vista previa de descripción en tareas) | `Web/wwwroot/js/tooltips.js`, `Web/Views/Dashboard/*.cshtml` |
+| 5.10 | **Developer Profiles Grid**: reemplazar tabla de Workers por grid de tarjetas con avatar, rol, búsqueda en tiempo real, skills colapsables con barra de progreso, contador de evaluaciones | `Web/Views/Worker/Index.cshtml`, `Web/wwwroot/js/worker-grid.js`, `Application/DTOs/WorkerProfileDto.cs`, `Infrastructure/Handlers/Queries/GetAllWorkersQueryHandler.cs` |
+
+---
+
+## 🔷 FASE 6 — Validación Extrema de XP, Auditoría OWASP y Cierre
+
+| # | Tarea | Archivo / Ruta |
+|---|-------|----------------|
+| 6.1 | Test extremo: worker con skill en 6.0, recibe evaluación "mal" con criticidad "high" (×1.5), debe bajar a 5.25 (6.0 + (-0.5 × 1.5) = 5.25) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
+| 6.2 | Test extremo: worker con skill en 0.0, recibe evaluación "mal" con criticidad "critical" (×2.0), debe quedar en 0.0 (clamping inferior) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
+| 6.3 | Test extremo: worker con skill en 9.5, recibe "muy_bien" con criticidad "critical" (×2.0), debe quedar en 10.0 (clamping superior: 9.5 + 0.5×2.0 = 10.5 → clamp a 10.0) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
+| 6.4 | ADR 005: documentar algoritmo de cálculo de XP con fórmula, multiplicadores y clamping | `docs/005-decision-xp-calculation-algorithm.md` |
+| 6.5 | Auditoría OWASP: revisar inyección SQL (parametrización), XSS en Razor (Html.Encode), saneamiento subida .md, cabeceras HTTP security | `docs/006-owasp-security-audit.md` |
+| 6.6 | Actualizar `CHANGELOG.md` con v1.0.0 (Added: todas las fases, Fixed: clamping edge cases, Security: OWASP mitigaciones, UI Polish, ID Encryption) | `CHANGELOG.md` |
+| 6.7 | Actualizar `README.md` con descripción técnica, instrucciones de despliegue (docker-compose up), y enlaces a ADRs | `README.md` |
 
 ---
 
@@ -166,7 +203,8 @@
 - `project_workers` (alcance) se pueden añadir/remover libremente.
 
 ### Worker
-- Editable solo `name`. `skills_vector` lo recalcula el sistema vía evaluaciones (no manual).
+- Editables `name` y `skills_vector` (desde la página `Worker/Edit` usando el Skill Pills Selector).
+- `skills_vector` también se recalcula automáticamente vía evaluaciones de tareas.
 
 ### Task
 
@@ -194,7 +232,8 @@ C:\Users\leisa\source\repos\sfmanagement\
 ├── .config\
 │   └── dotnet-tools.json              → Husky tool manifest
 ├── database\
-│   └── init.sql                       → Schema + seeding
+│   ├── init.sql                       → Schema + seeding
+│   └── stored_procedures.sql          → sp_add_skill
 ├── docs\
 │   ├── 001-decision-arquitectura-persistencia.md  (existente)
 │   ├── 002-decision-project-structure.md
@@ -222,14 +261,15 @@ C:\Users\leisa\source\repos\sfmanagement\
 │   │   └── Mappers\                   → DataReaderMapper
 │   │
 │   └── SFManagement.Web\
-│       ├── Controllers\               → DashboardController, ProjectController, etc.
-│       ├── Views\Shared\              → _Layout.cshtml
-│       ├── Views\Dashboard\           → Index.cshtml, partials
-│       ├── Views\Project\             → Create.cshtml
+│       ├── Controllers\               → DashboardController, ProjectController, SkillController, WorkerController, TaskController
+│       ├── Views\Shared\              → _Layout.cshtml, _SkillSelector.cshtml
+│       ├── Views\Dashboard\           → Index.cshtml, _AssignWorkerModal.cshtml, _EvaluationModal.cshtml
+│       ├── Views\Project\             → Create.cshtml, Detail.cshtml
 │       ├── Views\Task\                → Create.cshtml
-│       ├── Views\Worker\              → Detail.cshtml
-│       ├── ViewModels\                → DashboardViewModel, etc.
-│       └── wwwroot\js\                → kanban.js, modal.js, evaluation.js
+│       ├── Views\Worker\              → Detail.cshtml, Edit.cshtml
+│       ├── Views\Skill\               → Index.cshtml, Create.cshtml, Edit.cshtml
+│       ├── ViewModels\                → DashboardViewModel, AssignWorkerViewModel, EvaluationViewModel, WorkerHistoryViewModel
+│       └── wwwroot\js\                → kanban.js, modal.js, evaluation.js, skill-selector.js
 │
 ├── tests\
 │   ├── SFManagement.UnitTests\        → SkillVectorTests, XpCalculationTests
@@ -247,4 +287,4 @@ C:\Users\leisa\source\repos\sfmanagement\
 
 ---
 
-**Total: ~91 tareas** distribuidas en 5 fases.
+**Total: ~110 tareas** distribuidas en 6 fases.

@@ -68,7 +68,7 @@ public sealed class PerformanceEvaluationTests(SfManagementFixture fixture)
 
         var createTask = services.GetRequiredService<ICommandHandler<CreateTaskCommand>>();
         var taskCmd = new CreateTaskCommand(projectCmd.CreatedId, "Evaluation Task", null,
-            Criticality.High, new float[12]);
+            Criticality.High, new float[1024]);
         await createTask.HandleAsync(taskCmd);
 
         return (projectCmd.CreatedId, taskCmd.CreatedId);

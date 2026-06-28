@@ -1,0 +1,20 @@
+@model SkillDto
+
+<h1 class="text-2xl font-bold mb-6">Edit Skill</h1>
+
+<form method="post" class="max-w-md space-y-4">
+    <input type="hidden" name="skillId" value="@Model.Id">
+
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Skill Name</label>
+        <input type="text" name="name" value="@Model.Name" required
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+    </div>
+    <div class="text-xs text-gray-400">
+        Vector position: @Model.VectorPosition (immutable)
+    </div>
+    <button type="submit"
+            class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+        Save Changes
+    </button>
+</form>

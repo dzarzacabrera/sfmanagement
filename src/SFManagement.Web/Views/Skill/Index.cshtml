@@ -1,0 +1,55 @@
+@model List<SkillDto>
+
+<h1 class="text-2xl font-bold mb-6">Skills Catalogue</h1>
+
+<div class="mb-4">
+    <a href="/Skill/Create"
+       class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+        Add New Skill
+    </a>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse">
+        <thead>
+            <tr class="bg-gray-100 text-left">
+                <th class="px-4 py-2 font-medium text-gray-600">ID</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Name</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Position</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Status</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var skill in Model)
+            {
+                <tr class="border-t border-gray-200 hover:bg-gray-50">
+                    <td class="px-4 py-2 text-gray-500">@skill.Id</td>
+                    <td class="px-4 py-2">@skill.Name</td>
+                    <td class="px-4 py-2 text-center font-mono">@skill.VectorPosition</td>
+                    <td class="px-4 py-2">
+                        @if (skill.IsActive)
+                        {
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
+                        }
+                        else
+                        {
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Inactive</span>
+                        }
+                    </td>
+                    <td class="px-4 py-2 flex gap-2">
+                        <a href="/Skill/Edit?skillId=@skill.Id"
+                           class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Edit</a>
+                        <form method="post" action="/Skill/ToggleActive" class="inline">
+                            <input type="hidden" name="skillId" value="@skill.Id">
+                            <button type="submit"
+                                    class="text-xs font-medium hover:underline @(skill.IsActive ? "text-red-600 hover:text-red-800" : "text-green-600 hover:text-green-800")">
+                                @(skill.IsActive ? "Deactivate" : "Activate")
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

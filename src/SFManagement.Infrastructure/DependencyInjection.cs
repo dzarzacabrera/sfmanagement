@@ -28,11 +28,18 @@ public static class DependencyInjection
         services.AddTransient<ICommandHandler<UpdateTaskCommand>, UpdateTaskCommandHandler>();
         services.AddTransient<ICommandHandler<UpdateWorkerCommand>, UpdateWorkerCommandHandler>();
         services.AddTransient<ICommandHandler<UpdateSkillCatalogueCommand>, UpdateSkillCatalogueCommandHandler>();
+        services.AddTransient<ICommandHandler<CreateSkillCommand>, CreateSkillCommandHandler>();
+        services.AddTransient<ICommandHandler<ToggleSkillActiveCommand>, ToggleSkillActiveCommandHandler>();
+        services.AddTransient<ICommandHandler<CreateWorkerCommand>, CreateWorkerCommandHandler>();
 
         services.AddTransient<IGetDashboardTasksQueryHandler, GetDashboardTasksQueryHandler>();
         services.AddTransient<IGetRecommendedWorkersQueryHandler, GetRecommendedWorkersQueryHandler>();
         services.AddTransient<IGetWorkerHistoryQueryHandler, GetWorkerHistoryQueryHandler>();
         services.AddTransient<IGetWorkersByProjectQueryHandler, GetWorkersByProjectQueryHandler>();
+        services.AddTransient<IGetAllSkillsQueryHandler, GetAllSkillsQueryHandler>();
+        services.AddTransient<IGetAllWorkersQueryHandler, GetAllWorkersQueryHandler>();
+        services.AddTransient<IGetAllProjectsQueryHandler, GetAllProjectsQueryHandler>();
+        services.AddTransient<IGetAllTasksQueryHandler, GetAllTasksQueryHandler>();
 
         return services;
     }

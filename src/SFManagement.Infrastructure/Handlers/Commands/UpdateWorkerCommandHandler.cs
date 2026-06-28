@@ -1,4 +1,5 @@
 using Npgsql;
+using Pgvector;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
 using SFManagement.Infrastructure.Data;
@@ -11,16 +12,35 @@ internal sealed class UpdateWorkerCommandHandler(INpgsqlConnectionFactory connec
     public async Task HandleAsync(UpdateWorkerCommand command)
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
-        await using var cmd = new NpgsqlCommand(
-            "UPDATE workers SET name = $1 WHERE id = $2", connection)
-        {
-            Parameters =
-            {
-                new() { Value = command.Name },
-                new() { Value = command.WorkerId }
-            }
-        };
 
-        await cmd.ExecuteNonQueryAsync();
+        if (command.SkillsVector is not null)
+        {
+            await using var cmd = new NpgsqlCommand(
+                "UPDATE workers SET name = $1, role = $2, skills_vector = $3 WHERE id = $4", connection)
+            {
+                Parameters =
+                {
+                    new() { Value = command.Name },
+                    new() { Value = command.Role },
+                    new() { Value = new Vector(command.SkillsVector) },
+                    new() { Value = command.WorkerId }
+                }
+            };
+            await cmd.ExecuteNonQueryAsync();
+        }
+        else
+        {
+            await using var cmd = new NpgsqlCommand(
+                "UPDATE workers SET name = $1, role = $2 WHERE id = $3", connection)
+            {
+                Parameters =
+                {
+                    new() { Value = command.Name },
+                    new() { Value = command.Role },
+                    new() { Value = command.WorkerId }
+                }
+            };
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 }
