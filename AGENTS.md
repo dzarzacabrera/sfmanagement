@@ -47,7 +47,7 @@ No se permite el uso de librerías de mediación externas (como MediatR). La sep
 *   El mapeo e hidratación de objetos desde la base de datos hacia las entidades o DTOs debe ser manual.
 
 ### Especificaciones Técnicas
-*   **Lenguaje:** C# 10.
+*   **Lenguaje:** C# Net 10.
 *   **Tipo de Proyecto:** ASP.NET Core Web App (MVC).
 *   **Idioma del Código (Strict English Only):** Todo el código fuente sin excepción debe escribirse en inglés. Esto incluye: nombres de proyectos, namespaces, nombres de clases (`Project`, `Task`, `Worker`, `SkillEvaluation`), variables, propiedades, métodos, tablas de la base de datos, columnas, comentarios en el código, comandos, consultas y mensajes de log. El español queda relegado única y exclusivamente a los textos visuales de cara al usuario final en las vistas Razor del Frontend (UI).
 *   **Base de Datos:** PostgreSQL con la extensión `pgvector` habilitada.
