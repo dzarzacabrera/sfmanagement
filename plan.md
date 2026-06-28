@@ -76,9 +76,9 @@
 | 2.24 | Query `GetWorkerHistoryQuery` (WorkerId) → List<EvaluationHistoryDto> | `Application/Queries/GetWorkerHistoryQuery.cs` |
 | 2.25 | Query `GetWorkersByProjectQuery` (ProjectId) → List<WorkerDto> | `Application/Queries/GetWorkersByProjectQuery.cs` |
 | 2.26 | DTOs: `TaskDto`, `WorkerScoreDto`, `EvaluationHistoryDto`, `WorkerDto` | `Application/DTOs/` |
-| 2.27 | Test: `SkillVectorTests` — creación, clamping superior 10.0, clamping inferior 0.0, ApplyImpact (todas las combinaciones criticality × rating) | `tests/Unit/SkillVectorTests.cs` |
-| 2.28 | Test: `XpCalculationTests` — verificar multiplicadores criticalidad × puntos base | `tests/Unit/XpCalculationTests.cs` |
-| 2.29 | Test: `DomainValidationTests` — validar estados Kanban, enums, reglas de edición | `tests/Unit/DomainValidationTests.cs` |
+| 2.27 | Test: `SkillVectorTests` — creación, clamping superior 10.0, clamping inferior 0.0, ApplyImpact (todas las combinaciones criticality × rating) | `tests/SFManagement.UnitTests/SkillVectorTests.cs` |
+| 2.28 | Test: `XpCalculationTests` — verificar multiplicadores criticalidad × puntos base | `tests/SFManagement.UnitTests/XpCalculationTests.cs` |
+| 2.29 | Test: `DomainValidationTests` — validar estados Kanban, enums, reglas de edición | `tests/SFManagement.UnitTests/DomainValidationTests.cs` |
 | 2.30 | ADR 003: documentar diseño de SkillVector y algoritmo XP | `docs/003-decision-skill-vector-xp.md` |
 | 2.31 | Actualizar CHANGELOG.md con v0.1.0 | `CHANGELOG.md` |
 
