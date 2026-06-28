@@ -162,34 +162,40 @@
 
 ---
 
-## 🔷 FASE 5 — UI/UX Polish y Frontend Security
+## 🔷 FASE 5 — UI/UX Polish y Frontend Security (COMPLETED ✅)
 
-| # | Tarea | Archivo / Ruta |
-|---|-------|----------------|
-| 5.1 | **UI/UX Polish**: aplicar estilos consistentes a todas las vistas (Tailwind) — card shadows, button hover states, form focus rings, responsive gaps, empty-state illustrations, status badge uniformity, animations sutiles, tipografía consistente | `Web/Views/*/*.cshtml`, `Web/wwwroot/css/` |
-| 5.2 | **ID Encryption**: encriptar/empaquetar todos los IDs expuestos en URLs y formularios del frontend (`workerId`, `projectId`, `taskId`, `skillId`) usando un cifrado simétrico server-side (e.g. AES con clave en configuración); los controladores descifran automáticamente los IDs entrantes vía model binder o action filter | `Web/Infrastructure/EncryptedIdHandler.cs`, `Web/Controllers/*.cs` |
-| 5.3 | **Responsive Mobile-First**: probar y ajustar todas las vistas en viewports <768px — menú colapsable, tablas con scroll horizontal, cards apiladas, formularios de ancho completo, kanban vertical en móvil | `Web/Views/*/*.cshtml`, `Web/wwwroot/css/responsive.css` |
-| 5.4 | **Dark Mode / Theme Toggle**: implementar modo oscuro con Tailwind (`dark:` variant), persistencia en `localStorage`, toggle en la sidebar, transición suave entre temas | `Web/Views/Shared/_Layout.cshtml`, `Web/wwwroot/js/theme.js` |
-| 5.5 | **Loading Skeletons / Spinners**: mostrar indicadores de carga durante operaciones fetch (Assign, ChangeStatus, SubmitEvaluation) — spinners en botones, skeleton cards en kanban, estado "Cargando..." en modales | `Web/wwwroot/js/kanban.js`, `Web/wwwroot/js/modal.js`, `Web/wwwroot/css/loaders.css` |
-| 5.6 | **Toast Notifications**: sistema de notificaciones no-bloqueantes para feedback de acciones (guardado exitoso, error, skill añadida) — auto-dismiss después de 3s, stack de toasts, animación slide-in/out | `Web/wwwroot/js/toast.js`, `Web/Views/Shared/_Layout.cshtml` |
-| 5.7 | **Breadcrumb Navigation**: migas de pan en todas las páginas mostrando la jerarquía (ej: Workers > Edit Worker #1), generadas desde el controlador o routing | `Web/Views/Shared/_Breadcrumb.cshtml`, `Web/Controllers/*.cs` |
-| 5.8 | **Paginación en Listas Largas**: añadir paginación server-side con `OFFSET`/`LIMIT` en queries de Workers, Tasks y Skills — número de página, total de páginas, navegación | `Web/Controllers/*.cs`, `Infrastructure/Handlers/Queries/*.cs`, `Web/Views/*/Index.cshtml` |
-| 5.9 | **Tooltips / Hover Cards**: tooltips en elementos del Dashboard (nombre de skill al hover sobre badge, score de recomendación en cards de asignación, vista previa de descripción en tareas) | `Web/wwwroot/js/tooltips.js`, `Web/Views/Dashboard/*.cshtml` |
-| 5.10 | **Developer Profiles Grid**: reemplazar tabla de Workers por grid de tarjetas con avatar, rol, búsqueda en tiempo real, skills colapsables con barra de progreso, contador de evaluaciones | `Web/Views/Worker/Index.cshtml`, `Web/wwwroot/js/worker-grid.js`, `Application/DTOs/WorkerProfileDto.cs`, `Infrastructure/Handlers/Queries/GetAllWorkersQueryHandler.cs` |
+| # | Tarea | Archivo / Ruta | Estado |
+|---|-------|----------------|--------|
+| 5.1 | **UI/UX Polish**: aplicar estilos consistentes a todas las vistas (Tailwind) — card shadows, button hover states, form focus rings, responsive gaps, empty-state illustrations, status badge uniformity, animations sutiles, tipografía consistente | `Web/Views/*/*.cshtml`, `Web/wwwroot/css/` | ✅ |
+| 5.2 | **ID Encryption**: encriptar/empaquetar todos los IDs expuestos en URLs y formularios del frontend (`workerId`, `projectId`, `taskId`, `skillId`) usando un cifrado simétrico server-side (e.g. AES con clave en configuración); los controladores descifran automáticamente los IDs entrantes vía model binder o action filter | `Web/Infrastructure/EncryptedIdHandler.cs`, `Web/Controllers/*.cs` | ✅ |
+| 5.3 | **Responsive Mobile-First**: probar y ajustar todas las vistas en viewports <768px — menú colapsable, tablas con scroll horizontal, cards apiladas, formularios de ancho completo, kanban vertical en móvil | `Web/Views/*/*.cshtml`, `Web/wwwroot/css/responsive.css` | ✅ |
+| 5.4 | **Dark Mode / Theme Toggle**: implementar modo oscuro con Tailwind (`dark:` variant), persistencia en `localStorage`, toggle en la sidebar, transición suave entre temas | `Web/Views/Shared/_Layout.cshtml`, `Web/wwwroot/js/theme.js` | ✅ |
+| 5.5 | **Loading Skeletons / Spinners**: mostrar indicadores de carga durante operaciones fetch (Assign, ChangeStatus, SubmitEvaluation) — spinners en botones, skeleton cards en kanban, estado "Cargando..." en modales | `Web/wwwroot/js/kanban.js`, `Web/wwwroot/js/modal.js`, `Web/wwwroot/css/loaders.css` | ✅ |
+| 5.6 | **Toast Notifications**: sistema de notificaciones no-bloqueantes para feedback de acciones (guardado exitoso, error, skill añadida) — auto-dismiss después de 3s, stack de toasts, animación slide-in/out | `Web/wwwroot/js/toast.js`, `Web/Views/Shared/_Layout.cshtml` | ✅ |
+| 5.7 | **Breadcrumb Navigation**: migas de pan en todas las páginas mostrando la jerarquía (ej: Workers > Edit Worker #1), generadas desde el controlador o routing | `Web/Views/Shared/_Breadcrumb.cshtml`, `Web/Controllers/*.cs` | ✅ |
+| 5.8 | **Paginación en Listas Largas**: añadir paginación server-side con `OFFSET`/`LIMIT` en queries de Workers, Tasks y Skills — número de página, total de páginas, navegación | `Web/Controllers/*.cs`, `Infrastructure/Handlers/Queries/*.cs`, `Web/Views/*/Index.cshtml` | ✅ |
+| 5.9 | **Tooltips / Hover Cards**: tooltips en elementos del Dashboard (nombre de skill al hover sobre badge, score de recomendación en cards de asignación, vista previa de descripción en tareas) | `Web/wwwroot/js/tooltips.js`, `Web/Views/Dashboard/*.cshtml` | ✅ |
+| 5.10 | **Developer Profiles Grid**: reemplazar tabla de Workers por grid de tarjetas con avatar, rol, búsqueda en tiempo real, skills colapsables con barra de progreso, contador de evaluaciones | `Web/Views/Worker/Index.cshtml`, `Web/wwwroot/js/worker-grid.js`, `Application/DTOs/WorkerProfileDto.cs`, `Infrastructure/Handlers/Queries/GetAllWorkersQueryHandler.cs` | ✅ |
 
 ---
 
-## 🔷 FASE 6 — Validación Extrema de XP, Auditoría OWASP y Cierre
+## 🔷 FASE 6 — Flujo de Evaluación por Tarea Finalizada (Modal Wizard con Sliders)
+
+*(pendiente de iniciar)*
+
+---
+
+## 🔷 FASE 7 — Validación Extrema de XP, Auditoría OWASP y Cierre
 
 | # | Tarea | Archivo / Ruta |
 |---|-------|----------------|
-| 6.1 | Test extremo: worker con skill en 6.0, recibe evaluación "mal" con criticidad "high" (×1.5), debe bajar a 5.25 (6.0 + (-0.5 × 1.5) = 5.25) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
-| 6.2 | Test extremo: worker con skill en 0.0, recibe evaluación "mal" con criticidad "critical" (×2.0), debe quedar en 0.0 (clamping inferior) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
-| 6.3 | Test extremo: worker con skill en 9.5, recibe "muy_bien" con criticidad "critical" (×2.0), debe quedar en 10.0 (clamping superior: 9.5 + 0.5×2.0 = 10.5 → clamp a 10.0) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
-| 6.4 | ADR 005: documentar algoritmo de cálculo de XP con fórmula, multiplicadores y clamping | `docs/005-decision-xp-calculation-algorithm.md` |
-| 6.5 | Auditoría OWASP: revisar inyección SQL (parametrización), XSS en Razor (Html.Encode), saneamiento subida .md, cabeceras HTTP security | `docs/006-owasp-security-audit.md` |
-| 6.6 | Actualizar `CHANGELOG.md` con v1.0.0 (Added: todas las fases, Fixed: clamping edge cases, Security: OWASP mitigaciones, UI Polish, ID Encryption) | `CHANGELOG.md` |
-| 6.7 | Actualizar `README.md` con descripción técnica, instrucciones de despliegue (docker-compose up), y enlaces a ADRs | `README.md` |
+| 7.1 | Test extremo: worker con skill en 6.0, recibe evaluación "mal" con criticidad "high" (×1.5), debe bajar a 5.25 (6.0 + (-0.5 × 1.5) = 5.25) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
+| 7.2 | Test extremo: worker con skill en 0.0, recibe evaluación "mal" con criticidad "critical" (×2.0), debe quedar en 0.0 (clamping inferior) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
+| 7.3 | Test extremo: worker con skill en 9.5, recibe "muy_bien" con criticidad "critical" (×2.0), debe quedar en 10.0 (clamping superior: 9.5 + 0.5×2.0 = 10.5 → clamp a 10.0) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
+| 7.4 | ADR 005: documentar algoritmo de cálculo de XP con fórmula, multiplicadores y clamping | `docs/005-decision-xp-calculation-algorithm.md` |
+| 7.5 | Auditoría OWASP: revisar inyección SQL (parametrización), XSS en Razor (Html.Encode), saneamiento subida .md, cabeceras HTTP security | `docs/006-owasp-security-audit.md` |
+| 7.6 | Actualizar `CHANGELOG.md` con v1.0.0 (Added: todas las fases, Fixed: clamping edge cases, Security: OWASP mitigaciones, UI Polish, ID Encryption) | `CHANGELOG.md` |
+| 7.7 | Actualizar `README.md` con descripción técnica, instrucciones de despliegue (docker-compose up), y enlaces a ADRs | `README.md` |
 
 ---
 
@@ -287,4 +293,4 @@ C:\Users\leisa\source\repos\sfmanagement\
 
 ---
 
-**Total: ~110 tareas** distribuidas en 6 fases.
+**Total: ~125 tareas** distribuidas en 7 fases.

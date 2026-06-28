@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddTransient<ICommandHandler<CreateProjectCommand>, CreateProjectCommandHandler>();
         services.AddTransient<ICommandHandler<CreateTaskCommand>, CreateTaskCommandHandler>();
         services.AddTransient<ICommandHandler<AssignWorkerCommand>, AssignWorkerCommandHandler>();
+        services.AddTransient<ICommandHandler<RemoveWorkerFromTaskCommand>, RemoveWorkerFromTaskCommandHandler>();
         services.AddTransient<ICommandHandler<ChangeTaskStatusCommand>, ChangeTaskStatusCommandHandler>();
         services.AddTransient<ICommandHandler<EvaluateTaskCommand>, EvaluateTaskCommandHandler>();
         services.AddTransient<ICommandHandler<UpdateProjectCommand>, UpdateProjectCommandHandler>();
@@ -40,6 +41,7 @@ public static class DependencyInjection
         services.AddTransient<IGetAllWorkersQueryHandler, GetAllWorkersQueryHandler>();
         services.AddTransient<IGetAllProjectsQueryHandler, GetAllProjectsQueryHandler>();
         services.AddTransient<IGetAllTasksQueryHandler, GetAllTasksQueryHandler>();
+        services.AddTransient<IGetWorkerTasksQueryHandler, GetWorkerTasksQueryHandler>();
 
         return services;
     }

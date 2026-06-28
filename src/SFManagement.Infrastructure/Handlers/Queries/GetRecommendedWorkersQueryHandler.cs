@@ -28,9 +28,11 @@ internal sealed class GetRecommendedWorkersQueryHandler(INpgsqlConnectionFactory
             "FROM workers w " +
             "INNER JOIN project_workers pw ON pw.worker_id = w.id " +
             "WHERE pw.project_id = $2 " +
+            "AND w.id NOT IN (SELECT worker_id FROM task_assignments WHERE task_id = $3) " +
             "ORDER BY compatibility_score DESC", connection);
         cmd.Parameters.Add(new() { Value = new Pgvector.Vector(taskVector) });
         cmd.Parameters.Add(new() { Value = query.ProjectId });
+        cmd.Parameters.Add(new() { Value = query.TaskId });
 
         var results = new List<WorkerScoreDto>();
         await using var reader = await cmd.ExecuteReaderAsync();

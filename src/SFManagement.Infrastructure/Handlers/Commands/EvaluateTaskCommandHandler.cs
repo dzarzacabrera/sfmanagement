@@ -16,15 +16,27 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
 
-        var (task, assignment) = await LoadTaskAndAssignmentAsync(command.TaskId, connection);
+        var (task, assignment) = await LoadTaskAndAssignmentAsync(command.TaskId, command.WorkerId, connection);
         if (task.Status != ProjectTaskStatus.Finish)
             throw new InvalidOperationException("Cannot evaluate a task that is not in Finish status.");
 
+        var requiredVector = task.RequiredSkillsVector.ToArray();
+        var requiredPositions = new HashSet<int>();
+        for (int i = 0; i < requiredVector.Length; i++)
+        {
+            if (requiredVector[i] > 0)
+                requiredPositions.Add(i);
+        }
+
         var workerSkills = await LoadWorkerSkillsAsync(assignment.WorkerId, connection);
         var currentVector = new SkillVector(workerSkills);
+        var hasChanges = false;
 
         foreach (var evaluation in command.Evaluations)
         {
+            if (!requiredPositions.Contains(evaluation.SkillPosition))
+                continue;
+
             var basePoints = evaluation.Rating.ToBasePoints();
             var multiplier = SkillVector.CalculateCriticalityMultiplier(task.Criticality);
             var impact = basePoints * multiplier;
@@ -33,25 +45,33 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
                 evaluation.SkillPosition, basePoints, multiplier);
             var newLevel = newVector[evaluation.SkillPosition];
 
-            await InsertEvaluationAsync(connection, command.TaskId, assignment.WorkerId,
-                evaluation, task.Criticality, basePoints, impact, previousLevel, newLevel);
+            if (Math.Abs(newLevel - previousLevel) > 0.001)
+            {
+                await InsertEvaluationAsync(connection, command.TaskId, assignment.WorkerId,
+                    evaluation, task.Criticality, basePoints, impact, previousLevel, newLevel);
+                hasChanges = true;
+            }
 
             currentVector = newVector;
         }
 
-        await UpdateWorkerSkillsAsync(connection, assignment.WorkerId, currentVector);
+        if (hasChanges)
+        {
+            await UpdateWorkerSkillsAsync(connection, assignment.WorkerId, currentVector);
+        }
     }
 
     private static async Task<(ProjectTask Task, TaskAssignment Assignment)> LoadTaskAndAssignmentAsync(
-        int taskId, NpgsqlConnection connection)
+        int taskId, int workerId, NpgsqlConnection connection)
     {
         await using var cmd = new NpgsqlCommand(
             "SELECT t.id, t.project_id, t.title, t.description, t.criticality, t.status, " +
             "t.required_skills_vector, ta.id, ta.task_id, ta.worker_id, ta.assigned_at " +
             "FROM tasks t " +
             "INNER JOIN task_assignments ta ON ta.task_id = t.id " +
-            "WHERE t.id = $1", connection);
+            "WHERE t.id = $1 AND ta.worker_id = $2", connection);
         cmd.Parameters.Add(new() { Value = taskId });
+        cmd.Parameters.Add(new() { Value = workerId });
 
         await using var reader = await cmd.ExecuteReaderAsync();
         if (!await reader.ReadAsync())

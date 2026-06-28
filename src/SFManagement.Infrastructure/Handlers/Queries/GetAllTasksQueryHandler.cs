@@ -1,4 +1,5 @@
 using Npgsql;
+using NpgsqlTypes;
 using SFManagement.Application.DTOs;
 using SFManagement.Application.Queries;
 using SFManagement.Infrastructure.Data;
@@ -12,31 +13,60 @@ internal sealed class GetAllTasksQueryHandler(INpgsqlConnectionFactory connectio
     public async Task<IReadOnlyList<TaskDto>> HandleAsync(GetAllTasksQuery query)
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
-        await using var cmd = new NpgsqlCommand(
-            "SELECT t.id, t.project_id, t.title, t.description, t.criticality, t.status, " +
-            "t.required_skills_vector, a.worker_id, w.name AS worker_name " +
-            "FROM tasks t " +
-            "LEFT JOIN task_assignments a ON a.task_id = t.id " +
-            "LEFT JOIN workers w ON w.id = a.worker_id " +
-            "ORDER BY t.id", connection);
-        await using var reader = await cmd.ExecuteReaderAsync();
 
-        var results = new List<TaskDto>();
-        while (await reader.ReadAsync())
+        await using var cmd = new NpgsqlCommand(
+            "SELECT id, project_id, title, description, criticality, status, " +
+            "required_skills_vector FROM tasks ORDER BY id", connection);
+
+        var tasks = new List<(int Id, int ProjectId, string Title, string? Description,
+            Domain.Enums.Criticality Criticality, Domain.Enums.ProjectTaskStatus Status, float[] Vector)>();
+
+        await using (var reader = await cmd.ExecuteReaderAsync())
         {
-            var mapper = new DataReaderMapper(reader);
-            results.Add(new TaskDto(
-                mapper.GetInt32("id"),
-                mapper.GetInt32("project_id"),
-                mapper.GetString("title"),
-                mapper.GetStringOrNull("description"),
-                mapper.GetEnum<Domain.Enums.Criticality>("criticality"),
-                mapper.GetEnum<Domain.Enums.ProjectTaskStatus>("status"),
-                mapper.GetVector("required_skills_vector"),
-                reader.IsDBNull(7) ? null : mapper.GetInt32("worker_id"),
-                reader.IsDBNull(8) ? null : mapper.GetString("worker_name")));
+            while (await reader.ReadAsync())
+            {
+                var m = new DataReaderMapper(reader);
+                tasks.Add((m.GetInt32("id"), m.GetInt32("project_id"),
+                    m.GetString("title"), m.GetStringOrNull("description"),
+                    m.GetEnum<Domain.Enums.Criticality>("criticality"),
+                    m.GetEnum<Domain.Enums.ProjectTaskStatus>("status"),
+                    m.GetVector("required_skills_vector")));
+            }
         }
 
-        return results;
+        var assigned = await LoadAssignmentsAsync(connection, tasks.Select(t => t.Id).ToArray());
+
+        return tasks.Select(t => new TaskDto(
+            t.Id, t.ProjectId, t.Title, t.Description,
+            t.Criticality, t.Status, t.Vector,
+            assigned.GetValueOrDefault(t.Id))).ToList();
+    }
+
+    private static async Task<Dictionary<int, List<AssignedWorkerDto>>> LoadAssignmentsAsync(
+        NpgsqlConnection connection, int[] taskIds)
+    {
+        var result = new Dictionary<int, List<AssignedWorkerDto>>();
+        if (taskIds.Length == 0) return result;
+
+        await using var cmd = new NpgsqlCommand(
+            "SELECT ta.task_id, w.id AS worker_id, w.name AS worker_name " +
+            "FROM task_assignments ta " +
+            "INNER JOIN workers w ON w.id = ta.worker_id " +
+            "WHERE ta.task_id = ANY($1) " +
+            "ORDER BY ta.assigned_at", connection);
+        cmd.Parameters.Add(new() { Value = taskIds, NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Integer });
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var m = new DataReaderMapper(reader);
+            var taskId = m.GetInt32("task_id");
+            if (!result.ContainsKey(taskId))
+                result[taskId] = new List<AssignedWorkerDto>();
+            result[taskId].Add(new AssignedWorkerDto(
+                m.GetInt32("worker_id"), m.GetString("worker_name")));
+        }
+
+        return result;
     }
 }

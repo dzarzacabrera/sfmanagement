@@ -1,4 +1,5 @@
 using Npgsql;
+using NpgsqlTypes;
 using SFManagement.Application.DTOs;
 using SFManagement.Application.Queries;
 using SFManagement.Domain.Enums;
@@ -13,33 +14,101 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
     public async Task<IReadOnlyList<TaskDto>> HandleAsync(GetDashboardTasksQuery query)
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
+
+        var skills = await LoadSkillsAsync(connection);
+
         await using var cmd = new NpgsqlCommand(
             "SELECT t.id, t.project_id, t.title, t.description, t.criticality, t.status, " +
-            "t.required_skills_vector, ta.worker_id AS assigned_worker_id, w.name AS assigned_worker_name " +
+            "t.required_skills_vector " +
             "FROM tasks t " +
-            "LEFT JOIN task_assignments ta ON ta.task_id = t.id " +
-            "LEFT JOIN workers w ON w.id = ta.worker_id " +
             "WHERE t.project_id = $1 " +
             "ORDER BY t.id", connection);
         cmd.Parameters.Add(new() { Value = query.ProjectId });
 
-        var results = new List<TaskDto>();
+        var tasks = new List<(int Id, int ProjectId, string Title, string? Description,
+            Criticality Criticality, ProjectTaskStatus Status, float[] Vector)>();
+
+        await using (var reader = await cmd.ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                var mapper = new DataReaderMapper(reader);
+                tasks.Add((mapper.GetInt32("id"), mapper.GetInt32("project_id"),
+                    mapper.GetString("title"), mapper.GetStringOrNull("description"),
+                    mapper.GetEnum<Criticality>("criticality"),
+                    mapper.GetEnum<ProjectTaskStatus>("status"),
+                    mapper.GetVector("required_skills_vector")));
+            }
+        }
+
+        var assigned = await LoadAssignmentsAsync(connection, tasks.Select(t => t.Id).ToArray());
+
+        return tasks.Select(t => new TaskDto(
+            t.Id, t.ProjectId, t.Title, t.Description,
+            t.Criticality, t.Status, t.Vector,
+            assigned.GetValueOrDefault(t.Id),
+            DecodeSkills(t.Vector, skills))).ToList();
+    }
+
+    private static async Task<Dictionary<int, List<AssignedWorkerDto>>> LoadAssignmentsAsync(
+        NpgsqlConnection connection, int[] taskIds)
+    {
+        var result = new Dictionary<int, List<AssignedWorkerDto>>();
+        if (taskIds.Length == 0) return result;
+
+        await using var cmd = new NpgsqlCommand(
+            "SELECT ta.task_id, w.id AS worker_id, w.name AS worker_name " +
+            "FROM task_assignments ta " +
+            "INNER JOIN workers w ON w.id = ta.worker_id " +
+            "WHERE ta.task_id = ANY($1) " +
+            "ORDER BY ta.assigned_at", connection);
+        cmd.Parameters.Add(new() { Value = taskIds, NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Integer });
+
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            var mapper = new DataReaderMapper(reader);
-            results.Add(new TaskDto(
-                mapper.GetInt32("id"),
-                mapper.GetInt32("project_id"),
-                mapper.GetString("title"),
-                mapper.GetStringOrNull("description"),
-                mapper.GetEnum<Criticality>("criticality"),
-                mapper.GetEnum<ProjectTaskStatus>("status"),
-                mapper.GetVector("required_skills_vector"),
-                mapper.GetInt32OrNull("assigned_worker_id"),
-                mapper.GetStringOrNull("assigned_worker_name")));
+            var m = new DataReaderMapper(reader);
+            var taskId = m.GetInt32("task_id");
+            if (!result.ContainsKey(taskId))
+                result[taskId] = new List<AssignedWorkerDto>();
+            result[taskId].Add(new AssignedWorkerDto(
+                m.GetInt32("worker_id"), m.GetString("worker_name")));
         }
 
-        return results;
+        return result;
+    }
+
+    private static async Task<List<SkillDto>> LoadSkillsAsync(NpgsqlConnection connection)
+    {
+        await using var cmd = new NpgsqlCommand(
+            "SELECT id, name, vector_position, is_active FROM skills_catalogue ORDER BY vector_position", connection);
+        var skills = new List<SkillDto>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var m = new DataReaderMapper(reader);
+            var isActive = reader.GetFieldValue<bool>(reader.GetOrdinal("is_active"));
+            skills.Add(new SkillDto(
+                m.GetInt32("id"),
+                m.GetString("name"),
+                m.GetInt32("vector_position"),
+                isActive));
+        }
+        return skills;
+    }
+
+    private static List<TaskSkillDto> DecodeSkills(float[] vector, List<SkillDto> catalogue)
+    {
+        var result = new List<TaskSkillDto>();
+        for (int i = 0; i < vector.Length; i++)
+        {
+            if (vector[i] > 0)
+            {
+                var skill = catalogue.FirstOrDefault(s => s.VectorPosition == i);
+                var name = skill?.Name ?? $"Skill #{i}";
+                result.Add(new TaskSkillDto(name, i, vector[i]));
+            }
+        }
+        return result;
     }
 }

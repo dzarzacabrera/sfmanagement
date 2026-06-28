@@ -2,18 +2,18 @@
 @using System.Text.Json
 
 @{
-    var skillsJson = JsonSerializer.Serialize(Model.Select(s => new { s.Id, s.Name, s.VectorPosition, s.IsActive }));
+    var skillsJson = JsonSerializer.Serialize(Model.Select(s => new { id = s.Id, name = s.Name, vectorPosition = s.VectorPosition, isActive = s.IsActive }));
 }
 
 <div class="skill-selector" data-field-prefix="@(ViewBag.SkillFieldPrefix ?? "")" data-skills='@skillsJson'>
-    <input type="text" class="skill-filter w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3 focus:ring-2 focus:ring-indigo-500"
+    <input type="text" class="skill-filter w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
            placeholder="Search skills...">
 
-    <div class="skill-unselected flex flex-wrap gap-2 mb-4 min-h-[60px] p-2 bg-gray-50 rounded-lg">
+    <div class="skill-unselected flex flex-wrap gap-2 mb-4 min-h-[60px] p-2 bg-gray-50 rounded-lg dark:bg-gray-800">
     </div>
 
-    <div class="border-t border-gray-200 pt-3">
-        <p class="text-xs font-medium text-gray-500 mb-2">Selected</p>
+    <div class="border-t border-gray-200 pt-3 dark:border-gray-700">
+        <p class="text-xs font-medium text-gray-500 mb-2 dark:text-gray-400">Selected</p>
         <div class="skill-selected flex flex-col gap-2">
         </div>
     </div>

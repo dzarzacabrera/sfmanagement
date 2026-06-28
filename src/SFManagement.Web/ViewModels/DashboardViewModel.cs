@@ -1,4 +1,5 @@
 using SFManagement.Application.DTOs;
+using SFManagement.Application.Queries;
 using SFManagement.Domain.Enums;
 
 namespace SFManagement.Web.ViewModels;
@@ -17,8 +18,8 @@ public record TaskCardDto(
     string? Description,
     Criticality Criticality,
     ProjectTaskStatus Status,
-    int? AssignedWorkerId,
-    string? AssignedWorkerName);
+    IReadOnlyList<AssignedWorkerDto>? AssignedWorkers = null,
+    IReadOnlyList<TaskSkillDto>? Skills = null);
 
 public record AssignWorkerViewModel(
     int TaskId,
@@ -30,11 +31,13 @@ public record EvaluationViewModel(
     string TaskTitle,
     int WorkerId,
     string WorkerName,
-    IReadOnlyList<SkillPositionDto> SkillPositions);
+    IReadOnlyList<SkillPositionDto> SkillPositions,
+    IReadOnlyList<AssignedWorkerDto>? AssignedWorkers = null);
 
 public record SkillPositionDto(int Position, string SkillName);
 
 public record WorkerHistoryViewModel(
     int WorkerId,
     string WorkerName,
-    IReadOnlyList<EvaluationHistoryDto> Evaluations);
+    IReadOnlyList<EvaluationHistoryDto> Evaluations,
+    IReadOnlyList<WorkerTaskDto>? AssignedTasks = null);

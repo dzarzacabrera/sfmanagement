@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
@@ -12,6 +14,8 @@ public class WorkerController : Controller
     [HttpGet]
     public IActionResult Create()
     {
+        ViewBag.PageTitle = "Add Worker";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "/Worker/Index"), new("Add Worker", "") };
         return View();
     }
 
@@ -33,6 +37,8 @@ public class WorkerController : Controller
         var workers = await handler.HandleAsync(new GetAllWorkersQuery());
         var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
         ViewBag.AllSkills = skills;
+        ViewBag.PageTitle = "Workers";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "") };
         return View(workers);
     }
 
@@ -40,18 +46,24 @@ public class WorkerController : Controller
     public async Task<IActionResult> Detail(
         [FromQuery] int workerId,
         [FromServices] IGetAllWorkersQueryHandler allWorkersHandler,
-        [FromServices] IGetWorkerHistoryQueryHandler handler)
+        [FromServices] IGetWorkerHistoryQueryHandler historyHandler,
+        [FromServices] IGetWorkerTasksQueryHandler tasksHandler)
     {
         var workers = await allWorkersHandler.HandleAsync(new GetAllWorkersQuery());
         var worker = workers.FirstOrDefault(w => w.Id == workerId);
         if (worker is null) return NotFound();
 
-        var evaluations = await handler.HandleAsync(new GetWorkerHistoryQuery(workerId));
+        var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(workerId));
+        var tasks = await tasksHandler.HandleAsync(new GetWorkerTasksQuery(workerId));
 
         var vm = new WorkerHistoryViewModel(
             workerId,
             worker.Name,
-            evaluations);
+            evaluations,
+            tasks);
+
+        ViewBag.PageTitle = worker.Name;
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "/Worker/Index"), new(worker.Name, "") };
 
         return View(vm);
     }
@@ -73,6 +85,15 @@ public class WorkerController : Controller
         var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
         ViewBag.AllSkills = skills;
         ViewBag.WorkerRole = worker.Role;
+
+        var activeSkills = skills
+            .Select(s => new { pos = s.VectorPosition, level = Math.Round(worker.SkillsVector.ElementAtOrDefault(s.VectorPosition), 1) })
+            .Where(s => s.level > 0)
+            .ToList();
+        ViewBag.WorkerSkillsJson = JsonSerializer.Serialize(activeSkills);
+
+        ViewBag.PageTitle = "Edit Worker";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "/Worker/Index"), new("Edit", "") };
 
         return View(vm);
     }

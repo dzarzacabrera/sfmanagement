@@ -5,14 +5,14 @@ using SFManagement.Infrastructure.Data;
 
 namespace SFManagement.Infrastructure.Handlers.Commands;
 
-internal sealed class AssignWorkerCommandHandler(INpgsqlConnectionFactory connectionFactory)
-    : ICommandHandler<AssignWorkerCommand>
+internal sealed class RemoveWorkerFromTaskCommandHandler(INpgsqlConnectionFactory connectionFactory)
+    : ICommandHandler<RemoveWorkerFromTaskCommand>
 {
-    public async Task HandleAsync(AssignWorkerCommand command)
+    public async Task HandleAsync(RemoveWorkerFromTaskCommand command)
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
         await using var cmd = new NpgsqlCommand(
-            "INSERT INTO task_assignments (task_id, worker_id) VALUES ($1, $2)", connection)
+            "DELETE FROM task_assignments WHERE task_id = $1 AND worker_id = $2", connection)
         {
             Parameters =
             {

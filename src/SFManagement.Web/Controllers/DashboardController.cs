@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
@@ -24,6 +26,9 @@ public class DashboardController : Controller
             tasks.Where(t => t.Status == ProjectTaskStatus.InProgress).Select(MapToCard).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.Blocked).Select(MapToCard).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.Finish).Select(MapToCard).ToList());
+
+        ViewBag.PageTitle = "Dashboard";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new($"Project #{projectId}", ""), new("Dashboard", "") };
 
         return View(vm);
     }
@@ -60,6 +65,17 @@ public class DashboardController : Controller
 
     [HttpPost]
     [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> RemoveWorker(
+        [FromForm] int taskId,
+        [FromForm] int workerId,
+        [FromServices] ICommandHandler<RemoveWorkerFromTaskCommand> handler)
+    {
+        await handler.HandleAsync(new RemoveWorkerFromTaskCommand(taskId, workerId));
+        return Ok();
+    }
+
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ChangeStatus(
         [FromForm] int taskId,
         [FromForm] string newStatus,
@@ -74,19 +90,23 @@ public class DashboardController : Controller
     public async Task<IActionResult> EvaluationPopup(
         [FromQuery] int taskId,
         [FromQuery] int projectId,
-        [FromServices] IGetDashboardTasksQueryHandler taskHandler,
-        [FromServices] IGetAllSkillsQueryHandler skillsHandler)
+        [FromServices] IGetDashboardTasksQueryHandler taskHandler)
     {
         var tasks = await taskHandler.HandleAsync(new GetDashboardTasksQuery(projectId));
         var task = tasks.FirstOrDefault(t => t.Id == taskId);
-        var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
+        var workers = task?.AssignedWorkers;
+
+        var taskSkills = task?.Skills
+            ?.Select(s => new SkillPositionDto(s.SkillPosition, s.SkillName))
+            .ToList() ?? [];
 
         var vm = new EvaluationViewModel(
             taskId,
             task?.Title ?? $"Task #{taskId}",
-            task?.AssignedWorkerId ?? 0,
-            task?.AssignedWorkerName ?? "Unknown",
-            skills.Select(s => new SkillPositionDto(s.VectorPosition, s.Name)).ToList());
+            workers?.FirstOrDefault()?.WorkerId ?? 0,
+            workers?.FirstOrDefault()?.WorkerName ?? "Unknown",
+            taskSkills,
+            workers);
 
         return PartialView("_EvaluationModal", vm);
     }
@@ -95,6 +115,7 @@ public class DashboardController : Controller
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> SubmitEvaluation(
         [FromForm] int taskId,
+        [FromForm] int workerId,
         [FromForm] int[] skillPositions,
         [FromForm] string[] ratings,
         [FromServices] ICommandHandler<EvaluateTaskCommand> handler)
@@ -103,11 +124,11 @@ public class DashboardController : Controller
             .Select((pos, i) => new SkillEvaluation(pos, Enum.Parse<PerformanceRating>(ratings[i], ignoreCase: true)))
             .ToList();
 
-        await handler.HandleAsync(new EvaluateTaskCommand(taskId, evaluations));
+        await handler.HandleAsync(new EvaluateTaskCommand(taskId, workerId, evaluations));
         return Ok();
     }
 
     private static TaskCardDto MapToCard(TaskDto t) => new(
         t.Id, t.Title, t.Description, t.Criticality, t.Status,
-        t.AssignedWorkerId, t.AssignedWorkerName);
+        t.AssignedWorkers, t.Skills);
 }
