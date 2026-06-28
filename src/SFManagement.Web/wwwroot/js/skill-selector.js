@@ -20,7 +20,7 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
         skills.forEach(function (s) {
             if (selected.has(s.vectorPosition)) return;
             if (filter && !s.name.toLowerCase().includes(filter)) return;
-            unselectedHtml += '<span class="skill-pill cursor-pointer px-3 py-1 rounded-full text-xs font-medium bg-white border border-gray-300 hover:border-indigo-400 hover:text-indigo-600 transition-colors" data-pos="' + s.vectorPosition + '" data-name="' + s.name.replace(/'/g, '&apos;') + '" data-tooltip="' + s.name + ': click to add">' + s.name + '</span>';
+            unselectedHtml += '<span class="skill-pill cursor-pointer px-3 py-1 rounded-full text-xs font-medium bg-white border border-gray-300 hover:border-brand hover:text-brand transition-colors" data-pos="' + s.vectorPosition + '" data-name="' + s.name.replace(/'/g, '&apos;') + '" data-tooltip="' + s.name + ': click to add">' + s.name + '</span>';
         });
         unselectedBox.innerHTML = unselectedHtml;
 
@@ -28,8 +28,8 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
         selected.forEach(function (level, pos) {
             var skill = skills.find(function (s) { return s.vectorPosition === pos; });
             var name = skill ? skill.name : 'Skill #' + pos;
-            selectedHtml += '<div class="skill-selected-item flex items-center gap-3 p-2 rounded-lg border border-indigo-200 bg-indigo-50" data-pos="' + pos + '">';
-            selectedHtml += '<span class="skill-selected-pill px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">' + name + '</span>';
+            selectedHtml += '<div class="skill-selected-item flex items-center gap-3 p-2 rounded-lg border border-brand-dark/30 bg-brand-light/20" data-pos="' + pos + '">';
+            selectedHtml += '<span class="skill-selected-pill px-3 py-1 rounded-full text-xs font-medium bg-brand-light/40 text-brand">' + name + '</span>';
             selectedHtml += '<span class="text-xs text-gray-500">Level:</span>';
             selectedHtml += '<input type="number" class="skill-level w-20 border border-gray-300 rounded px-2 py-1 text-xs" min="0" max="10" step="0.5" value="' + level + '">';
             selectedHtml += '<button type="button" class="skill-remove ml-auto text-gray-400 hover:text-red-500 text-sm font-bold">&times;</button>';

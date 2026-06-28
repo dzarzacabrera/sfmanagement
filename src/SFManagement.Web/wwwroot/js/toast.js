@@ -12,7 +12,7 @@
         var colors = {
             success: 'bg-green-600 text-white',
             error: 'bg-red-600 text-white',
-            info: 'bg-indigo-600 text-white',
+            info: 'bg-brand text-white',
             warning: 'bg-amber-500 text-white'
         };
         var icons = {
