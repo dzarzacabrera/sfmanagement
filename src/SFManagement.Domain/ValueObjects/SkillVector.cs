@@ -33,9 +33,9 @@ public class SkillVector
 
     public static double CalculateCriticalityMultiplier(Criticality criticality) => criticality switch
     {
-        Enums.Criticality.Low      => 0.5,
-        Enums.Criticality.Medium   => 1.0,
-        Enums.Criticality.High     => 1.5,
+        Enums.Criticality.Low => 0.5,
+        Enums.Criticality.Medium => 1.0,
+        Enums.Criticality.High => 1.5,
         Enums.Criticality.Critical => 2.0,
         _ => throw new ArgumentOutOfRangeException(nameof(criticality), criticality, null)
     };
