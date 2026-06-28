@@ -1,0 +1,64 @@
+using Microsoft.AspNetCore.Mvc;
+using SFManagement.Application.Abstractions;
+using SFManagement.Application.Commands;
+using SFManagement.Application.Queries;
+using SFManagement.Domain.Enums;
+using SFManagement.Web.ViewModels;
+
+namespace SFManagement.Web.Controllers;
+
+public class TaskController : Controller
+{
+    [HttpGet]
+    public async Task<IActionResult> Index(
+        [FromServices] IGetAllTasksQueryHandler handler)
+    {
+        var tasks = await handler.HandleAsync(new GetAllTasksQuery());
+        return View(tasks);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Create(
+        [FromQuery] int projectId,
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler)
+    {
+        var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
+        var criticalities = new List<CriticalityOption>
+        {
+            new(Criticality.Low, "Low"),
+            new(Criticality.Medium, "Medium"),
+            new(Criticality.High, "High"),
+            new(Criticality.Critical, "Critical"),
+        };
+
+        ViewBag.AllSkills = skills;
+
+        return View(new CreateTaskViewModel(projectId, skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition)).ToList(), criticalities));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        [FromForm] int projectId,
+        [FromForm] string title,
+        [FromForm] string? description,
+        [FromForm] string criticality,
+        [FromForm] int[] skillPositions,
+        [FromForm] float[] skillLevels,
+        [FromServices] ICommandHandler<CreateTaskCommand> handler)
+    {
+        var vector = new float[1024];
+        for (int i = 0; i < skillPositions.Length && i < skillLevels.Length; i++)
+        {
+            var pos = skillPositions[i];
+            if (pos >= 0 && pos < 1024)
+                vector[pos] = Math.Clamp(skillLevels[i], 0.0f, 10.0f);
+        }
+
+        var command = new CreateTaskCommand(
+            projectId, title, description,
+            Enum.Parse<Criticality>(criticality, ignoreCase: true),
+            vector);
+        await handler.HandleAsync(command);
+        return RedirectToAction("Index", "Dashboard", new { projectId });
+    }
+}

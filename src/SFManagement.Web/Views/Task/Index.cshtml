@@ -1,0 +1,71 @@
+@model IReadOnlyList<TaskDto>
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Tasks</h1>
+    <div class="flex gap-2">
+        <a href="/Task/Create?projectId=1"
+           class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+            + New Task
+        </a>
+    </div>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse">
+        <thead>
+            <tr class="bg-gray-100 text-left">
+                <th class="px-4 py-2 font-medium text-gray-600">ID</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Title</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Project</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Status</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Criticality</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Assigned</th>
+                <th class="px-4 py-2 font-medium text-gray-600">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var task in Model)
+            {
+                <tr class="border-t border-gray-200 hover:bg-gray-50">
+                    <td class="px-4 py-2 text-gray-500">@task.Id</td>
+                    <td class="px-4 py-2 font-medium">@task.Title</td>
+                    <td class="px-4 py-2">Project #@task.ProjectId</td>
+                    <td class="px-4 py-2">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                            @(task.Status == ProjectTaskStatus.InProgress ? "bg-amber-100 text-amber-700" :
+                              task.Status == ProjectTaskStatus.Blocked ? "bg-red-100 text-red-700" :
+                              task.Status == ProjectTaskStatus.Finish ? "bg-green-100 text-green-700" :
+                              "bg-blue-100 text-blue-700")">
+                            @task.Status
+                        </span>
+                    </td>
+                    <td class="px-4 py-2">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                            @(task.Criticality == Criticality.Critical ? "bg-red-100 text-red-700" :
+                              task.Criticality == Criticality.High ? "bg-orange-100 text-orange-700" :
+                              task.Criticality == Criticality.Medium ? "bg-blue-100 text-blue-700" :
+                              "bg-gray-100 text-gray-600")">
+                            @task.Criticality
+                        </span>
+                    </td>
+                    <td class="px-4 py-2 text-gray-500">@(task.AssignedWorkerName ?? "—")</td>
+                    <td class="px-4 py-2">
+                        <a href="/Dashboard/Index?projectId=@task.ProjectId"
+                           class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Board</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="text-center py-12">
+        <p class="text-gray-400 mb-4">No tasks yet.</p>
+        <a href="/Task/Create?projectId=1"
+           class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+            Create your first task
+        </a>
+    </div>
+}

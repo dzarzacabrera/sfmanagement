@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="SFManagement.IntegrationTests" />
+    <InternalsVisibleTo Include="SFManagement.E2ETests" />
   </ItemGroup>
 
 </Project>

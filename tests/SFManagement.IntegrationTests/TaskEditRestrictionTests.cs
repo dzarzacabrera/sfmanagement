@@ -17,7 +17,7 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
 
         var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<UpdateTaskCommand>>();
         var command = new UpdateTaskCommand(taskId, "Updated Title", "Updated",
-            Criticality.Low, new float[12]);
+            Criticality.Low, new float[1024]);
 
         await handler.HandleAsync(command);
     }
@@ -33,7 +33,7 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
 
         var updateHandler = scope.ServiceProvider.GetRequiredService<ICommandHandler<UpdateTaskCommand>>();
         var command = new UpdateTaskCommand(taskId, "Should Fail", null,
-            Criticality.Medium, new float[12]);
+            Criticality.Medium, new float[1024]);
 
         await FluentActions.Invoking(() => updateHandler.HandleAsync(command))
             .Should().ThrowAsync<InvalidOperationException>();
@@ -51,7 +51,7 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
 
         var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<UpdateTaskCommand>>();
         var command = new UpdateTaskCommand(taskId, "Should Fail", null,
-            Criticality.Medium, new float[12]);
+            Criticality.Medium, new float[1024]);
 
         await FluentActions.Invoking(() => handler.HandleAsync(command))
             .Should().ThrowAsync<InvalidOperationException>();
@@ -65,7 +65,7 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
 
         var createTask = services.GetRequiredService<ICommandHandler<CreateTaskCommand>>();
         var taskCmd = new CreateTaskCommand(projectCmd.CreatedId, "Test Task", null,
-            Criticality.Medium, new float[12]);
+            Criticality.Medium, new float[1024]);
         await createTask.HandleAsync(taskCmd);
 
         return (projectCmd.CreatedId, taskCmd.CreatedId);

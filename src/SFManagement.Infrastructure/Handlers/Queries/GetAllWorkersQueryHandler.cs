@@ -6,23 +6,20 @@ using SFManagement.Infrastructure.Mappers;
 
 namespace SFManagement.Infrastructure.Handlers.Queries;
 
-internal sealed class GetWorkersByProjectQueryHandler(INpgsqlConnectionFactory connectionFactory)
-    : IGetWorkersByProjectQueryHandler
+internal sealed class GetAllWorkersQueryHandler(INpgsqlConnectionFactory connectionFactory)
+    : IGetAllWorkersQueryHandler
 {
-    public async Task<IReadOnlyList<WorkerDto>> HandleAsync(GetWorkersByProjectQuery query)
+    public async Task<IReadOnlyList<WorkerDto>> HandleAsync(GetAllWorkersQuery query)
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
+
         await using var cmd = new NpgsqlCommand(
             "SELECT w.id, w.name, w.role, w.skills_vector, " +
             "(SELECT COUNT(*) FROM performance_evaluations WHERE worker_id = w.id) AS evaluation_count " +
-            "FROM workers w " +
-            "INNER JOIN project_workers pw ON pw.worker_id = w.id " +
-            "WHERE pw.project_id = $1 " +
-            "ORDER BY w.id", connection);
-        cmd.Parameters.Add(new() { Value = query.ProjectId });
+            "FROM workers w ORDER BY w.id", connection);
+        await using var reader = await cmd.ExecuteReaderAsync();
 
         var results = new List<WorkerDto>();
-        await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
             var mapper = new DataReaderMapper(reader);
