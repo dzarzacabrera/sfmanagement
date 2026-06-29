@@ -12,15 +12,15 @@ internal sealed class CreateWorkerCommandHandler(INpgsqlConnectionFactory connec
     public async Task HandleAsync(CreateWorkerCommand command)
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
-        var zeroVector = new Vector(new float[1024]);
 
         await using var cmd = new NpgsqlCommand(
-            "INSERT INTO workers (name, skills_vector) VALUES ($1, $2) RETURNING id", connection)
+            "INSERT INTO workers (name, role, skills_vector) VALUES ($1, $2, $3) RETURNING id", connection)
         {
             Parameters =
             {
                 new() { Value = command.Name },
-                new() { Value = zeroVector }
+                new() { Value = command.Role },
+                new() { Value = new Pgvector.Vector(command.SkillsVector) }
             }
         };
 

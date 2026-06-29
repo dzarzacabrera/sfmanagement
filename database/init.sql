@@ -169,6 +169,12 @@ INSERT INTO tasks (id, project_id, title, description, criticality, status, requ
 INSERT INTO tasks (id, project_id, title, description, criticality, status, required_skills_vector) OVERRIDING SYSTEM VALUE VALUES
 (4, 2, 'Migrate Legacy Storefront Footer to Tailwind CSS', 'Replace old custom layout stylesheets in the storefront footer view with utility-first classes to guarantee proper mobile responsiveness and a minimum tactile target of 44x44px.', 'low', 'Finish', util_pad_vector(ARRAY[0.0, 0.0, 0.0, 4.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]));
 
+-- 3.6 Task Assignments
+INSERT INTO task_assignments (task_id, worker_id) VALUES
+(2, 1),
+(3, 4),
+(4, 3);
+
 -- Reset sequences to avoid conflicts with identity columns
 ALTER TABLE skills_catalogue ALTER COLUMN id RESTART WITH 13;
 ALTER TABLE projects ALTER COLUMN id RESTART WITH 3;

@@ -24,7 +24,7 @@ function openAssignModal(taskId, projectId) {
                     .then(function (r) {
                         if (r.ok) {
                             closeModal();
-                            updateTaskCard(taskId, null);
+                            refreshTaskCard(taskId);
                             showToast('Worker assigned successfully', 'success');
                         } else {
                             showToast('Assign failed: ' + r.status, 'error');
@@ -54,12 +54,7 @@ function removeWorker(taskId, workerId, btn) {
     fetch('/Dashboard/RemoveWorker', { method: 'POST', body: formData })
         .then(function (r) {
             if (r.ok) {
-                var pill = btn.closest('span');
-                if (pill) pill.remove();
-                var container = pill ? pill.closest('.flex-wrap') : null;
-                if (container && container.querySelectorAll('span').length === 1) {
-                    container.innerHTML = '<span class="text-xs text-gray-400 dark:text-gray-500">Unassigned</span>';
-                }
+                refreshTaskCard(taskId);
                 showToast('Worker removed', 'success');
             } else {
                 showToast('Remove failed: ' + r.status, 'error');
@@ -90,10 +85,8 @@ function openEvaluationModal(taskId, projectId) {
                     .then(function (r) {
                         if (r.ok) {
                             closeModal();
-                            var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
-                            if (card) card.remove();
+                            refreshTaskCard(taskId);
                             showToast('Evaluation submitted successfully', 'success');
-                            updateColumnCounts();
                         } else {
                             showToast('Evaluation failed: ' + r.status, 'error');
                             if (btn) { btn.disabled = false; btn.textContent = 'Submit Evaluation'; }
@@ -109,6 +102,37 @@ function openEvaluationModal(taskId, projectId) {
             if (skel) skel.remove();
             showToast('Failed to load evaluation: ' + err.message, 'error');
         });
+}
+
+function refreshTaskCard(taskId, newStatus) {
+    var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
+    if (!card) return;
+
+    var projectId = window.__dashboardProjectId || 1;
+
+    fetch('/Dashboard/GetTaskCardHtml?taskId=' + taskId + '&projectId=' + projectId)
+        .then(function (r) { if (!r.ok) return null; return r.text(); })
+        .then(function (html) {
+            if (!html) return;
+            var temp = document.createElement('div');
+            temp.innerHTML = html;
+            var newCard = temp.querySelector('.task-card');
+            if (!newCard) return;
+
+            if (newStatus) {
+                var targetCol = document.querySelector('.kanban-column[data-status="' + newStatus + '"]');
+                if (targetCol) {
+                    var placeholder = targetCol.querySelector('.empty-placeholder');
+                    if (placeholder) placeholder.remove();
+                    targetCol.appendChild(newCard);
+                    card.remove();
+                }
+            } else {
+                card.parentNode.replaceChild(newCard, card);
+            }
+            updateColumnCounts();
+        })
+        .catch(function () { /* silently fail */ });
 }
 
 function updateTaskCard(taskId, newStatus) {
@@ -158,7 +182,7 @@ document.querySelectorAll('.kanban-column').forEach(function (col) {
         fetch('/Dashboard/ChangeStatus', { method: 'POST', body: formData })
             .then(function (r) {
                 if (r.ok) {
-                    updateTaskCard(taskId, newStatus);
+                    refreshTaskCard(taskId, newStatus);
                     showToast('Task moved to ' + newStatus, 'success');
                 } else {
                     showToast('Status change failed: ' + r.status, 'error');

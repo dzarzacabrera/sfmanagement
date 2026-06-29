@@ -53,7 +53,9 @@ else
                         <div class="font-semibold text-gray-900 truncate dark:text-gray-100">@worker.Name</div>
                         <div class="text-xs text-gray-500 truncate dark:text-gray-400">@worker.Role</div>
                     </div>
-                    <div class="text-xs text-gray-400 whitespace-nowrap shrink-0 dark:text-gray-500">@worker.EvaluationCount evaluations</div>
+                    <div class="text-xs text-gray-400 whitespace-nowrap shrink-0 dark:text-gray-500">
+                        @worker.ActiveTaskCount tasks | @worker.EvaluationCount evaluations
+                    </div>
                 </div>
 
                 <div class="space-y-2">
@@ -61,11 +63,11 @@ else
                     {
                         var skill = workerSkills[i];
                         <div class="skill-row flex items-center gap-2 text-xs @(i >= 4 ? "hidden extra-skill" : "")">
-                            <span class="text-gray-700 dark:text-gray-300 w-24 truncate shrink-0">@skill.Name</span>
-                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden dark:bg-gray-700">
+                            <span class="text-gray-700 dark:text-gray-300 flex-[36] min-[1800px]:flex-[34] min-w-0 truncate">@skill.Name</span>
+                            <div class="flex-[54] min-[1800px]:flex-[60] h-1.5 bg-gray-100 rounded-full overflow-hidden dark:bg-gray-700">
                                 <div class="h-full bg-brand-dark rounded-full transition-all" style="width: @(skill.Value / 10.0 * 100)%"></div>
                             </div>
-                            <span class="font-bold text-gray-900 dark:text-gray-100 w-8 text-right tabular-nums">@skill.Value.ToString("0.0")</span>
+                            <span class="font-bold text-gray-900 dark:text-gray-100 flex-[10] min-[1800px]:flex-[6] text-right tabular-nums">@skill.Value.ToString("0.0")</span>
                         </div>
                     }
                 </div>

@@ -12,8 +12,11 @@ namespace SFManagement.Web.Controllers;
 public class WorkerController : Controller
 {
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create(
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler)
     {
+        var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
+        ViewBag.AllSkills = skills;
         ViewBag.PageTitle = "Add Worker";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "/Worker/Index"), new("Add Worker", "") };
         return View();
@@ -22,11 +25,26 @@ public class WorkerController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(
         [FromForm] string name,
+        [FromForm] string? role,
+        [FromForm] int[]? skillPositions,
+        [FromForm] float[]? skillLevels,
         [FromServices] ICommandHandler<CreateWorkerCommand> handler)
     {
-        var command = new CreateWorkerCommand(name);
+        var vector = new float[1024];
+        if (skillPositions is not null && skillLevels is not null)
+        {
+            int count = Math.Min(skillPositions.Length, skillLevels.Length);
+            for (int i = 0; i < count; i++)
+            {
+                var pos = skillPositions[i];
+                if (pos >= 0 && pos < 1024)
+                    vector[pos] = Math.Clamp(skillLevels[i], 0.0f, 10.0f);
+            }
+        }
+
+        var command = new CreateWorkerCommand(name, role ?? string.Empty, vector);
         await handler.HandleAsync(command);
-        return RedirectToAction("Edit", new { workerId = command.CreatedId });
+        return RedirectToAction("Index");
     }
 
     [HttpGet]
