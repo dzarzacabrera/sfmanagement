@@ -13,8 +13,12 @@ public sealed class TaskStatusTransitionTests(SfManagementFixture fixture)
     public async Task QueuedToInProgressToFinish_ShouldSucceed()
     {
         using var scope = fixture.Factory.Services.CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<ChangeTaskStatusCommand>>();
+        var sp = scope.ServiceProvider;
 
+        var assignHandler = sp.GetRequiredService<ICommandHandler<AssignWorkerCommand>>();
+        await assignHandler.HandleAsync(new AssignWorkerCommand(1, 1));
+
+        var handler = sp.GetRequiredService<ICommandHandler<ChangeTaskStatusCommand>>();
         await handler.HandleAsync(new ChangeTaskStatusCommand(1, ProjectTaskStatus.InProgress));
         await handler.HandleAsync(new ChangeTaskStatusCommand(1, ProjectTaskStatus.Finish));
     }

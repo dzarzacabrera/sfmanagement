@@ -10,6 +10,10 @@
     </div>
 </div>
 
+<script>
+    window.__dashboardProjectId = @Model.ProjectId;
+</script>
+
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     @foreach (var (status, label, color, tasks) in new[] {
         ("Queued", "Queued", "border-l-blue-500", Model.QueuedTasks),
@@ -68,7 +72,7 @@
                                                 @worker.WorkerName
                                                 @if (task.Status != ProjectTaskStatus.Finish)
                                                 {
-                                                    <button type="button" class="text-blue-400 hover:text-red-500 font-bold ml-0.5 transition-colors"
+                                                    <button type="button" class="text-blue-400 hover:text-red-500 font-bold text-sm leading-none ml-0.5 transition-colors"
                                                             data-tooltip="Remove @worker.WorkerName"
                                                             onclick="removeWorker(@task.Id, @worker.WorkerId, this)">
                                                         &times;

@@ -16,6 +16,11 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
     function render() {
         var filter = filterInput.value.toLowerCase();
 
+        // Clean up any lingering tooltips before re-rendering
+        document.querySelectorAll('._tooltipEl, [data-tooltip]').forEach(function (el) {
+            if (el._tooltipEl) { el._tooltipEl.remove(); el._tooltipEl = null; }
+        });
+
         var unselectedHtml = '';
         skills.forEach(function (s) {
             if (selected.has(s.vectorPosition)) return;
@@ -61,7 +66,7 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
         var pill = e.target.closest('.skill-pill');
         if (!pill) return;
         var pos = parseInt(pill.dataset.pos);
-        selected.set(pos, 0);
+        selected.set(pos, 6);
         render();
     });
 
@@ -84,6 +89,7 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
         var val = parseFloat(input.value);
         if (isNaN(val)) val = 0;
         selected.set(pos, Math.min(10, Math.max(0, val)));
+        render();
     });
 
     filterInput.addEventListener('input', render);

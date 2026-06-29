@@ -37,6 +37,18 @@ internal sealed class ChangeTaskStatusCommandHandler(INpgsqlConnectionFactory co
                 new SkillVector(mapper.GetVector("required_skills_vector")));
         }
 
+        if (command.NewStatus == ProjectTaskStatus.InProgress)
+        {
+            await using var checkCmd = new NpgsqlCommand(
+                "SELECT COUNT(1) FROM task_assignments WHERE task_id = $1", connection)
+            {
+                Parameters = { new() { Value = command.TaskId } }
+            };
+            var count = (long)(await checkCmd.ExecuteScalarAsync())!;
+            if (count == 0)
+                throw new InvalidOperationException("Cannot set a task to In Progress without at least one assigned worker.");
+        }
+
         task.ChangeStatus(command.NewStatus);
 
         await using var updateCmd = new NpgsqlCommand(

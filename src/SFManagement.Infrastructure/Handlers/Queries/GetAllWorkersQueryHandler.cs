@@ -15,7 +15,10 @@ internal sealed class GetAllWorkersQueryHandler(INpgsqlConnectionFactory connect
 
         await using var cmd = new NpgsqlCommand(
             "SELECT w.id, w.name, w.role, w.skills_vector, " +
-            "(SELECT COUNT(*) FROM performance_evaluations WHERE worker_id = w.id) AS evaluation_count " +
+            "(SELECT COUNT(*) FROM performance_evaluations WHERE worker_id = w.id) AS evaluation_count, " +
+            "(SELECT COUNT(*) FROM task_assignments ta " +
+            "INNER JOIN tasks t ON t.id = ta.task_id " +
+            "WHERE ta.worker_id = w.id AND t.status <> 'Finish') AS active_task_count " +
             "FROM workers w ORDER BY w.id", connection);
         await using var reader = await cmd.ExecuteReaderAsync();
 
@@ -28,6 +31,7 @@ internal sealed class GetAllWorkersQueryHandler(INpgsqlConnectionFactory connect
                 mapper.GetString("name"),
                 mapper.GetString("role"),
                 mapper.GetInt32("evaluation_count"),
+                mapper.GetInt32("active_task_count"),
                 mapper.GetVector("skills_vector")));
         }
 

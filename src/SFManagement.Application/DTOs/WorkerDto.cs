@@ -5,5 +5,6 @@ public record WorkerDto(
     string Name,
     string Role,
     int EvaluationCount,
+    int ActiveTaskCount,
     float[] SkillsVector);
 

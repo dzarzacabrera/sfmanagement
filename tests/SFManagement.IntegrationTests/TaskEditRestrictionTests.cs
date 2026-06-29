@@ -26,12 +26,16 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
     public async Task UpdateInProgressTask_ShouldThrow()
     {
         using var scope = fixture.Factory.Services.CreateScope();
-        var (_, taskId) = await CreateProjectWithQueuedTaskAsync(scope.ServiceProvider);
+        var sp = scope.ServiceProvider;
+        var (_, taskId) = await CreateProjectWithQueuedTaskAsync(sp);
 
-        var statusHandler = scope.ServiceProvider.GetRequiredService<ICommandHandler<ChangeTaskStatusCommand>>();
+        var assignHandler = sp.GetRequiredService<ICommandHandler<AssignWorkerCommand>>();
+        await assignHandler.HandleAsync(new AssignWorkerCommand(taskId, 1));
+
+        var statusHandler = sp.GetRequiredService<ICommandHandler<ChangeTaskStatusCommand>>();
         await statusHandler.HandleAsync(new ChangeTaskStatusCommand(taskId, ProjectTaskStatus.InProgress));
 
-        var updateHandler = scope.ServiceProvider.GetRequiredService<ICommandHandler<UpdateTaskCommand>>();
+        var updateHandler = sp.GetRequiredService<ICommandHandler<UpdateTaskCommand>>();
         var command = new UpdateTaskCommand(taskId, "Should Fail", null,
             Criticality.Medium, new float[1024]);
 
@@ -43,9 +47,13 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
     public async Task UpdateFinishedTask_ShouldThrow()
     {
         using var scope = fixture.Factory.Services.CreateScope();
-        var (_, taskId) = await CreateProjectWithQueuedTaskAsync(scope.ServiceProvider);
+        var sp = scope.ServiceProvider;
+        var (_, taskId) = await CreateProjectWithQueuedTaskAsync(sp);
 
-        var statusHandler = scope.ServiceProvider.GetRequiredService<ICommandHandler<ChangeTaskStatusCommand>>();
+        var assignHandler = sp.GetRequiredService<ICommandHandler<AssignWorkerCommand>>();
+        await assignHandler.HandleAsync(new AssignWorkerCommand(taskId, 1));
+
+        var statusHandler = sp.GetRequiredService<ICommandHandler<ChangeTaskStatusCommand>>();
         await statusHandler.HandleAsync(new ChangeTaskStatusCommand(taskId, ProjectTaskStatus.InProgress));
         await statusHandler.HandleAsync(new ChangeTaskStatusCommand(taskId, ProjectTaskStatus.Finish));
 

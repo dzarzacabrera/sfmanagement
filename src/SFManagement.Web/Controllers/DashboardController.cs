@@ -128,6 +128,20 @@ public class DashboardController : Controller
         return Ok();
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetTaskCardHtml(
+        [FromQuery] int taskId,
+        [FromQuery] int projectId,
+        [FromServices] IGetDashboardTasksQueryHandler handler)
+    {
+        var tasks = await handler.HandleAsync(new GetDashboardTasksQuery(projectId));
+        var task = tasks.FirstOrDefault(t => t.Id == taskId);
+        if (task == null) return NotFound();
+
+        ViewBag.ProjectId = projectId;
+        return PartialView("_TaskCard", MapToCard(task));
+    }
+
     private static TaskCardDto MapToCard(TaskDto t) => new(
         t.Id, t.Title, t.Description, t.Criticality, t.Status,
         t.AssignedWorkers, t.Skills);
