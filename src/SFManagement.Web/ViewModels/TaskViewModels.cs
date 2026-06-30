@@ -1,13 +1,19 @@
+using SFManagement.Application.DTOs;
 using SFManagement.Domain.Enums;
 
 namespace SFManagement.Web.ViewModels;
 
 public record CreateProjectViewModel();
 
-public record ProjectDetailViewModel(int Id, string Name, string? DescriptionMd);
+public record ProjectDetailViewModel(
+    int Id,
+    string Name,
+    string? DescriptionMd,
+    IReadOnlyList<WorkerDto>? Workers = null);
 
 public record CreateTaskViewModel(
     int ProjectId,
+    IReadOnlyList<ProjectDto> Projects,
     IReadOnlyList<SkillCatalogueItem> Skills,
     IReadOnlyList<CriticalityOption> Criticalities);
 

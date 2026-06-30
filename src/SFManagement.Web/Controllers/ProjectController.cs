@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
+using SFManagement.Application.DTOs;
 using SFManagement.Application.Queries;
 using SFManagement.Web.ViewModels;
 
@@ -48,10 +50,45 @@ public class ProjectController : Controller
 
     [HttpGet]
     public async Task<IActionResult> Detail(
-        [FromQuery] int projectId)
+        [FromQuery] int projectId,
+        [FromServices] IGetAllProjectsQueryHandler projectHandler,
+        [FromServices] IGetWorkersByProjectQueryHandler workersHandler)
     {
+        var projects = await projectHandler.HandleAsync(new GetAllProjectsQuery());
+        var project = projects.FirstOrDefault(p => p.Id == projectId);
+
+        var workers = await workersHandler.HandleAsync(new GetWorkersByProjectQuery(projectId));
+
         ViewBag.PageTitle = $"Project #{projectId}";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new($"Project #{projectId}", "") };
-        return View(new ProjectDetailViewModel(projectId, $"Project #{projectId}", null));
+
+        var vm = new ProjectDetailViewModel(
+            projectId,
+            project?.Name ?? $"Project #{projectId}",
+            project?.DescriptionMd,
+            workers);
+
+        return View(vm);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> AddWorkerPopup(
+        [FromQuery] int projectId,
+        [FromServices] IGetWorkersNotInProjectQueryHandler handler)
+    {
+        var workers = await handler.HandleAsync(new GetWorkersNotInProjectQuery(projectId));
+        var vm = new AddWorkerToProjectPopupViewModel(projectId, workers);
+        return PartialView("~/Views/Dashboard/_AddWorkerToProjectModal.cshtml", vm);
+    }
+
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> AddWorkerToProject(
+        [FromForm] int projectId,
+        [FromForm] int workerId,
+        [FromServices] ICommandHandler<AddWorkerToProjectCommand> handler)
+    {
+        await handler.HandleAsync(new AddWorkerToProjectCommand(projectId, workerId));
+        return Ok();
     }
 }
