@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
+using SFManagement.Application.DTOs;
 using SFManagement.Application.Queries;
 using SFManagement.Domain.Enums;
 using SFManagement.Web.ViewModels;
@@ -22,9 +24,11 @@ public class TaskController : Controller
 
     [HttpGet]
     public async Task<IActionResult> Create(
-        [FromQuery] int projectId,
+        [FromQuery] int? projectId,
+        [FromServices] IGetAllProjectsQueryHandler projectsHandler,
         [FromServices] IGetAllSkillsQueryHandler skillsHandler)
     {
+        var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
         var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
         var criticalities = new List<CriticalityOption>
         {
@@ -38,7 +42,8 @@ public class TaskController : Controller
         ViewBag.PageTitle = "Create Task";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "/Task/Index"), new("Create Task", "") };
 
-        return View(new CreateTaskViewModel(projectId, skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition)).ToList(), criticalities));
+        var defaultProjectId = projectId ?? (projects.Count > 0 ? projects[0].Id : 1);
+        return View(new CreateTaskViewModel(defaultProjectId, projects, skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition)).ToList(), criticalities));
     }
 
     [HttpPost]

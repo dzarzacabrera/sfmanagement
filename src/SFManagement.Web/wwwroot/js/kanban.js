@@ -202,3 +202,40 @@ document.querySelectorAll('.task-card').forEach(function (card) {
         this.style.opacity = '';
     });
 });
+
+function openAddWorkerPopup(projectId) {
+    var col = document.querySelector('.kanban-column');
+    var skel = col ? showSkeleton(col) : null;
+
+    fetch('/Dashboard/AddWorkerPopup?projectId=' + projectId)
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+            if (skel) skel.remove();
+            openModal(html);
+            document.getElementById('addWorkerToProjectForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                var btn = this.querySelector('button[type="submit"]');
+                if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Adding...'; }
+                var formData = new FormData(this);
+                fetch('/Dashboard/AddWorkerToProject', { method: 'POST', body: formData })
+                    .then(function (r) {
+                        if (r.ok) {
+                            closeModal();
+                            showToast('Worker added to project', 'success');
+                            location.reload();
+                        } else {
+                            showToast('Failed: ' + r.status, 'error');
+                            if (btn) { btn.disabled = false; btn.textContent = 'Add Worker'; }
+                        }
+                    })
+                    .catch(function (err) {
+                        showToast('Error: ' + err.message, 'error');
+                        if (btn) { btn.disabled = false; btn.textContent = 'Add Worker'; }
+                    });
+            });
+        })
+        .catch(function (err) {
+            if (skel) skel.remove();
+            showToast('Failed to load popup: ' + err.message, 'error');
+        });
+}

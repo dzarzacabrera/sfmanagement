@@ -38,6 +38,10 @@ public record EvaluationViewModel(
 
 public record SkillPositionDto(int Position, string SkillName);
 
+public record AddWorkerToProjectPopupViewModel(
+    int ProjectId,
+    IReadOnlyList<WorkerDto> Workers);
+
 public record WorkerHistoryViewModel(
     int WorkerId,
     string WorkerName,

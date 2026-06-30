@@ -1,0 +1,33 @@
+@model AddWorkerToProjectPopupViewModel
+
+<h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Add Worker to Project</h2>
+
+<form id="addWorkerToProjectForm">
+    <input type="hidden" name="projectId" value="@Model.ProjectId">
+    <div class="space-y-2 max-h-[40vh] sm:max-h-60 overflow-y-auto">
+        @foreach (var worker in Model.Workers)
+        {
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-brand-light/20 has-[:checked]:bg-brand-light/20 has-[:checked]:border-brand-dark/50 dark:border-gray-600 dark:hover:bg-gray-700">
+                <input type="radio" name="workerId" value="@worker.Id" class="accent-brand">
+                <div>
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-200">@worker.Name</div>
+                    <div class="text-xs text-gray-400">@worker.Role</div>
+                </div>
+            </label>
+        }
+    </div>
+    @if (Model.Workers.Count == 0)
+    {
+        <p class="text-sm text-gray-400 italic text-center py-4">All workers are already assigned to this project.</p>
+    }
+    <div class="flex justify-end gap-2 mt-4">
+        <button type="button" onclick="closeModal()"
+                class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep">
+            Add Worker
+        </button>
+    </div>
+</form>

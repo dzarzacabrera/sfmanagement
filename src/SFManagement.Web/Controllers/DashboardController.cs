@@ -131,6 +131,27 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> AddWorkerPopup(
+        [FromQuery] int projectId,
+        [FromServices] IGetWorkersNotInProjectQueryHandler handler)
+    {
+        var workers = await handler.HandleAsync(new GetWorkersNotInProjectQuery(projectId));
+        var vm = new AddWorkerToProjectPopupViewModel(projectId, workers);
+        return PartialView("_AddWorkerToProjectModal", vm);
+    }
+
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> AddWorkerToProject(
+        [FromForm] int projectId,
+        [FromForm] int workerId,
+        [FromServices] ICommandHandler<AddWorkerToProjectCommand> handler)
+    {
+        await handler.HandleAsync(new AddWorkerToProjectCommand(projectId, workerId));
+        return Ok();
+    }
+
+    [HttpGet]
     public async Task<IActionResult> GetTaskCardHtml(
         [FromQuery] int taskId,
         [FromQuery] int projectId,
