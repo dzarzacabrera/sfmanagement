@@ -17,7 +17,7 @@ function openAssignModal(taskId, projectId) {
             openModal(html);
             document.getElementById('assignForm').addEventListener('submit', function (e) {
                 e.preventDefault();
-                var btn = this.querySelector('button[type="submit"]');
+                var btn = e.submitter || this.querySelector('button[type="submit"]');
                 if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Assigning...'; }
                 var formData = new FormData(this);
                 fetch('/Dashboard/AssignWorker', { method: 'POST', body: formData })

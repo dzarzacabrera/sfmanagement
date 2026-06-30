@@ -3,4 +3,6 @@ namespace SFManagement.Application.DTOs;
 public record WorkerScoreDto(
     int Id,
     string Name,
-    double CompatibilityScore);
+    string Role,
+    double CompatibilityScore,
+    float[] SkillsVector);
