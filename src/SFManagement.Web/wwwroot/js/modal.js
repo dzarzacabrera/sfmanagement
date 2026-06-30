@@ -5,6 +5,11 @@ function openModal(html) {
     var content = document.getElementById('modal-content');
     lastFocusedElement = document.activeElement;
 
+    // Remove any lingering tooltips
+    document.querySelectorAll('._tooltip-el, [class*="pointer-events-none"][style*="background"]').forEach(function (el) {
+        if (el.parentNode) el.remove();
+    });
+
     content.innerHTML = html;
     root.classList.remove('hidden', 'modal-exit-active');
     root.classList.add('flex', 'modal-enter');

@@ -1,18 +1,43 @@
 @model AssignWorkerViewModel
+@using SFManagement.Domain.Enums
 
-<h2 class="text-lg font-semibold mb-4 dark:text-white">Assign Worker</h2>
-<p class="text-sm text-gray-500 mb-4 dark:text-gray-400">Task: <strong>@Model.TaskTitle</strong></p>
+<div class="flex items-start justify-between gap-3 mb-4">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight">@Model.TaskTitle</h2>
+    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full shrink-0
+        @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
+          Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
+          Model.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-200" :
+          "bg-gray-50 text-gray-600 border border-gray-200")">
+        @Model.Criticality
+    </span>
+</div>
+
+@if (Model.Skills?.Count > 0)
+{
+    <div class="flex flex-col gap-1.5 mb-4">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-brand">Skills</span>
+        <div class="flex flex-wrap gap-1.5">
+            @foreach (var skill in Model.Skills)
+            {
+                <span class="inline-flex items-center text-[10px] font-semibold rounded-md border border-brand-dark overflow-hidden">
+                    <span class="px-2 py-0.5 bg-brand-light text-brand">@skill.SkillName</span>
+                    <span class="px-1.5 py-0.5 bg-brand-dark text-white font-bold border-l border-brand-dark">@skill.RequiredLevel.ToString("0")</span>
+                </span>
+            }
+        </div>
+    </div>
+}
 
 <form id="assignForm">
     <input type="hidden" name="taskId" value="@Model.TaskId">
-    <div class="space-y-2 max-h-60 overflow-y-auto">
+    <div class="space-y-2 max-h-[40vh] sm:max-h-60 overflow-y-auto">
         @foreach (var worker in Model.Workers)
         {
-            <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-brand-light/20 has-[:checked]:bg-brand-light/20 has-[:checked]:border-brand-dark/50 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-brand-light/20 has-[:checked]:bg-brand-light/20 has-[:checked]:border-brand-dark/50 dark:border-gray-600 dark:hover:bg-gray-700">
                 <input type="radio" name="workerId" value="@worker.Id" class="accent-brand">
                 <div>
                     <div class="text-sm font-medium dark:text-gray-200">@worker.Name</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-400">Compatibility: @worker.CompatibilityScore.ToString("0.00")</div>
+                    <div class="text-xs text-gray-400">Compatibility: @worker.CompatibilityScore.ToString("0.00")</div>
                 </div>
             </label>
         }

@@ -5,6 +5,10 @@
         var text = target.dataset.tooltip;
         if (!text) return;
 
+        // Don't show tooltips when a modal is open
+        var root = document.getElementById('modal-root');
+        if (root && !root.classList.contains('hidden')) return;
+
         var tip = document.createElement('div');
         tip.className = 'fixed z-50 px-2 py-1 rounded text-xs font-medium shadow-lg pointer-events-none';
         tip.style.background = '#1f2937';

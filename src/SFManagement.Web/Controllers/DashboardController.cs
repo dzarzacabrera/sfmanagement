@@ -47,6 +47,8 @@ public class DashboardController : Controller
         var vm = new AssignWorkerViewModel(
             taskId,
             task?.Title ?? $"Task #{taskId}",
+            task?.Criticality ?? Criticality.Medium,
+            task?.Skills ?? new List<TaskSkillDto>(),
             workers);
 
         return PartialView("_AssignWorkerModal", vm);
