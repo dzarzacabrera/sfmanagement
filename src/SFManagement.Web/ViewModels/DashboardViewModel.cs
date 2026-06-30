@@ -24,6 +24,8 @@ public record TaskCardDto(
 public record AssignWorkerViewModel(
     int TaskId,
     string TaskTitle,
+    Criticality Criticality,
+    IReadOnlyList<TaskSkillDto>? Skills,
     IReadOnlyList<WorkerScoreDto> Workers);
 
 public record EvaluationViewModel(
