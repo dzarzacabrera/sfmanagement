@@ -19,7 +19,8 @@ public record TaskCardDto(
     Criticality Criticality,
     ProjectTaskStatus Status,
     IReadOnlyList<AssignedWorkerDto>? AssignedWorkers = null,
-    IReadOnlyList<TaskSkillDto>? Skills = null);
+    IReadOnlyList<TaskSkillDto>? Skills = null,
+    bool AllWorkersEvaluated = false);
 
 public record AssignWorkerViewModel(
     int TaskId,
@@ -31,6 +32,7 @@ public record AssignWorkerViewModel(
 public record EvaluationViewModel(
     int TaskId,
     string TaskTitle,
+    string? Description,
     int WorkerId,
     string WorkerName,
     IReadOnlyList<SkillPositionDto> SkillPositions,

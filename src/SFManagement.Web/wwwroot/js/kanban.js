@@ -76,20 +76,23 @@ function openEvaluationModal(taskId, projectId) {
         .then(function (html) {
             if (skel) skel.remove();
             openModal(html);
-            document.getElementById('evaluationForm').addEventListener('submit', function (e) {
+            var form = document.getElementById('evaluationForm');
+            if (!form) return;
+            form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 var btn = this.querySelector('button[type="submit"]');
                 if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Submitting...'; }
                 var formData = new FormData(this);
                 fetch('/Dashboard/SubmitEvaluation', { method: 'POST', body: formData })
-                    .then(function (r) {
-                        if (r.ok) {
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.hasMore) {
+                            showToast('Evaluation submitted. Select next worker.', 'success');
+                            openEvaluationModal(taskId, projectId);
+                        } else {
                             closeModal();
                             refreshTaskCard(taskId);
-                            showToast('Evaluation submitted successfully', 'success');
-                        } else {
-                            showToast('Evaluation failed: ' + r.status, 'error');
-                            if (btn) { btn.disabled = false; btn.textContent = 'Submit Evaluation'; }
+                            showToast('All evaluations submitted successfully', 'success');
                         }
                     })
                     .catch(function (err) {
@@ -122,9 +125,10 @@ function refreshTaskCard(taskId, newStatus) {
             if (newStatus) {
                 var targetCol = document.querySelector('.kanban-column[data-status="' + newStatus + '"]');
                 if (targetCol) {
+                    var targetContainer = targetCol.querySelector('.space-y-4') || targetCol;
                     var placeholder = targetCol.querySelector('.empty-placeholder');
                     if (placeholder) placeholder.remove();
-                    targetCol.appendChild(newCard);
+                    targetContainer.insertBefore(newCard, targetContainer.firstChild);
                     card.remove();
                 }
             } else {
@@ -166,44 +170,92 @@ function updateColumnCounts() {
     });
 }
 
-document.querySelectorAll('.kanban-column').forEach(function (col) {
-    col.addEventListener('dragover', function (e) { e.preventDefault(); });
-    col.addEventListener('drop', function (e) {
-        e.preventDefault();
-        var taskId = e.dataTransfer.getData('text/plain');
-        var newStatus = this.dataset.status;
+// Event delegation for drag events (works with dynamically refreshed cards)
+document.getElementById('kanban-grid').addEventListener('dragstart', function (e) {
+    var card = e.target.closest('.task-card');
+    if (!card) return;
+    e.dataTransfer.setData('text/plain', card.dataset.taskId);
+    card.style.opacity = '0.5';
+});
 
-        if (!taskId || !newStatus) return;
+document.getElementById('kanban-grid').addEventListener('dragend', function (e) {
+    var card = e.target.closest('.task-card');
+    if (!card) return;
+    card.style.opacity = '';
+});
 
+document.getElementById('kanban-grid').addEventListener('dragover', function (e) {
+    var col = e.target.closest('.kanban-column');
+    if (col) e.preventDefault();
+});
+
+document.getElementById('kanban-grid').addEventListener('drop', function (e) {
+    var col = e.target.closest('.kanban-column');
+    if (!col) return;
+    e.preventDefault();
+    var taskId = e.dataTransfer.getData('text/plain');
+    var newStatus = col.dataset.status;
+
+    if (!taskId || !newStatus) return;
+
+    var formData = new FormData();
+    formData.append('taskId', taskId);
+    formData.append('newStatus', newStatus);
+
+    fetch('/Dashboard/ChangeStatus', { method: 'POST', body: formData })
+        .then(function (r) {
+            if (r.ok) {
+                refreshTaskCard(taskId, newStatus);
+                showToast('Task moved to ' + newStatus, 'success');
+            } else {
+                showToast('Status change failed: ' + r.status, 'error');
+            }
+        })
+        .catch(function (err) { showToast('Status change error: ' + err.message, 'error'); });
+});
+
+function archiveTask(taskId, projectId, btn) {
+    var card = btn.closest('.task-card');
+    if (!card) return;
+
+    // Animate card out
+    card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    card.style.transform = 'scale(0.95)';
+    card.style.opacity = '0';
+
+    var undoKey = 'archive-undo-' + taskId;
+
+    showUndoToast('Task archived.', function () {
+        // Undo: restore the card
+        card.style.transform = '';
+        card.style.opacity = '';
+        clearTimeout(window[undoKey]);
+        showToast('Archive cancelled', 'info');
+    });
+
+    // After 2 seconds, actually archive
+    window[undoKey] = setTimeout(function () {
         var formData = new FormData();
         formData.append('taskId', taskId);
-        formData.append('newStatus', newStatus);
-
-        fetch('/Dashboard/ChangeStatus', { method: 'POST', body: formData })
+        fetch('/Dashboard/ArchiveTask', { method: 'POST', body: formData })
             .then(function (r) {
                 if (r.ok) {
-                    refreshTaskCard(taskId, newStatus);
-                    showToast('Task moved to ' + newStatus, 'success');
+                    card.remove();
+                    updateColumnCounts();
+                    showToast('Task archived permanently', 'info');
                 } else {
-                    showToast('Status change failed: ' + r.status, 'error');
+                    showToast('Archive failed: ' + r.status, 'error');
+                    card.style.transform = '';
+                    card.style.opacity = '';
                 }
             })
-            .catch(function (err) { showToast('Status change error: ' + err.message, 'error'); });
-    });
-});
-
-document.querySelectorAll('.task-card').forEach(function (card) {
-    card.setAttribute('draggable', true);
-    card.addEventListener('dragstart', function (e) {
-        e.dataTransfer.setData('text/plain', this.dataset.taskId);
-        this.style.opacity = '0.5';
-    });
-    card.addEventListener('dragend', function (e) {
-        this.style.opacity = '';
-    });
-});
-
-function openAddWorkerPopup(projectId) {
+            .catch(function (err) {
+                showToast('Archive error: ' + err.message, 'error');
+                card.style.transform = '';
+                card.style.opacity = '';
+            });
+    }, 2000);
+}
     var col = document.querySelector('.kanban-column');
     var skel = col ? showSkeleton(col) : null;
 
