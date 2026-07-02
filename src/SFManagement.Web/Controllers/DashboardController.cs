@@ -1,12 +1,14 @@
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
 using SFManagement.Application.DTOs;
 using SFManagement.Application.Queries;
 using SFManagement.Web.ViewModels;
 using SFManagement.Domain.Enums;
+using SFManagement.Infrastructure.Data;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace SFManagement.Web.Controllers;
 
@@ -15,20 +17,23 @@ public class DashboardController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(
         [FromQuery] int projectId,
-        [FromServices] IGetDashboardTasksQueryHandler handler)
+        [FromServices] IGetDashboardTasksQueryHandler handler,
+        [FromServices] IGetAllProjectsQueryHandler projectsHandler)
     {
         var tasks = await handler.HandleAsync(new GetDashboardTasksQuery(projectId));
+        var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
+        var projectName = projects.FirstOrDefault(p => p.Id == projectId)?.Name ?? $"Project #{projectId}";
 
         var vm = new DashboardViewModel(
             projectId,
-            $"Project #{projectId}",
+            projectName,
             tasks.Where(t => t.Status == ProjectTaskStatus.Queued).Select(MapToCard).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.InProgress).Select(MapToCard).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.Blocked).Select(MapToCard).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.Finish).Select(MapToCard).ToList());
 
         ViewBag.PageTitle = "Dashboard";
-        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new($"Project #{projectId}", ""), new("Dashboard", "") };
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new(projectName, ""), new("Dashboard", "") };
 
         return View(vm);
     }
@@ -92,11 +97,27 @@ public class DashboardController : Controller
     public async Task<IActionResult> EvaluationPopup(
         [FromQuery] int taskId,
         [FromQuery] int projectId,
-        [FromServices] IGetDashboardTasksQueryHandler taskHandler)
+        [FromServices] IGetDashboardTasksQueryHandler taskHandler,
+        [FromServices] INpgsqlConnectionFactory connFactory)
     {
         var tasks = await taskHandler.HandleAsync(new GetDashboardTasksQuery(projectId));
         var task = tasks.FirstOrDefault(t => t.Id == taskId);
         var workers = task?.AssignedWorkers;
+
+        // Exclude workers that already have evaluations for this task
+        HashSet<int> evaluatedWorkerIds = [];
+        if (workers?.Count > 0)
+        {
+            await using var conn = await connFactory.GetOpenConnectionAsync();
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT DISTINCT worker_id FROM performance_evaluations WHERE task_id = @taskId";
+            cmd.Parameters.AddWithValue("@taskId", taskId);
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+                evaluatedWorkerIds.Add(reader.GetInt32(0));
+        }
+
+        var remainingWorkers = workers?.Where(w => !evaluatedWorkerIds.Contains(w.WorkerId)).ToList();
 
         var taskSkills = task?.Skills
             ?.Select(s => new SkillPositionDto(s.SkillPosition, s.SkillName))
@@ -105,10 +126,11 @@ public class DashboardController : Controller
         var vm = new EvaluationViewModel(
             taskId,
             task?.Title ?? $"Task #{taskId}",
-            workers?.FirstOrDefault()?.WorkerId ?? 0,
-            workers?.FirstOrDefault()?.WorkerName ?? "Unknown",
+            task?.Description,
+            remainingWorkers?.FirstOrDefault()?.WorkerId ?? 0,
+            remainingWorkers?.FirstOrDefault()?.WorkerName ?? "Unknown",
             taskSkills,
-            workers);
+            remainingWorkers is { Count: > 0 } ? remainingWorkers : null);
 
         return PartialView("_EvaluationModal", vm);
     }
@@ -120,14 +142,34 @@ public class DashboardController : Controller
         [FromForm] int workerId,
         [FromForm] int[] skillPositions,
         [FromForm] string[] ratings,
-        [FromServices] ICommandHandler<EvaluateTaskCommand> handler)
+        [FromServices] ICommandHandler<EvaluateTaskCommand> handler,
+        [FromServices] INpgsqlConnectionFactory connFactory)
     {
         var evaluations = skillPositions
             .Select((pos, i) => new SkillEvaluation(pos, Enum.Parse<PerformanceRating>(ratings[i], ignoreCase: true)))
             .ToList();
 
         await handler.HandleAsync(new EvaluateTaskCommand(taskId, workerId, evaluations));
-        return Ok();
+
+        // Check if there are remaining unevaluated workers
+        var assignedCount = 0;
+        var evaluatedCount = 0;
+        await using (var conn = await connFactory.GetOpenConnectionAsync())
+        {
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT (SELECT COUNT(*) FROM task_assignments WHERE task_id = @taskId) AS total,
+                       (SELECT COUNT(DISTINCT worker_id) FROM performance_evaluations WHERE task_id = @taskId) AS evaluated";
+            cmd.Parameters.AddWithValue("@taskId", taskId);
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                assignedCount = reader.GetInt32(0);
+                evaluatedCount = reader.GetInt32(1);
+            }
+        }
+
+        return Json(new { hasMore = evaluatedCount < assignedCount });
     }
 
     [HttpGet]
@@ -165,7 +207,17 @@ public class DashboardController : Controller
         return PartialView("_TaskCard", MapToCard(task));
     }
 
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> ArchiveTask(
+        [FromForm] int taskId,
+        [FromServices] ICommandHandler<ArchiveTaskCommand> handler)
+    {
+        await handler.HandleAsync(new ArchiveTaskCommand(taskId));
+        return Ok();
+    }
+
     private static TaskCardDto MapToCard(TaskDto t) => new(
         t.Id, t.Title, t.Description, t.Criticality, t.Status,
-        t.AssignedWorkers, t.Skills);
+        t.AssignedWorkers, t.Skills, t.AllWorkersEvaluated);
 }

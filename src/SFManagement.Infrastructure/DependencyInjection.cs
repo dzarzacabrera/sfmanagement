@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddTransient<ICommandHandler<RemoveWorkerFromTaskCommand>, RemoveWorkerFromTaskCommandHandler>();
         services.AddTransient<ICommandHandler<ChangeTaskStatusCommand>, ChangeTaskStatusCommandHandler>();
         services.AddTransient<ICommandHandler<EvaluateTaskCommand>, EvaluateTaskCommandHandler>();
+        services.AddTransient<ICommandHandler<ArchiveTaskCommand>, ArchiveTaskCommandHandler>();
         services.AddTransient<ICommandHandler<UpdateProjectCommand>, UpdateProjectCommandHandler>();
         services.AddTransient<ICommandHandler<UpdateTaskCommand>, UpdateTaskCommandHandler>();
         services.AddTransient<ICommandHandler<UpdateWorkerCommand>, UpdateWorkerCommandHandler>();

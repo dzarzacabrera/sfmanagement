@@ -5,5 +5,6 @@ public enum ProjectTaskStatus
     Queued,
     InProgress,
     Blocked,
-    Finish
+    Finish,
+    Archived
 }

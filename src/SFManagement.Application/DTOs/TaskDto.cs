@@ -15,4 +15,5 @@ public record TaskDto(
     ProjectTaskStatus Status,
     float[] RequiredSkillsVector,
     IReadOnlyList<AssignedWorkerDto>? AssignedWorkers = null,
-    IReadOnlyList<TaskSkillDto>? Skills = null);
+    IReadOnlyList<TaskSkillDto>? Skills = null,
+    bool AllWorkersEvaluated = false);

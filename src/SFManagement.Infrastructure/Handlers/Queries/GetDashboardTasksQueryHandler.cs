@@ -19,25 +19,30 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
 
         await using var cmd = new NpgsqlCommand(
             "SELECT t.id, t.project_id, t.title, t.description, t.criticality, t.status, " +
-            "t.required_skills_vector " +
+            "t.required_skills_vector, " +
+            "(SELECT COUNT(DISTINCT pe.worker_id) FROM performance_evaluations pe WHERE pe.task_id = t.id) AS evaluated_count, " +
+            "(SELECT COUNT(1) FROM task_assignments ta WHERE ta.task_id = t.id) AS assigned_count " +
             "FROM tasks t " +
-            "WHERE t.project_id = $1 " +
+            "WHERE t.project_id = $1 AND t.status != 'Archived' " +
             "ORDER BY t.id", connection);
         cmd.Parameters.Add(new() { Value = query.ProjectId });
 
         var tasks = new List<(int Id, int ProjectId, string Title, string? Description,
-            Criticality Criticality, ProjectTaskStatus Status, float[] Vector)>();
+            Criticality Criticality, ProjectTaskStatus Status, float[] Vector, bool AllWorkersEvaluated)>();
 
         await using (var reader = await cmd.ExecuteReaderAsync())
         {
             while (await reader.ReadAsync())
             {
                 var mapper = new DataReaderMapper(reader);
+                var assignedCount = reader.GetInt32(reader.GetOrdinal("assigned_count"));
+                var evaluatedCount = reader.GetInt32(reader.GetOrdinal("evaluated_count"));
                 tasks.Add((mapper.GetInt32("id"), mapper.GetInt32("project_id"),
                     mapper.GetString("title"), mapper.GetStringOrNull("description"),
                     mapper.GetEnum<Criticality>("criticality"),
                     mapper.GetEnum<ProjectTaskStatus>("status"),
-                    mapper.GetVector("required_skills_vector")));
+                    mapper.GetVector("required_skills_vector"),
+                    assignedCount > 0 && evaluatedCount >= assignedCount));
             }
         }
 
@@ -47,7 +52,8 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
             t.Id, t.ProjectId, t.Title, t.Description,
             t.Criticality, t.Status, t.Vector,
             assigned.GetValueOrDefault(t.Id),
-            DecodeSkills(t.Vector, skills))).ToList();
+            DecodeSkills(t.Vector, skills),
+            t.AllWorkersEvaluated)).ToList();
     }
 
     private static async Task<Dictionary<int, List<AssignedWorkerDto>>> LoadAssignmentsAsync(

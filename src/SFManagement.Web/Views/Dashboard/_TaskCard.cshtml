@@ -80,13 +80,22 @@
                     Assign
                 </button>
             }
-            @if (Model.Status == ProjectTaskStatus.Finish)
+            @if (Model.Status == ProjectTaskStatus.Finish && !Model.AllWorkersEvaluated)
             {
                 <button class="btn-evaluate text-xs font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm"
                         data-task-id="@Model.Id"
                         data-tooltip="Evaluate this completed task"
                         onclick="openEvaluationModal(@Model.Id, @projectId)">
                     Evaluate
+                </button>
+            }
+            @if (Model.Status == ProjectTaskStatus.Finish && Model.AllWorkersEvaluated)
+            {
+                <button class="btn-archive text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-600 text-white hover:bg-gray-700 transition-colors shadow-sm"
+                        data-task-id="@Model.Id"
+                        data-tooltip="Archive this task"
+                        onclick="archiveTask(@Model.Id, @projectId, this)">
+                    Archive
                 </button>
             }
         </div>
