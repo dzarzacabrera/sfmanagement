@@ -256,6 +256,8 @@ function archiveTask(taskId, projectId, btn) {
             });
     }, 2000);
 }
+
+function openAddWorkerPopup(projectId) {
     var col = document.querySelector('.kanban-column');
     var skel = col ? showSkeleton(col) : null;
 
