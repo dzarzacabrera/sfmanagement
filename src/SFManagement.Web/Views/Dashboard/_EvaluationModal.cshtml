@@ -27,7 +27,7 @@
             <p class="text-sm text-gray-500 mb-4 dark:text-gray-400">Worker: <strong>@Model.WorkerName</strong></p>
             <input type="hidden" name="workerId" value="@Model.WorkerId">
         }
-        <div class="space-y-3 max-h-60 overflow-y-auto">
+        <div class="space-y-3">
             @for (int i = 0; i < Model.SkillPositions.Count; i++)
             {
                 <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-600">
@@ -48,7 +48,7 @@
                 Cancel
             </button>
             <button type="submit"
-                    class="px-4 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700">
+                    class="px-4 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep">
                 Submit Evaluation
             </button>
         </div>
