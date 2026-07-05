@@ -43,6 +43,7 @@ public class ProjectTask
             (ProjectTaskStatus.Queued, ProjectTaskStatus.InProgress) => true,
             (ProjectTaskStatus.InProgress, ProjectTaskStatus.Blocked) => true,
             (ProjectTaskStatus.InProgress, ProjectTaskStatus.Finish) => true,
+            (ProjectTaskStatus.Blocked, ProjectTaskStatus.Finish) => true,
             (ProjectTaskStatus.Blocked, ProjectTaskStatus.Queued) => true,
             (ProjectTaskStatus.Blocked, ProjectTaskStatus.InProgress) => true,
             (ProjectTaskStatus.Finish, ProjectTaskStatus.Archived) => true,

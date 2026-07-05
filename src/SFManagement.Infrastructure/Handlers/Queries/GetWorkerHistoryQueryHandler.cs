@@ -14,10 +14,13 @@ internal sealed class GetWorkerHistoryQueryHandler(INpgsqlConnectionFactory conn
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
         await using var cmd = new NpgsqlCommand(
-            "SELECT pe.id, t.title AS task_title, pe.skill_position, pe.rating, pe.criticality, " +
+            "SELECT pe.id, t.title AS task_title, " +
+            "COALESCE(sc.name, 'Skill #' || pe.skill_position) AS skill_name, " +
+            "pe.skill_position, pe.rating, pe.criticality, " +
             "pe.base_points, pe.impact, pe.previous_level, pe.new_level, pe.created_at " +
             "FROM performance_evaluations pe " +
             "INNER JOIN tasks t ON t.id = pe.task_id " +
+            "LEFT JOIN skills_catalogue sc ON sc.vector_position = pe.skill_position " +
             "WHERE pe.worker_id = $1 " +
             "ORDER BY pe.created_at DESC", connection);
         cmd.Parameters.Add(new() { Value = query.WorkerId });
@@ -30,6 +33,7 @@ internal sealed class GetWorkerHistoryQueryHandler(INpgsqlConnectionFactory conn
             results.Add(new EvaluationHistoryDto(
                 mapper.GetInt32("id"),
                 mapper.GetString("task_title"),
+                mapper.GetString("skill_name"),
                 mapper.GetInt32("skill_position"),
                 mapper.GetEnum<PerformanceRating>("rating"),
                 mapper.GetEnum<Criticality>("criticality"),

@@ -161,12 +161,12 @@ public class DashboardController : Controller
         [FromForm] int taskId,
         [FromForm] int workerId,
         [FromForm] int[] skillPositions,
-        [FromForm] double[] basePoints,
+        [FromForm] int[] basePoints,
         [FromServices] ICommandHandler<EvaluateTaskCommand> handler,
         [FromServices] INpgsqlConnectionFactory connFactory)
     {
         var evaluations = skillPositions
-            .Select((pos, i) => new SkillEvaluation(pos, basePoints.Length > i ? basePoints[i] : 0.0))
+            .Select((pos, i) => new SkillEvaluation(pos, basePoints.Length > i ? basePoints[i] / 10000.0 : 0.0))
             .ToList();
 
         await handler.HandleAsync(new EvaluateTaskCommand(taskId, workerId, evaluations));

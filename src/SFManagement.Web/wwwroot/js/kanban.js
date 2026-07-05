@@ -76,55 +76,61 @@ function openEvaluationModal(taskId, projectId) {
         .then(function (html) {
             if (skel) skel.remove();
             openModal(html);
-            document.getElementById('evaluationForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                var btn = this.querySelector('button[type="submit"]');
-                if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Submitting...'; }
-
-                var workerSelect = document.querySelector('[name="workerId"]');
-                var workerId = workerSelect ? (workerSelect.tagName === 'SELECT' ? workerSelect.value : workerSelect.value) : 0;
-                var sliders = document.querySelectorAll('#skillSliders input[type="range"]');
-                var skillPositions = [];
-                var basePoints = [];
-
-                sliders.forEach(function (s) {
-                    var pos = s.getAttribute('data-position');
-                    var val = parseFloat(s.value);
-                    skillPositions.push(pos);
-                    basePoints.push((val / 10.0 - 0.5).toFixed(4));
-                });
-
-                var formData = new FormData();
-                formData.append('taskId', taskId);
-                formData.append('workerId', workerId);
-                for (var i = 0; i < skillPositions.length; i++) {
-                    formData.append('skillPositions', skillPositions[i]);
-                    formData.append('basePoints', basePoints[i]);
-                }
-
-                fetch('/Dashboard/SubmitEvaluation', { method: 'POST', body: formData })
-                    .then(function (r) { return r.json(); })
-                    .then(function (data) {
-                        if (data.hasMore) {
-                            showToast('Evaluation submitted. Select next worker.', 'success');
-                            openEvaluationModal(taskId, projectId);
-                        } else {
-                            closeModal();
-                            refreshTaskCard(taskId);
-                            showToast('All evaluations submitted successfully', 'success');
-                        }
-                    })
-                    .catch(function (err) {
-                        showToast('Evaluation error: ' + err.message, 'error');
-                        if (btn) { btn.disabled = false; btn.textContent = 'Submit Evaluation'; }
-                    });
-            });
         })
         .catch(function (err) {
             if (skel) skel.remove();
             showToast('Failed to load evaluation: ' + err.message, 'error');
         });
 }
+
+// Event delegation for evaluation form submit (survives innerHTML replacement)
+document.getElementById('modal-root').addEventListener('submit', function (e) {
+    var form = e.target.closest('#evaluationForm');
+    if (!form) return;
+    e.preventDefault();
+
+    var taskId = form.querySelector('[name="taskId"]').value;
+    var workerSelect = form.querySelector('[name="workerId"]');
+    var workerId = workerSelect ? workerSelect.value : 0;
+    var sliders = form.querySelectorAll('#skillSliders input[type="range"]');
+    var skillPositions = [];
+    var basePoints = [];
+
+    sliders.forEach(function (s) {
+        var pos = s.getAttribute('data-position');
+        var val = parseFloat(s.value);
+        skillPositions.push(pos);
+        basePoints.push(Math.round((val / 10.0 - 0.5) * 10000));
+    });
+
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Submitting...'; }
+
+    var formData = new FormData();
+    formData.append('taskId', taskId);
+    formData.append('workerId', workerId);
+    for (var i = 0; i < skillPositions.length; i++) {
+        formData.append('skillPositions', skillPositions[i]);
+        formData.append('basePoints', basePoints[i]);
+    }
+
+    fetch('/Dashboard/SubmitEvaluation', { method: 'POST', body: formData })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.hasMore) {
+                showToast('Evaluation submitted. Select next worker.', 'success');
+                openEvaluationModal(parseInt(taskId), window.__dashboardProjectId || 1);
+            } else {
+                closeModal();
+                refreshTaskCard(parseInt(taskId));
+                showToast('All evaluations submitted successfully', 'success');
+            }
+        })
+        .catch(function (err) {
+            showToast('Evaluation error: ' + err.message, 'error');
+            if (btn) { btn.disabled = false; btn.textContent = 'Submit Evaluation'; }
+        });
+});
 
 function reloadEvaluationPopup(taskId, workerId) {
     var projectId = window.__dashboardProjectId || 1;
@@ -155,7 +161,7 @@ function updateSliderPreview(input) {
 
     var basePoints = val / 10.0 - 0.5;
     var bpHidden = document.getElementById('bp-' + pos);
-    if (bpHidden) bpHidden.value = basePoints.toFixed(4);
+    if (bpHidden) bpHidden.value = Math.round(basePoints * 10000);
 
     var form = document.getElementById('evaluationForm');
     var multiplier = form ? parseFloat(form.getAttribute('data-crit-multiplier')) || 1.0 : 1.0;
@@ -166,19 +172,19 @@ function updateSliderPreview(input) {
     var diffEl = document.getElementById('diff-' + pos);
     if (!currentEl || !newEl || !diffEl) return;
 
-    var current = parseFloat(currentEl.textContent) || 0;
+    var current = parseFloat(input.getAttribute('data-current')) || 0;
     var impact = basePoints * multiplier;
-    var newLevel = Math.max(0, Math.min(10, current + impact));
+    var newLevel = Math.max(0, Math.min(10, Math.round((current + impact) / 0.05) * 0.05));
 
-    newEl.textContent = newLevel.toFixed(1);
+    newEl.textContent = newLevel.toFixed(2);
 
     var diff = newLevel - current;
-    var diffText = (diff >= 0 ? '+' : '') + diff.toFixed(1);
+    var diffText = (diff >= 0 ? '+' : '') + diff.toFixed(2);
     diffEl.textContent = diffText;
 
     diffEl.className = 'inline-block px-1.5 py-0.5 rounded-full text-[10px] font-semibold';
-    if (diff > 0.01) diffEl.classList.add('bg-green-100', 'text-green-700');
-    else if (diff < -0.01) diffEl.classList.add('bg-red-100', 'text-red-700');
+    if (diff > 0.001) diffEl.classList.add('bg-green-100', 'text-green-700');
+    else if (diff < -0.001) diffEl.classList.add('bg-red-100', 'text-red-700');
     else diffEl.classList.add('bg-gray-100', 'text-gray-500');
 }
 

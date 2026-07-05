@@ -42,7 +42,7 @@ public sealed class PerformanceEvaluationFlowTests(SfManagementE2eFixture fixtur
             {
                 ["taskId"] = "1",
                 ["skillPositions"] = "0",
-                ["basePoints"] = "0.5"
+                ["basePoints"] = "5000"
             }));
 
         evalResult.StatusCode.Should().Be(HttpStatusCode.OK);
