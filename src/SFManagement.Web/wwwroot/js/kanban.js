@@ -299,19 +299,32 @@ function archiveTask(taskId, projectId, btn) {
     var card = btn.closest('.task-card');
     if (!card) return;
 
-    // Animate card out
-    card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    // Capture current height for collapse animation
+    var h = card.scrollHeight;
+    card.style.overflow = 'hidden';
+    card.style.maxHeight = h + 'px';
+    // Force reflow so the maxHeight takes effect before transition
+    void card.offsetWidth;
+    card.style.transition = 'transform 0.3s ease, opacity 0.3s ease, max-height 0.3s ease 0.3s, margin 0.3s ease 0.3s, padding 0.3s ease 0.3s';
     card.style.transform = 'scale(0.95)';
     card.style.opacity = '0';
+    card.style.maxHeight = '0';
+    card.style.margin = '0';
+    card.style.padding = '0';
 
     var undoKey = 'archive-undo-' + taskId;
 
     showUndoToast('Task archived.', function () {
-        // Undo: restore the card
+        // Undo: restore the card with reverse animation
+        card.style.transition = 'transform 0.3s ease, opacity 0.3s ease, max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease';
         card.style.transform = '';
         card.style.opacity = '';
+        card.style.maxHeight = '';
+        card.style.margin = '';
+        card.style.padding = '';
+        card.style.overflow = '';
         clearTimeout(window[undoKey]);
-        showToast('Archive cancelled', 'info');
+        showToast('Archive cancelled', 'undo');
     });
 
     // After 2 seconds, actually archive
@@ -323,17 +336,27 @@ function archiveTask(taskId, projectId, btn) {
                 if (r.ok) {
                     card.remove();
                     updateColumnCounts();
-                    showToast('Task archived permanently', 'info');
+                    showToast('Task archived permanently', 'success');
                 } else {
                     showToast('Archive failed: ' + r.status, 'error');
+                    card.style.transition = '';
                     card.style.transform = '';
                     card.style.opacity = '';
+                    card.style.maxHeight = '';
+                    card.style.margin = '';
+                    card.style.padding = '';
+                    card.style.overflow = '';
                 }
             })
             .catch(function (err) {
                 showToast('Archive error: ' + err.message, 'error');
+                card.style.transition = '';
                 card.style.transform = '';
                 card.style.opacity = '';
+                card.style.maxHeight = '';
+                card.style.margin = '';
+                card.style.padding = '';
+                card.style.overflow = '';
             });
     }, 2000);
 }
