@@ -37,7 +37,7 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
             if (!requiredPositions.Contains(evaluation.SkillPosition))
                 continue;
 
-            var basePoints = evaluation.Rating.ToBasePoints();
+            var basePoints = evaluation.BasePoints;
             var multiplier = SkillVector.CalculateCriticalityMultiplier(task.Criticality);
             var impact = basePoints * multiplier;
             var previousLevel = currentVector[evaluation.SkillPosition];
@@ -106,6 +106,14 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
         return result!.ToArray();
     }
 
+    private static string ToPerformanceRatingString(double basePoints) => basePoints switch
+    {
+        < -0.25 => "Poor",
+        < 0.1 => "Average",
+        < 0.35 => "Good",
+        _ => "Excellent"
+    };
+
     private static async Task InsertEvaluationAsync(NpgsqlConnection connection, int taskId, int workerId,
         SkillEvaluation evaluation, Criticality criticality, double basePoints, double impact,
         double previousLevel, double newLevel)
@@ -121,9 +129,9 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
                 new() { Value = taskId },
                 new() { Value = workerId },
                 new() { Value = evaluation.SkillPosition },
-                new() { Value = evaluation.Rating.ToString() },
+                new() { Value = ToPerformanceRatingString(evaluation.BasePoints) },
                 new() { Value = criticality.ToString().ToLowerInvariant() },
-                new() { Value = basePoints },
+                new() { Value = Math.Round(basePoints, 2) },
                 new() { Value = Math.Round(impact, 2) },
                 new() { Value = Math.Round(previousLevel, 1) },
                 new() { Value = Math.Round(newLevel, 1) }

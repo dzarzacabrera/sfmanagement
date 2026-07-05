@@ -18,7 +18,7 @@ public sealed class PerformanceEvaluationTests(SfManagementFixture fixture)
 
         var evalHandler = sp.GetRequiredService<ICommandHandler<EvaluateTaskCommand>>();
         var evalCommand = new EvaluateTaskCommand(taskId, 1,
-            [new SkillEvaluation(0, PerformanceRating.Excellent)]);
+            [new SkillEvaluation(0, 0.5)]);
         await evalHandler.HandleAsync(evalCommand);
     }
 
@@ -31,7 +31,7 @@ public sealed class PerformanceEvaluationTests(SfManagementFixture fixture)
 
         var evalHandler = sp.GetRequiredService<ICommandHandler<EvaluateTaskCommand>>();
         var evalCommand = new EvaluateTaskCommand(taskId, 1,
-            [new SkillEvaluation(0, PerformanceRating.Average)]);
+            [new SkillEvaluation(0, 0.0)]);
 
         await FluentActions.Invoking(() => evalHandler.HandleAsync(evalCommand))
             .Should().ThrowAsync<InvalidOperationException>();

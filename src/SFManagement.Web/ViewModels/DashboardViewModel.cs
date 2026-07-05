@@ -33,10 +33,12 @@ public record EvaluationViewModel(
     int TaskId,
     string TaskTitle,
     string? Description,
+    Criticality Criticality,
     int WorkerId,
     string WorkerName,
     IReadOnlyList<SkillPositionDto> SkillPositions,
-    IReadOnlyList<AssignedWorkerDto>? AssignedWorkers = null);
+    IReadOnlyList<AssignedWorkerDto>? AssignedWorkers = null,
+    float[]? CurrentWorkerVector = null);
 
 public record SkillPositionDto(int Position, string SkillName);
 

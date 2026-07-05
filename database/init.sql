@@ -94,10 +94,10 @@ CREATE TABLE IF NOT EXISTS performance_evaluations (
     skill_position    INT NOT NULL,
     rating            performance_rating NOT NULL,
     criticality       criticality NOT NULL,
-    base_points       NUMERIC(3,1) NOT NULL,
-    impact            NUMERIC(4,2) NOT NULL,
-    previous_level    NUMERIC(4,1) NOT NULL,
-    new_level         NUMERIC(4,1) NOT NULL,
+    base_points       DOUBLE PRECISION NOT NULL,
+    impact            DOUBLE PRECISION NOT NULL,
+    previous_level    DOUBLE PRECISION NOT NULL,
+    new_level         DOUBLE PRECISION NOT NULL,
     created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

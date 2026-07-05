@@ -38,9 +38,6 @@ public class ProjectTask
 
     public void ChangeStatus(ProjectTaskStatus newStatus)
     {
-        if (Status == ProjectTaskStatus.Finish)
-            throw new InvalidOperationException("Finished tasks cannot change status.");
-
         var validTransitions = (Status, newStatus) switch
         {
             (ProjectTaskStatus.Queued, ProjectTaskStatus.InProgress) => true,
@@ -48,6 +45,8 @@ public class ProjectTask
             (ProjectTaskStatus.InProgress, ProjectTaskStatus.Finish) => true,
             (ProjectTaskStatus.Blocked, ProjectTaskStatus.Queued) => true,
             (ProjectTaskStatus.Blocked, ProjectTaskStatus.InProgress) => true,
+            (ProjectTaskStatus.Finish, ProjectTaskStatus.Archived) => true,
+            (ProjectTaskStatus.Archived, ProjectTaskStatus.Finish) => true,
             _ => false
         };
 
