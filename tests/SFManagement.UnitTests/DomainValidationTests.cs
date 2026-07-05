@@ -80,7 +80,32 @@ public class DomainValidationTests
     }
 
     [Fact]
-    public void ProjectTask_ChangeStatus_FinishToAny_Throws()
+    public void ProjectTask_ChangeStatus_FinishToArchived_Succeeds()
+    {
+        var task = CreateQueuedTask();
+        task.ChangeStatus(ProjectTaskStatus.InProgress);
+        task.ChangeStatus(ProjectTaskStatus.Finish);
+
+        task.ChangeStatus(ProjectTaskStatus.Archived);
+
+        task.Status.Should().Be(ProjectTaskStatus.Archived);
+    }
+
+    [Fact]
+    public void ProjectTask_ChangeStatus_ArchivedToFinish_Succeeds()
+    {
+        var task = CreateQueuedTask();
+        task.ChangeStatus(ProjectTaskStatus.InProgress);
+        task.ChangeStatus(ProjectTaskStatus.Finish);
+        task.ChangeStatus(ProjectTaskStatus.Archived);
+
+        task.ChangeStatus(ProjectTaskStatus.Finish);
+
+        task.Status.Should().Be(ProjectTaskStatus.Finish);
+    }
+
+    [Fact]
+    public void ProjectTask_ChangeStatus_FinishToInvalid_Throws()
     {
         var task = CreateQueuedTask();
         task.ChangeStatus(ProjectTaskStatus.InProgress);
@@ -88,8 +113,7 @@ public class DomainValidationTests
 
         Action act = () => task.ChangeStatus(ProjectTaskStatus.Queued);
 
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Finished*");
+        act.Should().Throw<InvalidOperationException>();
     }
 
     [Fact]

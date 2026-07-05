@@ -97,6 +97,7 @@ public class DashboardController : Controller
     public async Task<IActionResult> EvaluationPopup(
         [FromQuery] int taskId,
         [FromQuery] int projectId,
+        [FromQuery] int? workerId,
         [FromServices] IGetDashboardTasksQueryHandler taskHandler,
         [FromServices] INpgsqlConnectionFactory connFactory)
     {
@@ -119,6 +120,23 @@ public class DashboardController : Controller
 
         var remainingWorkers = workers?.Where(w => !evaluatedWorkerIds.Contains(w.WorkerId)).ToList();
 
+        // Select the requested worker or fall back to first remaining
+        var selectedWorker = remainingWorkers?.FirstOrDefault(w => w.WorkerId == (workerId ?? 0))
+            ?? remainingWorkers?.FirstOrDefault();
+
+        // Fetch selected worker's skills vector for the recalculation preview
+        float[]? currentWorkerVector = null;
+        if (selectedWorker != null)
+        {
+            await using var conn = await connFactory.GetOpenConnectionAsync();
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT skills_vector FROM workers WHERE id = @workerId";
+            cmd.Parameters.AddWithValue("@workerId", selectedWorker.WorkerId);
+            var result = await cmd.ExecuteScalarAsync();
+            if (result is Pgvector.Vector vec)
+                currentWorkerVector = vec.ToArray();
+        }
+
         var taskSkills = task?.Skills
             ?.Select(s => new SkillPositionDto(s.SkillPosition, s.SkillName))
             .ToList() ?? [];
@@ -127,10 +145,12 @@ public class DashboardController : Controller
             taskId,
             task?.Title ?? $"Task #{taskId}",
             task?.Description,
-            remainingWorkers?.FirstOrDefault()?.WorkerId ?? 0,
-            remainingWorkers?.FirstOrDefault()?.WorkerName ?? "Unknown",
+            task?.Criticality ?? Criticality.Medium,
+            selectedWorker?.WorkerId ?? 0,
+            selectedWorker?.WorkerName ?? "Unknown",
             taskSkills,
-            remainingWorkers is { Count: > 0 } ? remainingWorkers : null);
+            remainingWorkers is { Count: > 0 } ? remainingWorkers : null,
+            currentWorkerVector);
 
         return PartialView("_EvaluationModal", vm);
     }
@@ -141,12 +161,12 @@ public class DashboardController : Controller
         [FromForm] int taskId,
         [FromForm] int workerId,
         [FromForm] int[] skillPositions,
-        [FromForm] string[] ratings,
+        [FromForm] double[] basePoints,
         [FromServices] ICommandHandler<EvaluateTaskCommand> handler,
         [FromServices] INpgsqlConnectionFactory connFactory)
     {
         var evaluations = skillPositions
-            .Select((pos, i) => new SkillEvaluation(pos, Enum.Parse<PerformanceRating>(ratings[i], ignoreCase: true)))
+            .Select((pos, i) => new SkillEvaluation(pos, basePoints.Length > i ? basePoints[i] : 0.0))
             .ToList();
 
         await handler.HandleAsync(new EvaluateTaskCommand(taskId, workerId, evaluations));
