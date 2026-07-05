@@ -38,18 +38,12 @@ public class ProjectTask
 
     public void ChangeStatus(ProjectTaskStatus newStatus)
     {
-        var validTransitions = (Status, newStatus) switch
-        {
-            (ProjectTaskStatus.Queued, ProjectTaskStatus.InProgress) => true,
-            (ProjectTaskStatus.InProgress, ProjectTaskStatus.Blocked) => true,
-            (ProjectTaskStatus.InProgress, ProjectTaskStatus.Finish) => true,
-            (ProjectTaskStatus.Blocked, ProjectTaskStatus.Finish) => true,
-            (ProjectTaskStatus.Blocked, ProjectTaskStatus.Queued) => true,
-            (ProjectTaskStatus.Blocked, ProjectTaskStatus.InProgress) => true,
-            (ProjectTaskStatus.Finish, ProjectTaskStatus.Archived) => true,
-            (ProjectTaskStatus.Archived, ProjectTaskStatus.Finish) => true,
-            _ => false
-        };
+        // Full freedom between Queued, InProgress, Blocked, Finish
+        var isActive = Status is ProjectTaskStatus.Queued or ProjectTaskStatus.InProgress or ProjectTaskStatus.Blocked or ProjectTaskStatus.Finish;
+        var isActiveTarget = newStatus is ProjectTaskStatus.Queued or ProjectTaskStatus.InProgress or ProjectTaskStatus.Blocked or ProjectTaskStatus.Finish;
+        var validTransitions = (isActive && isActiveTarget)
+            || (Status == ProjectTaskStatus.Finish && newStatus == ProjectTaskStatus.Archived)
+            || (Status == ProjectTaskStatus.Archived && newStatus == ProjectTaskStatus.Finish);
 
         if (!validTransitions)
             throw new InvalidOperationException($"Invalid transition from {Status} to {newStatus}.");

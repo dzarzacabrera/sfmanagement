@@ -4,11 +4,11 @@
     <h1 class="text-2xl font-bold dark:text-white">@Model.ProjectName</h1>
     <div class="flex gap-2">
         <a href="/Task/Create?projectId=@Model.ProjectId"
-           class="bg-brand text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-deep">
+           class="bg-brand text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-deep">
             + New Task
         </a>
         <button onclick="openAddWorkerPopup(@Model.ProjectId)"
-                class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
             Add Worker
         </button>
     </div>
@@ -22,12 +22,12 @@
     @foreach (var (status, label, color, tasks) in new[] {
         ("Queued", "Queued", "border-l-blue-500", Model.QueuedTasks),
         ("InProgress", "In Progress", "border-l-amber-500", Model.InProgressTasks),
-        ("Blocked", "Blocked", "border-l-red-500", Model.BlockedTasks),
-        ("Finish", "Finished", "border-l-green-500", Model.FinishedTasks) })
+        ("Finish", "Finished", "border-l-green-500", Model.FinishedTasks),
+        ("Blocked", "Blocked", "border-l-red-500", Model.BlockedTasks) })
     {
         <div class="bg-gray-100 rounded-xl p-3 kanban-column dark:bg-gray-800 dark:text-gray-100" data-status="@status">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-brand mb-3 px-1 dark:text-brand">
-                @label <span class="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300">@tasks.Count</span>
+                @label <span class="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300 task-count">@tasks.Count</span>
             </h2>
             <div class="space-y-4">
                 @foreach (var task in tasks)
@@ -64,7 +64,7 @@
                             </div>
                         }
                         <div class="my-3.5 border-t border-gray-100 dark:border-gray-700/60"></div>
-                        <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex flex-col gap-2.5">
                             <div class="flex flex-col gap-1.5">
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-brand dark:text-brand">Assigned Team</span>
                                 <div class="flex flex-wrap gap-1.5 items-center">
@@ -91,34 +91,53 @@
                                     }
                                 </div>
                             </div>
-                            <div class="flex shrink-0 items-end justify-end">
-                                @if (task.Status != ProjectTaskStatus.Finish)
-                                {
-                                    <button class="btn-assign text-xs font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm"
-                                            data-task-id="@task.Id"
-                                            data-tooltip="Assign a worker to this task"
-                                            onclick="openAssignModal(@task.Id, @Model.ProjectId)">
-                                        Assign
-                                    </button>
-                                }
-                                @if (task.Status == ProjectTaskStatus.Finish && !task.AllWorkersEvaluated)
-                                {
-                                    <button class="btn-evaluate text-xs font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm"
-                                            data-task-id="@task.Id"
-                                            data-tooltip="Evaluate this completed task"
-                                            onclick="openEvaluationModal(@task.Id, @Model.ProjectId)">
-                                        Evaluate
-                                    </button>
-                                }
-                                @if (task.Status == ProjectTaskStatus.Finish && task.AllWorkersEvaluated)
-                                {
-                                    <button class="btn-archive text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-600 text-white hover:bg-gray-700 transition-colors shadow-sm"
-                                            data-task-id="@task.Id"
-                                            data-tooltip="Archive this task"
-                                            onclick="archiveTask(@task.Id, @Model.ProjectId, this)">
-                                        Archive
-                                    </button>
-                                }
+                            <div class="flex items-center justify-between gap-2 mt-1">
+                                <div class="flex items-center gap-1.5">
+                                    @if (!(task.Status == ProjectTaskStatus.Finish && task.AllWorkersEvaluated))
+                                    {
+                                        var canBack = task.Status != ProjectTaskStatus.Queued;
+                                        <button type="button" class="text-xs font-medium px-2 py-1.5 rounded border @(canBack ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canBack ? "" : "pointer-events-none")"
+                                                onclick="@(canBack ? "moveTaskStatus(" + task.Id + ", -1)" : "")"
+                                                data-tooltip="Move to previous status">&larr;</button>
+                                        <button type="button" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-brand text-brand hover:bg-brand hover:text-white transition-colors"
+                                                onclick="openStatusSheet(@task.Id, '@task.Status', this)">
+                                            Change Status
+                                        </button>
+                                        var canForward = task.Status == ProjectTaskStatus.Queued || task.Status == ProjectTaskStatus.InProgress;
+                                        <button type="button" class="text-xs font-medium px-2 py-1.5 rounded border @(canForward ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canForward ? "" : "pointer-events-none")"
+                                                onclick="@(canForward ? "moveTaskStatus(" + task.Id + ", 1)" : "")"
+                                                data-tooltip="Move to next status">&rarr;</button>
+                                    }
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    @if (task.Status != ProjectTaskStatus.Finish)
+                                    {
+                                        <button class="btn-assign text-xs font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm border border-transparent"
+                                                data-task-id="@task.Id"
+                                                data-tooltip="Assign a worker to this task"
+                                                onclick="openAssignModal(@task.Id, @Model.ProjectId)">
+                                            Assign
+                                        </button>
+                                    }
+                                    @if (task.Status == ProjectTaskStatus.Finish && !task.AllWorkersEvaluated)
+                                    {
+                                        <button class="btn-evaluate text-xs font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm border border-transparent"
+                                                data-task-id="@task.Id"
+                                                data-tooltip="Evaluate this completed task"
+                                                onclick="openEvaluationModal(@task.Id, @Model.ProjectId)">
+                                            Evaluate
+                                        </button>
+                                    }
+                                    @if (task.Status == ProjectTaskStatus.Finish && task.AllWorkersEvaluated)
+                                    {
+                                        <button class="btn-archive text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-600 text-white hover:bg-gray-700 transition-colors shadow-sm border border-transparent"
+                                                data-task-id="@task.Id"
+                                                data-tooltip="Archive this task"
+                                                onclick="archiveTask(@task.Id, @Model.ProjectId, this)">
+                                            Archive
+                                        </button>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>

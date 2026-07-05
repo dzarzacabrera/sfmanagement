@@ -83,7 +83,6 @@ public class DomainValidationTests
     public void ProjectTask_ChangeStatus_FinishToArchived_Succeeds()
     {
         var task = CreateQueuedTask();
-        task.ChangeStatus(ProjectTaskStatus.InProgress);
         task.ChangeStatus(ProjectTaskStatus.Finish);
 
         task.ChangeStatus(ProjectTaskStatus.Archived);
@@ -95,7 +94,6 @@ public class DomainValidationTests
     public void ProjectTask_ChangeStatus_ArchivedToFinish_Succeeds()
     {
         var task = CreateQueuedTask();
-        task.ChangeStatus(ProjectTaskStatus.InProgress);
         task.ChangeStatus(ProjectTaskStatus.Finish);
         task.ChangeStatus(ProjectTaskStatus.Archived);
 
@@ -105,11 +103,32 @@ public class DomainValidationTests
     }
 
     [Fact]
-    public void ProjectTask_ChangeStatus_FinishToInvalid_Throws()
+    public void ProjectTask_ChangeStatus_FinishToQueued_Succeeds()
     {
         var task = CreateQueuedTask();
-        task.ChangeStatus(ProjectTaskStatus.InProgress);
         task.ChangeStatus(ProjectTaskStatus.Finish);
+
+        task.ChangeStatus(ProjectTaskStatus.Queued);
+
+        task.Status.Should().Be(ProjectTaskStatus.Queued);
+    }
+
+    [Fact]
+    public void ProjectTask_ChangeStatus_QueuedToFinish_Succeeds()
+    {
+        var task = CreateQueuedTask();
+
+        task.ChangeStatus(ProjectTaskStatus.Finish);
+
+        task.Status.Should().Be(ProjectTaskStatus.Finish);
+    }
+
+    [Fact]
+    public void ProjectTask_ChangeStatus_ArchivedToQueued_Throws()
+    {
+        var task = CreateQueuedTask();
+        task.ChangeStatus(ProjectTaskStatus.Finish);
+        task.ChangeStatus(ProjectTaskStatus.Archived);
 
         Action act = () => task.ChangeStatus(ProjectTaskStatus.Queued);
 
@@ -117,11 +136,11 @@ public class DomainValidationTests
     }
 
     [Fact]
-    public void ProjectTask_ChangeStatus_InvalidTransition_Throws()
+    public void ProjectTask_ChangeStatus_QueuedToArchived_Throws()
     {
         var task = CreateQueuedTask();
 
-        Action act = () => task.ChangeStatus(ProjectTaskStatus.Finish);
+        Action act = () => task.ChangeStatus(ProjectTaskStatus.Archived);
 
         act.Should().Throw<InvalidOperationException>();
     }
