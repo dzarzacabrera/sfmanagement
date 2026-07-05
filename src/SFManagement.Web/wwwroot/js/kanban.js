@@ -192,6 +192,14 @@ function refreshTaskCard(taskId, newStatus) {
     var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
     if (!card) return;
 
+    // Clean up orphaned tooltips before removing old card
+    card.querySelectorAll('[data-tooltip]').forEach(function (el) {
+        if (el._tooltipEl) {
+            el._tooltipEl.remove();
+            el._tooltipEl = null;
+        }
+    });
+
     var projectId = window.__dashboardProjectId || 1;
 
     fetch('/Dashboard/GetTaskCardHtml?taskId=' + taskId + '&projectId=' + projectId)
@@ -278,6 +286,9 @@ document.getElementById('kanban-grid').addEventListener('drop', function (e) {
     var newStatus = col.dataset.status;
 
     if (!taskId || !newStatus) return;
+
+    var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
+    if (card && card.getAttribute('data-status') === newStatus) return;
 
     var formData = new FormData();
     formData.append('taskId', taskId);
@@ -396,4 +407,132 @@ function openAddWorkerPopup(projectId) {
             if (skel) skel.remove();
             showToast('Failed to load popup: ' + err.message, 'error');
         });
+}
+
+// Status flow: Queued (0) -> InProgress (1) -> Finish (2); Blocked is separate
+var STATUS_FLOW = ['Queued', 'InProgress', 'Finish'];
+var STATUS_LABELS = { Queued: 'Queued', InProgress: 'In Progress', Finish: 'Finished', Blocked: 'Blocked' };
+
+function moveTaskStatus(taskId, direction) {
+    var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
+    if (!card) return;
+    var current = card.getAttribute('data-status');
+    if (current === 'Blocked') {
+        // Blocked can only go back to InProgress
+        if (direction === -1) changeStatus(taskId, 'InProgress');
+        return;
+    }
+    var idx = STATUS_FLOW.indexOf(current);
+    if (idx === -1) return;
+    var nextIdx = idx + direction;
+    if (nextIdx < 0 || nextIdx >= STATUS_FLOW.length) return;
+    changeStatus(taskId, STATUS_FLOW[nextIdx]);
+}
+
+function openStatusSheet(taskId, currentStatus, btn) {
+    var sheet = document.getElementById('status-bottom-sheet');
+    var body = document.getElementById('sheet-body');
+    var handle = document.getElementById('sheet-handle');
+    var opts = document.getElementById('status-sheet-options');
+    if (!sheet || !opts) return;
+
+    // Reset
+    sheet.className = 'z-[70]';
+    sheet.style.position = '';
+    sheet.style.top = '';
+    sheet.style.left = '';
+    sheet.style.width = '';
+    sheet.style.maxHeight = '';
+    sheet.style.backgroundColor = '';
+    sheet.onclick = null;
+    body.className = 'bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto';
+    body.style.borderRadius = '';
+    body.style.padding = '';
+    body.style.width = '';
+    body.style.maxHeight = '';
+    handle.classList.remove('hidden');
+
+    if (window.innerWidth >= 640 && btn) {
+        // Desktop: dropdown near button — no backdrop
+        handle.classList.add('hidden');
+        body.style.borderRadius = '0.75rem';
+        body.style.padding = '0.5rem';
+        body.style.width = '12rem';
+        body.style.maxHeight = '20rem';
+        body.className += ' border border-gray-200 dark:border-gray-700';
+
+        var rect = btn.getBoundingClientRect();
+        sheet.style.position = 'fixed';
+        sheet.style.top = Math.min(rect.bottom + 4, window.innerHeight - 330) + 'px';
+        sheet.style.left = Math.max(8, Math.min(rect.right - 192 + rect.width / 2, window.innerWidth - 200)) + 'px';
+    } else {
+        // Mobile: bottom sheet — parent gets the backdrop background
+        sheet.className += ' fixed inset-0 items-end justify-center flex';
+        sheet.style.backgroundColor = 'rgba(0,0,0,0.3)';
+        body.style.borderRadius = '1rem 1rem 0 0';
+        body.style.padding = '1.5rem 1.5rem 2rem';
+        body.style.width = '100%';
+        body.style.maxHeight = '60vh';
+        // Close when tapping outside the sheet body
+        sheet.onclick = function (e) {
+            if (e.target === sheet) closeStatusSheet();
+        };
+    }
+
+    opts.innerHTML = '';
+    var statuses = ['Queued', 'InProgress', 'Finish', 'Blocked'];
+    statuses.forEach(function (s) {
+        var label = STATUS_LABELS[s] || s;
+        var isCurrent = s === currentStatus;
+        var el = document.createElement('button');
+        var isDesktop = window.innerWidth >= 640;
+        el.className = 'w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors ' +
+            (isCurrent ? 'bg-brand text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600');
+        if (isDesktop && isCurrent) {
+            el.className += ' cursor-default';
+        }
+        el.textContent = label;
+        if (!isCurrent) {
+            el.onclick = function () {
+                closeStatusSheet();
+                changeStatus(taskId, s);
+            };
+        }
+        opts.appendChild(el);
+    });
+
+    sheet.classList.remove('hidden');
+}
+
+function closeStatusSheet() {
+    var sheet = document.getElementById('status-bottom-sheet');
+    if (sheet) sheet.classList.add('hidden');
+}
+
+// Close status sheet on click outside (desktop dropdown)
+document.addEventListener('click', function (e) {
+    var sheet = document.getElementById('status-bottom-sheet');
+    if (!sheet || sheet.classList.contains('hidden')) return;
+    if (window.innerWidth < 640) return;
+    if (e.target.closest('#status-bottom-sheet') || e.target.closest('[onclick*="openStatusSheet"]')) return;
+    closeStatusSheet();
+});
+
+function changeStatus(taskId, newStatus) {
+    var formData = new FormData();
+    formData.append('taskId', taskId);
+    formData.append('newStatus', newStatus);
+
+    fetch('/Dashboard/ChangeStatus', { method: 'POST', body: formData })
+        .then(function (r) {
+            if (r.ok) {
+                refreshTaskCard(taskId, newStatus);
+                showToast('Task moved to ' + (STATUS_LABELS[newStatus] || newStatus), 'success');
+            } else {
+                return r.text().then(function (txt) {
+                    showToast('Status change failed: ' + txt, 'error');
+                });
+            }
+        })
+        .catch(function (err) { showToast('Status change error: ' + err.message, 'error'); });
 }
