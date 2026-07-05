@@ -39,16 +39,16 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
 
             var basePoints = evaluation.BasePoints;
             var multiplier = SkillVector.CalculateCriticalityMultiplier(task.Criticality);
-            var impact = basePoints * multiplier;
             var previousLevel = currentVector[evaluation.SkillPosition];
             var newVector = currentVector.ApplyImpact(
                 evaluation.SkillPosition, basePoints, multiplier);
             var newLevel = newVector[evaluation.SkillPosition];
+            var actualImpact = newLevel - previousLevel;
 
-            if (Math.Abs(newLevel - previousLevel) > 0.001)
+            if (Math.Abs(actualImpact) > 0.001)
             {
                 await InsertEvaluationAsync(connection, command.TaskId, assignment.WorkerId,
-                    evaluation, task.Criticality, basePoints, impact, previousLevel, newLevel);
+                    evaluation, task.Criticality, basePoints, actualImpact, previousLevel, newLevel);
                 hasChanges = true;
             }
 
@@ -131,10 +131,10 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
                 new() { Value = evaluation.SkillPosition },
                 new() { Value = ToPerformanceRatingString(evaluation.BasePoints) },
                 new() { Value = criticality.ToString().ToLowerInvariant() },
-                new() { Value = Math.Round(basePoints, 2) },
-                new() { Value = Math.Round(impact, 2) },
-                new() { Value = Math.Round(previousLevel, 1) },
-                new() { Value = Math.Round(newLevel, 1) }
+                new() { Value = SkillVector.RoundToPointZeroFive(basePoints) },
+                new() { Value = SkillVector.RoundToPointZeroFive(impact) },
+                new() { Value = SkillVector.RoundToPointZeroFive(previousLevel) },
+                new() { Value = SkillVector.RoundToPointZeroFive(newLevel) }
             }
         };
 

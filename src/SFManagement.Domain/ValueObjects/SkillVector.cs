@@ -13,7 +13,7 @@ public class SkillVector
         if (values is null || values.Length == 0)
             throw new ArgumentException("Vector must have at least one dimension.", nameof(values));
 
-        _values = values.Select(v => Math.Clamp(v, 0.0f, 10.0f)).ToArray();
+        _values = values.Select(v => RoundToPointZeroFive(Math.Clamp(v, 0.0f, 10.0f))).ToArray();
     }
 
     public float this[int index] => _values[index];
@@ -27,9 +27,14 @@ public class SkillVector
 
         var impact = (float)(basePoints * criticalityMultiplier);
         var updated = _values.ToArray();
-        updated[skillPosition] = Math.Clamp(updated[skillPosition] + impact, 0.0f, 10.0f);
+        var newValue = (float)RoundToPointZeroFive(updated[skillPosition] + impact);
+        updated[skillPosition] = Math.Clamp(newValue, 0.0f, 10.0f);
         return new SkillVector(updated);
     }
+
+    public static double RoundToPointZeroFive(double value) => Math.Round(value / 0.05, MidpointRounding.AwayFromZero) * 0.05;
+
+    public static float RoundToPointZeroFive(float value) => (float)RoundToPointZeroFive((double)value);
 
     public static double CalculateCriticalityMultiplier(Criticality criticality) => criticality switch
     {

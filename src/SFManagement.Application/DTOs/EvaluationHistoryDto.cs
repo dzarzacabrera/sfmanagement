@@ -5,6 +5,7 @@ namespace SFManagement.Application.DTOs;
 public record EvaluationHistoryDto(
     int Id,
     string TaskTitle,
+    string SkillName,
     int SkillPosition,
     PerformanceRating Rating,
     Criticality Criticality,
