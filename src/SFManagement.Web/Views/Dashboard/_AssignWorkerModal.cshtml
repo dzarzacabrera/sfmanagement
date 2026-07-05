@@ -33,6 +33,11 @@
     <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate">@Model.TaskTitle</h2>
 </div>
 
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+    <p class="text-xs text-gray-500 mb-3 line-clamp-4 dark:text-gray-400 leading-relaxed">@Model.Description</p>
+}
+
 @if (Model.Skills?.Count > 0)
 {
     <div class="flex flex-col gap-1.5 mb-3">

@@ -52,6 +52,7 @@ public class DashboardController : Controller
         var vm = new AssignWorkerViewModel(
             taskId,
             task?.Title ?? $"Task #{taskId}",
+            task?.Description,
             task?.Criticality ?? Criticality.Medium,
             task?.Skills ?? new List<TaskSkillDto>(),
             workers);
