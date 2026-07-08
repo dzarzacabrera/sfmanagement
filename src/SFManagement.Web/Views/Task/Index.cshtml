@@ -4,7 +4,7 @@
     <h1 class="text-2xl font-bold dark:text-white">Tasks</h1>
     <div class="flex gap-2">
         <a href="/Task/Create?projectId=1"
-           class="bg-brand text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand">
+           class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand">
             + New Task
         </a>
     </div>
@@ -31,7 +31,7 @@
                     <td class="px-4 py-2 font-medium dark:text-gray-300">@task.Title</td>
                     <td class="px-4 py-2 dark:text-gray-300">Project #@task.ProjectId</td>
                     <td class="px-4 py-2">
-                        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                        <span class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
                             @(task.Status == ProjectTaskStatus.InProgress ? "bg-amber-100 text-amber-700" :
                               task.Status == ProjectTaskStatus.Blocked ? "bg-red-100 text-red-700" :
                               task.Status == ProjectTaskStatus.Finish ? "bg-green-100 text-green-700" :
@@ -40,7 +40,7 @@
                         </span>
                     </td>
                     <td class="px-4 py-2">
-                        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                        <span class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
                             @(task.Criticality == Criticality.Critical ? "bg-red-100 text-red-700" :
                               task.Criticality == Criticality.High ? "bg-orange-100 text-orange-700" :
                               task.Criticality == Criticality.Medium ? "bg-blue-100 text-blue-700" :
@@ -60,7 +60,7 @@
                     </td>
                     <td class="px-4 py-2">
                         <a href="/Dashboard/Index?projectId=@task.ProjectId"
-                           class="text-brand hover:text-brand-deep text-xs font-medium dark:text-brand dark:hover:text-brand">Board</a>
+                           class="text-brand hover:text-brand-deep text-sm font-medium dark:text-brand dark:hover:text-brand">Board</a>
                     </td>
                 </tr>
             }

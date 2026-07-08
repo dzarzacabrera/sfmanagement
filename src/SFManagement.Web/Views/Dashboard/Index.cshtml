@@ -4,11 +4,11 @@
     <h1 class="text-2xl font-bold dark:text-white">@Model.ProjectName</h1>
     <div class="flex gap-2">
         <a href="/Task/Create?projectId=@Model.ProjectId"
-           class="bg-brand text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-deep">
+           class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep">
             + New Task
         </a>
         <button onclick="openAddWorkerPopup(@Model.ProjectId)"
-                class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
             Add Worker
         </button>
     </div>
@@ -27,7 +27,7 @@
     {
         <div class="bg-gray-100 rounded-xl p-3 kanban-column dark:bg-gray-800 dark:text-gray-100" data-status="@status">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-brand mb-3 px-1 dark:text-brand">
-                @label <span class="ml-1 text-xs bg-gray-200 px-1.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300 task-count">@tasks.Count</span>
+                @label <span class="ml-1 text-sm sm:text-pill bg-gray-200 px-1.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300 task-count">@tasks.Count</span>
             </h2>
             <div class="space-y-4">
                 @foreach (var task in tasks)
@@ -37,7 +37,7 @@
                          data-task-id="@task.Id" data-status="@task.Status" draggable="@(!isQueuedAndUnassigned)">
                         <div class="flex items-start justify-between gap-3">
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">@task.Title</h3>
-                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full shrink-0
+                                    <span class="text-sm sm:text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0
                                 @(task.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
                                   task.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
                                   task.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-200" :
@@ -47,16 +47,16 @@
                         </div>
                         @if (!string.IsNullOrEmpty(task.Description))
                         {
-                            <p class="text-xs text-gray-500 mt-2 line-clamp-2 dark:text-gray-400 leading-relaxed">@task.Description</p>
+                            <p class="text-base sm:text-sm text-gray-500 mt-2 line-clamp-2 dark:text-gray-400 leading-relaxed">@task.Description</p>
                         }
                         @if (task.Skills?.Count > 0)
                         {
                             <div class="flex flex-col gap-1.5 mt-3">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-brand dark:text-brand">Skills</span>
+                                <span class="text-sm sm:text-pill font-bold uppercase tracking-wider text-brand dark:text-brand">Skills</span>
                                 <div class="flex flex-wrap gap-1.5">
                                     @foreach (var skill in task.Skills)
                                     {
-                                        <span class="inline-flex items-center text-[10px] font-semibold rounded-md border border-brand-dark overflow-hidden">
+                                        <span class="inline-flex items-center text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
                                             <span class="px-2 py-0.5 bg-brand-light text-brand dark:bg-brand-light/20 dark:text-blue-100">@skill.SkillName</span>
                                             <span class="px-1.5 py-0.5 bg-brand-dark text-white font-bold border-l border-brand-dark">@skill.RequiredLevel.ToString("0")</span>
                                         </span>
@@ -67,13 +67,13 @@
                         <div class="my-3.5 border-t border-gray-100 dark:border-gray-700/60"></div>
                         <div class="flex flex-col gap-2.5">
                             <div class="flex flex-col gap-1.5">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-brand dark:text-brand">Assigned Team</span>
+                                <span class="text-sm sm:text-pill font-bold uppercase tracking-wider text-brand dark:text-brand">Assigned Team</span>
                                 <div class="flex flex-wrap gap-1.5 items-center">
                                     @if (task.AssignedWorkers?.Count > 0)
                                     {
                                         foreach (var worker in task.AssignedWorkers)
                                         {
-                                            <span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50">
+                                            <span class="inline-flex items-center gap-1 text-sm sm:text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50">
                                                 @worker.WorkerName
                                                 @if (task.Status != ProjectTaskStatus.Finish)
                                                 {
@@ -88,7 +88,7 @@
                                     }
                                     else
                                     {
-                                        <span class="text-xs italic text-gray-400 dark:text-gray-500">Unassigned</span>
+                                        <span class="text-sm italic text-gray-400 dark:text-gray-500">Unassigned</span>
                                     }
                                 </div>
                             </div>
@@ -97,15 +97,15 @@
                                     @if (!isQueuedAndUnassigned && !(task.Status == ProjectTaskStatus.Finish && task.AllWorkersEvaluated))
                                     {
                                         var canBack = task.Status != ProjectTaskStatus.Queued;
-                                        <button type="button" class="text-xs font-medium px-2 py-1.5 rounded border @(canBack ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canBack ? "" : "pointer-events-none")"
+                                        <button type="button" class="text-sm font-medium px-2 py-1.5 rounded border @(canBack ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canBack ? "" : "pointer-events-none")"
                                                 onclick="@(canBack ? "moveTaskStatus(" + task.Id + ", -1)" : "")"
                                                 data-tooltip="Move to previous status">&larr;</button>
-                                        <button type="button" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-brand text-brand hover:bg-brand hover:text-white transition-colors"
+                                        <button type="button" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-brand text-brand hover:bg-brand hover:text-white transition-colors"
                                                 onclick="openStatusSheet(@task.Id, '@task.Status', this)">
                                             Change Status
                                         </button>
                                         var canForward = task.Status == ProjectTaskStatus.Queued || task.Status == ProjectTaskStatus.InProgress;
-                                        <button type="button" class="text-xs font-medium px-2 py-1.5 rounded border @(canForward ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canForward ? "" : "pointer-events-none")"
+                                        <button type="button" class="text-sm font-medium px-2 py-1.5 rounded border @(canForward ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canForward ? "" : "pointer-events-none")"
                                                 onclick="@(canForward ? "moveTaskStatus(" + task.Id + ", 1)" : "")"
                                                 data-tooltip="Move to next status">&rarr;</button>
                                     }
@@ -113,7 +113,7 @@
                                 <div class="flex items-center gap-1.5">
                                     @if (task.Status != ProjectTaskStatus.Finish)
                                     {
-                                        <button class="btn-assign text-xs font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm border border-transparent"
+                                        <button class="btn-assign text-sm font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm border border-transparent"
                                                 data-task-id="@task.Id"
                                                 data-tooltip="Assign a worker to this task"
                                                 onclick="openAssignModal(@task.Id, @Model.ProjectId)">
@@ -122,7 +122,7 @@
                                     }
                                     @if (task.Status == ProjectTaskStatus.Finish && !task.AllWorkersEvaluated)
                                     {
-                                        <button class="btn-evaluate text-xs font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm border border-transparent"
+                                        <button class="btn-evaluate text-sm font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm border border-transparent"
                                                 data-task-id="@task.Id"
                                                 data-tooltip="Evaluate this completed task"
                                                 onclick="openEvaluationModal(@task.Id, @Model.ProjectId)">
@@ -131,7 +131,7 @@
                                     }
                                     @if (task.Status == ProjectTaskStatus.Finish && task.AllWorkersEvaluated)
                                     {
-                                        <button class="btn-archive text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-600 text-white hover:bg-gray-700 transition-colors shadow-sm border border-transparent"
+                                        <button class="btn-archive text-sm font-medium px-3 py-1.5 rounded-lg bg-gray-600 text-white hover:bg-gray-700 transition-colors shadow-sm border border-transparent"
                                                 data-task-id="@task.Id"
                                                 data-tooltip="Archive this task"
                                                 onclick="archiveTask(@task.Id, @Model.ProjectId, this)">

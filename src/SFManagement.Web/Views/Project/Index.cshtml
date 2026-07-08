@@ -3,35 +3,43 @@
 <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold dark:text-white">Projects</h1>
     <a href="/Project/Create"
-       class="bg-brand dark:bg-brand text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-deep dark:hover:bg-brand-deep">
+       class="bg-brand dark:bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:hover:bg-brand-deep">
         + New Project
     </a>
 </div>
 
-<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+<div class="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
     @foreach (var project in Model)
     {
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@project.Name</h2>
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative"
+             onclick="location.href='/Project/Detail?projectId=@project.Id'">
+            <a href="/Project/Edit?projectId=@project.Id"
+               class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+               onclick="event.stopPropagation()"
+               aria-label="Edit @project.Name">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+            </a>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 pr-12">@project.Name</h2>
             @if (!string.IsNullOrEmpty(project.DescriptionMd))
             {
-                <p class="text-xs text-gray-400 mt-1 line-clamp-2 dark:text-gray-400">@project.DescriptionMd[..Math.Min(project.DescriptionMd.Length, 120)]</p>
+                var desc = project.DescriptionMd.Length > 120 ? project.DescriptionMd[..120] : project.DescriptionMd;
+                <p class="text-base sm:text-sm text-gray-400 mt-1 sm:mt-1.5 line-clamp-3 dark:text-gray-400">@Html.Raw(desc.Replace("\n", "<br>").Replace("\\n", "<br>"))</p>
             }
             <div class="flex gap-2 mt-4">
                 <a href="/Dashboard/Index?projectId=@project.Id"
-                   class="bg-brand text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-deep">
+                   class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep whitespace-nowrap shrink-0"
+                   onclick="event.stopPropagation()">
                     Dashboard
                 </a>
-                <a href="/Project/Detail?projectId=@project.Id"
-                   class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                    Details
-                </a>
                 <a href="/Task/Create?projectId=@project.Id"
-                   class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                   class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap shrink-0"
+                   onclick="event.stopPropagation()">
                     + Task
                 </a>
-                <button onclick="openAddWorkerPopup(@project.Id)"
-                        class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                <button onclick="event.stopPropagation(); openAddWorkerPopup(@project.Id)"
+                        class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap shrink-0">
                     Add Worker
                 </button>
             </div>

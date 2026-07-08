@@ -16,7 +16,7 @@
         {
             <a href="/Dashboard/Index?projectId=@t.ProjectId"
                class="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
-                <div class="text-xs text-gray-400 mb-1 dark:text-gray-400">@t.ProjectName</div>
+                <div class="text-sm text-gray-400 mb-1 dark:text-gray-400">@t.ProjectName</div>
                 <div class="text-sm font-medium text-gray-900 dark:text-gray-100">@t.TaskTitle</div>
             </a>
         }
@@ -54,7 +54,7 @@ else
                         <td class="px-4 py-2 dark:text-gray-300">@eval.TaskTitle</td>
                         <td class="px-4 py-2 dark:text-gray-300">@eval.SkillName</td>
                         <td class="px-4 py-2 dark:text-gray-300">
-                            <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                            <span class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
                                 @(eval.Rating == PerformanceRating.Excellent ? "bg-green-100 text-green-700" :
                                   eval.Rating == PerformanceRating.Good ? "bg-blue-100 text-blue-700" :
                                   eval.Rating == PerformanceRating.Average ? "bg-gray-100 text-gray-600" :

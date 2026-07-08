@@ -6,7 +6,7 @@
 <div class="prose prose-sm max-w-none mb-6">
     @if (!string.IsNullOrEmpty(Model.DescriptionMd))
     {
-        <pre class="bg-gray-50 p-4 rounded-lg text-xs font-mono whitespace-pre-wrap dark:bg-gray-800 dark:text-gray-300">@Model.DescriptionMd</pre>
+        <pre class="bg-gray-50 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap dark:bg-gray-800 dark:text-gray-300">@Model.DescriptionMd</pre>
     }
     else
     {
@@ -16,11 +16,11 @@
 
 <div class="flex items-center gap-2 mb-6">
     <a href="/Task/Create?projectId=@Model.Id"
-       class="bg-brand text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">
+       class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">
         Add Task
     </a>
     <button onclick="openAddWorkerPopup(@Model.Id)"
-            class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
         Add Worker
     </button>
 </div>
@@ -35,12 +35,12 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">@worker.Name</h3>
-                        <p class="text-xs text-gray-400 dark:text-gray-400">@worker.Role</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-400">@worker.Role</p>
                     </div>
                     <a href="/Worker/Detail?workerId=@worker.Id"
-                       class="text-xs font-medium text-brand hover:text-brand-deep">View</a>
+                       class="text-sm font-medium text-brand hover:text-brand-deep">View</a>
                 </div>
-                <div class="flex gap-3 mt-3 text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex gap-3 mt-3 text-sm text-gray-500 dark:text-gray-400">
                     <span>@worker.ActiveTaskCount active tasks</span>
                     <span>@worker.EvaluationCount evaluations</span>
                 </div>

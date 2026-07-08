@@ -49,6 +49,32 @@ public class ProjectController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Edit(
+        [FromQuery] int projectId,
+        [FromServices] IGetAllProjectsQueryHandler handler)
+    {
+        var projects = await handler.HandleAsync(new GetAllProjectsQuery());
+        var project = projects.FirstOrDefault(p => p.Id == projectId);
+        if (project is null) return NotFound();
+
+        ViewBag.PageTitle = "Edit Project";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new("Edit", "") };
+        return View(project);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit(
+        [FromForm] int projectId,
+        [FromForm] string name,
+        [FromForm] string? descriptionMd,
+        [FromServices] ICommandHandler<UpdateProjectCommand> handler)
+    {
+        var command = new UpdateProjectCommand(projectId, name, descriptionMd);
+        await handler.HandleAsync(command);
+        return RedirectToAction("Detail", new { projectId });
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Detail(
         [FromQuery] int projectId,
         [FromServices] IGetAllProjectsQueryHandler projectHandler,
