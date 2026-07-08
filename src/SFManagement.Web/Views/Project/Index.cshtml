@@ -11,19 +11,19 @@
 <div class="flex mb-6">
     <div class="flex items-stretch flex-1">
         <input type="text" id="projectSearch"
-               class="flex-1 min-w-0 border border-gray-300 rounded-l-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand focus:border-brand dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+               class="flex-1 min-w-0 border border-gray-300 rounded-lg xl:rounded-l-lg xl:rounded-tr-none xl:rounded-br-none px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand focus:border-brand dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                placeholder="Search projects...">
-        <div class="flex border border-l-0 border-gray-300 rounded-r-lg overflow-hidden dark:border-gray-600">
+        <div class="hidden xl:flex border border-l-0 border-gray-300 rounded-r-lg overflow-hidden dark:border-gray-600">
             <button type="button" id="viewList"
-                    class="hidden lg:block p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700"
+                    class="p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700"
                     title="List view">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
-            <div class="hidden lg:block w-px bg-gray-300 dark:bg-gray-600"></div>
+            <div class="w-px bg-gray-300 dark:bg-gray-600"></div>
             <button type="button" id="viewCards"
-                    class="p-2.5 transition-colors text-white bg-brand"
+                    class="p-2.5 transition-colors bg-blue-50 text-brand"
                     title="Card view">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
@@ -88,67 +88,69 @@ else
     </div>
 
     <div id="projectList" class="hidden">
-        <div class="rounded-xl border border-gray-200 shadow-sm overflow-hidden dark:border-gray-700">
-            <table class="w-full">
-                <tbody>
-                    @foreach (var project in Model)
-                    {
-                        var listDesc = !string.IsNullOrEmpty(project.DescriptionMd)
-                            ? (project.DescriptionMd.Length > 100 ? project.DescriptionMd[..100] + "..." : project.DescriptionMd)
-                            : "";
-                        <tr class="project-row border-b border-gray-100 last:border-b-0 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors"
-                            data-name="@project.Name.ToLower()">
-                            <td class="px-4 py-3.5">
-                                <div class="font-semibold text-gray-900 dark:text-gray-100 text-sm">@project.Name</div>
-                                @if (!string.IsNullOrEmpty(listDesc))
-                                {
-                                    <div class="text-sm text-gray-400 mt-0.5 line-clamp-1 dark:text-gray-500">@listDesc</div>
-                                }
-                            </td>
-                            <td class="px-4 py-3.5 text-right whitespace-nowrap">
-                                <div class="flex items-center justify-end gap-1">
-                                    <a href="/Project/Edit?projectId=@project.Id"
-                                       class="p-2 rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                       title="Edit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                        </svg>
-                                    </a>
-                                    <a href="/Project/Detail?projectId=@project.Id"
-                                       class="p-2 rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                       title="View details">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </a>
-                                    <a href="/Dashboard/Index?projectId=@project.Id"
-                                       class="p-2 rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                       title="Dashboard">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                        </svg>
-                                    </a>
-                                    <a href="/Task/Create?projectId=@project.Id"
-                                       class="p-2 rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                       title="Add task">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                        </svg>
-                                    </a>
-                                    <button onclick="openAddWorkerPopup(@project.Id)"
-                                            class="p-2 rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            title="Add worker">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="rounded-xl border border-gray-200 shadow-sm bg-white overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+            <div class="grid grid-cols-12 items-center gap-4 py-2.5 px-4 border-b border-gray-100 dark:border-gray-700">
+                <div class="col-span-3 text-xs font-semibold text-gray-400 tracking-wider uppercase">Project</div>
+                <div class="col-span-6 text-xs font-semibold text-gray-400 tracking-wider uppercase">Description</div>
+                <div class="col-span-3 text-xs font-semibold text-gray-400 tracking-wider uppercase text-right">Actions</div>
+            </div>
+            @foreach (var project in Model)
+            {
+                var listDesc = !string.IsNullOrEmpty(project.DescriptionMd)
+                    ? (project.DescriptionMd.Length > 100 ? project.DescriptionMd[..100] + "..." : project.DescriptionMd)
+                    : "";
+                <div class="project-row grid grid-cols-12 items-center gap-4 border-b border-gray-100 last:border-b-0 py-3 px-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors"
+                     data-name="@project.Name.ToLower()">
+                    <div class="col-span-3 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
+                        @project.Name
+                    </div>
+                    <div class="col-span-6 text-sm text-gray-500 dark:text-gray-400 truncate">
+                        @listDesc
+                    </div>
+                    <div class="col-span-3 flex items-center justify-end">
+                        <div class="flex items-center gap-1 pr-2 border-r border-gray-200 dark:border-gray-600">
+                            <a href="/Project/Detail?projectId=@project.Id"
+                               class="p-2 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                               title="View details">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </a>
+                            <a href="/Task/Create?projectId=@project.Id"
+                               class="p-2 rounded-lg text-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                               title="Add task">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </a>
+                            <button onclick="openAddWorkerPopup(@project.Id)"
+                                    class="p-2 rounded-lg text-purple-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                                    title="Add worker">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-1 pl-2">
+                            <a href="/Project/Edit?projectId=@project.Id"
+                               class="p-2 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                               title="Edit">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                </svg>
+                            </a>
+                            <a href="/Dashboard/Index?projectId=@project.Id"
+                               class="p-2 rounded-lg text-gray-400 hover:text-brand hover:bg-brand-light/20 dark:hover:bg-brand/20 transition-colors"
+                               title="Dashboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 
@@ -161,14 +163,14 @@ else
     function switchToCards() {
         document.getElementById('projectCards').classList.remove('hidden');
         document.getElementById('projectList').classList.add('hidden');
-        document.getElementById('viewCards').className = 'p-2.5 transition-colors text-white bg-brand';
+        document.getElementById('viewCards').className = 'p-2.5 transition-colors bg-blue-50 text-brand';
         document.getElementById('viewList').className = 'p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700';
     }
 
     function switchToList() {
         document.getElementById('projectCards').classList.add('hidden');
         document.getElementById('projectList').classList.remove('hidden');
-        document.getElementById('viewList').className = 'p-2.5 transition-colors text-white bg-brand';
+        document.getElementById('viewList').className = 'p-2.5 transition-colors bg-blue-50 text-brand';
         document.getElementById('viewCards').className = 'p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700';
     }
 
@@ -200,7 +202,7 @@ else
         }
     });
 
-    var mql = window.matchMedia('(max-width: 1023px)');
+    var mql = window.matchMedia('(max-width: 1199px)');
     mql.addEventListener('change', function (e) {
         if (e.matches) {
             if (document.getElementById('projectList') && !document.getElementById('projectList').classList.contains('hidden')) {
