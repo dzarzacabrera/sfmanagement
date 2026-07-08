@@ -10,9 +10,10 @@
         _ => "border-l-gray-500"
     };
     var projectId = ViewBag.ProjectId is int pid ? pid : 1;
+    var isQueuedAndUnassigned = Model.Status == ProjectTaskStatus.Queued && (Model.AssignedWorkers?.Count ?? 0) == 0;
 }
-<div class="task-card bg-white rounded-xl border border-gray-200 border-l-4 @color p-4 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-move dark:bg-gray-800 dark:border-gray-700"
-     data-task-id="@Model.Id" data-status="@Model.Status" draggable="true">
+<div class="task-card bg-white rounded-xl border border-gray-200 border-l-4 @color p-4 shadow-sm hover:shadow-md transition-shadow duration-200 @(isQueuedAndUnassigned ? "cursor-default" : "cursor-move") dark:bg-gray-800 dark:border-gray-700"
+     data-task-id="@Model.Id" data-status="@Model.Status" draggable="@(!isQueuedAndUnassigned)">
     <div class="flex items-start justify-between gap-3">
         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">@Model.Title</h3>
         <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full shrink-0
@@ -72,7 +73,7 @@
         </div>
         <div class="flex items-center justify-between gap-2 mt-1">
             <div class="flex items-center gap-1.5">
-                @if (!(Model.Status == ProjectTaskStatus.Finish && Model.AllWorkersEvaluated))
+                @if (!isQueuedAndUnassigned && !(Model.Status == ProjectTaskStatus.Finish && Model.AllWorkersEvaluated))
                 {
                     var canBack = Model.Status != ProjectTaskStatus.Queued;
                     <button type="button" class="text-xs font-medium px-2 py-1.5 rounded border @(canBack ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canBack ? "" : "pointer-events-none")"
