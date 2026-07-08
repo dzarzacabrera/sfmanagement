@@ -9,6 +9,9 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      fontSize: {
+        'pill': ['13px', { lineHeight: '1.25rem' }],
+      },
       colors: {
         brand: {
           DEFAULT: '#21668f',

@@ -2,7 +2,7 @@
     var crumbs = ViewBag.Breadcrumbs as IReadOnlyList<KeyValuePair<string, string>>;
     if (crumbs is not null && crumbs.Count > 0)
     {
-        <nav class="text-xs text-gray-400 mb-4 flex items-center gap-1.5 flex-wrap">
+        <nav class="text-sm text-gray-400 mb-4 flex items-center gap-1.5 flex-wrap">
             <a href="/" class="hover:text-brand transition-colors">Home</a>
             @foreach (var crumb in crumbs)
             {
