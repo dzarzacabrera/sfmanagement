@@ -1,6 +1,6 @@
 @model CreateProjectViewModel
 
-<h1 class="text-2xl font-bold mb-6 dark:text-white">Create New Project</h1>
+<h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Create New Project</h1>
 
 <form method="post" enctype="multipart/form-data" class="max-w-lg space-y-4">
     <div>
@@ -14,8 +14,14 @@
                class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-light/30 file:text-brand hover:file:bg-brand-light/50 dark:text-gray-400">
         <p class="text-sm text-gray-400 mt-1">Optional. Upload a .md file with the project specification.</p>
     </div>
-    <button type="submit"
-            class="bg-brand text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-brand-deep">
-        Create Project
-    </button>
+    <div class="flex gap-3">
+        <button type="submit"
+                class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep border border-transparent">
+            Create Project
+        </button>
+        <a href="/Project/Index"
+           class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            Cancel
+        </a>
+    </div>
 </form>

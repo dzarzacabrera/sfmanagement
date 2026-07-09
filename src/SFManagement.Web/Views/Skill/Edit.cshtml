@@ -1,6 +1,6 @@
 @model SkillDto
 
-<h1 class="text-2xl font-bold mb-6 dark:text-white">Edit Skill</h1>
+<h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Edit Skill</h1>
 
 <form method="post" class="max-w-md space-y-4">
     <input type="hidden" name="skillId" value="@Model.Id">
@@ -13,8 +13,14 @@
     <div class="text-sm text-gray-400">
         Vector position: @Model.VectorPosition (immutable)
     </div>
-    <button type="submit"
-            class="bg-brand text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-brand-deep">
-        Save Changes
-    </button>
+    <div class="flex gap-3">
+        <button type="submit"
+                class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep border border-transparent">
+            Save Changes
+        </button>
+        <a href="/Skill/Index"
+           class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            Cancel
+        </a>
+    </div>
 </form>

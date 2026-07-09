@@ -42,7 +42,7 @@ internal sealed class UpdateTaskCommandHandler(INpgsqlConnectionFactory connecti
 
         await using var updateCmd = new NpgsqlCommand(
             "UPDATE tasks SET title = $1, description = $2, criticality = $3::criticality, " +
-            "required_skills_vector = $4 WHERE id = $5", connection)
+            "required_skills_vector = $4, project_id = $5 WHERE id = $6", connection)
         {
             Parameters =
             {
@@ -50,6 +50,7 @@ internal sealed class UpdateTaskCommandHandler(INpgsqlConnectionFactory connecti
                 new() { Value = (object?)command.Description ?? DBNull.Value },
                 new() { Value = command.Criticality.ToString().ToLowerInvariant() },
                 new() { Value = new Pgvector.Vector(command.RequiredSkillsVector) },
+                new() { Value = command.ProjectId },
                 new() { Value = command.TaskId }
             }
         };

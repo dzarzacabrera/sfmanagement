@@ -13,21 +13,21 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
     public async Task UpdateQueuedTask_ShouldSucceed()
     {
         using var scope = fixture.Factory.Services.CreateScope();
-        var (_, taskId) = await CreateProjectWithQueuedTaskAsync(scope.ServiceProvider);
+        var (projectId, taskId) = await CreateProjectWithQueuedTaskAsync(scope.ServiceProvider);
 
         var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<UpdateTaskCommand>>();
-        var command = new UpdateTaskCommand(taskId, "Updated Title", "Updated",
+        var command = new UpdateTaskCommand(taskId, projectId, "Updated Title", "Updated",
             Criticality.Low, new float[1024]);
 
         await handler.HandleAsync(command);
     }
 
     [Fact]
-    public async Task UpdateInProgressTask_ShouldThrow()
+    public async Task UpdateInProgressTask_ShouldSucceed()
     {
         using var scope = fixture.Factory.Services.CreateScope();
         var sp = scope.ServiceProvider;
-        var (_, taskId) = await CreateProjectWithQueuedTaskAsync(sp);
+        var (projectId, taskId) = await CreateProjectWithQueuedTaskAsync(sp);
 
         var assignHandler = sp.GetRequiredService<ICommandHandler<AssignWorkerCommand>>();
         await assignHandler.HandleAsync(new AssignWorkerCommand(taskId, 1));
@@ -36,11 +36,10 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
         await statusHandler.HandleAsync(new ChangeTaskStatusCommand(taskId, ProjectTaskStatus.InProgress));
 
         var updateHandler = sp.GetRequiredService<ICommandHandler<UpdateTaskCommand>>();
-        var command = new UpdateTaskCommand(taskId, "Should Fail", null,
+        var command = new UpdateTaskCommand(taskId, projectId, "Updated Title", null,
             Criticality.Medium, new float[1024]);
 
-        await FluentActions.Invoking(() => updateHandler.HandleAsync(command))
-            .Should().ThrowAsync<InvalidOperationException>();
+        await updateHandler.HandleAsync(command);
     }
 
     [Fact]
@@ -48,7 +47,7 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
     {
         using var scope = fixture.Factory.Services.CreateScope();
         var sp = scope.ServiceProvider;
-        var (_, taskId) = await CreateProjectWithQueuedTaskAsync(sp);
+        var (projectId, taskId) = await CreateProjectWithQueuedTaskAsync(sp);
 
         var assignHandler = sp.GetRequiredService<ICommandHandler<AssignWorkerCommand>>();
         await assignHandler.HandleAsync(new AssignWorkerCommand(taskId, 1));
@@ -58,7 +57,7 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
         await statusHandler.HandleAsync(new ChangeTaskStatusCommand(taskId, ProjectTaskStatus.Finish));
 
         var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<UpdateTaskCommand>>();
-        var command = new UpdateTaskCommand(taskId, "Should Fail", null,
+        var command = new UpdateTaskCommand(taskId, projectId, "Should Fail", null,
             Criticality.Medium, new float[1024]);
 
         await FluentActions.Invoking(() => handler.HandleAsync(command))

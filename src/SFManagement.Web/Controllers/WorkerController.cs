@@ -81,7 +81,7 @@ public class WorkerController : Controller
             tasks);
 
         ViewBag.PageTitle = worker.Name;
-        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "/Worker/Index"), new(worker.Name, "") };
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "/Worker/Index"), new("Detail", "") };
 
         return View(vm);
     }

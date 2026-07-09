@@ -1,8 +1,10 @@
-@model CreateTaskViewModel
+@model EditTaskViewModel
 
-<h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Create New Task</h1>
+<h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Edit Task</h1>
 
 <form method="post" class="max-w-lg space-y-4">
+    <input type="hidden" name="taskId" value="@Model.TaskId">
+
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Project</label>
         <select name="projectId"
@@ -16,13 +18,13 @@
 
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Title</label>
-        <input type="text" name="title" required
+        <input type="text" name="title" value="@Model.Title" required
                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
     </div>
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Description</label>
         <textarea name="description" rows="4"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"></textarea>
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">@Model.Description</textarea>
     </div>
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Criticality</label>
@@ -30,7 +32,7 @@
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
             @foreach (var opt in Model.Criticalities)
             {
-                <option value="@opt.Value">@opt.Label</option>
+                <option value="@opt.Value" selected="@(opt.Value == Model.Criticality ? true : null)">@opt.Label</option>
             }
         </select>
     </div>
@@ -38,12 +40,13 @@
         <legend class="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Required Skills</legend>
         @await Html.PartialAsync("_SkillSelector", (IReadOnlyList<SkillDto>)ViewBag.AllSkills)
     </fieldset>
+
     <div class="flex gap-3">
         <button type="submit"
                 class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep border border-transparent">
-            Create Task
+            Save Changes
         </button>
-        <a href="/Task/Index"
+        <a href="@Url.Action("Detail", new { taskId = Model.TaskId })"
            class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
             Cancel
         </a>
@@ -51,10 +54,18 @@
 </form>
 
 <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
-        if (this.querySelectorAll('input[name="skillPositions"]').length === 0) {
-            e.preventDefault();
-            window.showToast('error', 'Please select at least one required skill.');
-        }
+    window.__taskSkills = @Html.Raw(ViewBag.TaskSkillsJson ?? "[]");
+    document.addEventListener('DOMContentLoaded', function () {
+        var container = document.querySelector('.skill-selector');
+        if (!container || !window.__taskSkills) return;
+        window.__taskSkills.forEach(function (s) {
+            var pill = container.querySelector('.skill-pill[data-pos="' + s.pos + '"]');
+            if (pill) pill.click();
+            var input = container.querySelector('.skill-selected-item[data-pos="' + s.pos + '"] .skill-level');
+            if (input) {
+                input.value = s.level;
+                input.dispatchEvent(new Event('change'));
+            }
+        });
     });
 </script>
