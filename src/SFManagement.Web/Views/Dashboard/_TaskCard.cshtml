@@ -79,9 +79,12 @@
                     <button type="button" class="text-sm font-medium px-2 py-1.5 rounded border @(canBack ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canBack ? "" : "pointer-events-none")"
                             onclick="@(canBack ? "moveTaskStatus(" + Model.Id + ", -1)" : "")"
                             data-tooltip="Move to previous status">&larr;</button>
-                    <button type="button" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-brand text-brand hover:bg-brand hover:text-white transition-colors"
+                    <button type="button" class="flex items-center gap-1.5 px-2.5 py-1.5 border border-brand rounded-lg text-sm font-semibold text-brand hover:bg-brand hover:text-white transition-colors"
                             onclick="openStatusSheet(@Model.Id, '@Model.Status', this)">
-                        Change Status
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>Status</span>
                     </button>
                     var canForward = Model.Status == ProjectTaskStatus.Queued || Model.Status == ProjectTaskStatus.InProgress;
                     <button type="button" class="text-sm font-medium px-2 py-1.5 rounded border @(canForward ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canForward ? "" : "pointer-events-none")"

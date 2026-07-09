@@ -16,4 +16,5 @@ public record TaskDto(
     float[] RequiredSkillsVector,
     IReadOnlyList<AssignedWorkerDto>? AssignedWorkers = null,
     IReadOnlyList<TaskSkillDto>? Skills = null,
-    bool AllWorkersEvaluated = false);
+    bool AllWorkersEvaluated = false,
+    string ProjectName = "");
