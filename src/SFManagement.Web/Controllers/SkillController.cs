@@ -59,6 +59,19 @@ public class SkillController : Controller
         return RedirectToAction("Index");
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Detail(
+        [FromQuery] int skillId,
+        [FromServices] IGetAllSkillsQueryHandler handler)
+    {
+        var skills = await handler.HandleAsync(new GetAllSkillsQuery(IncludeInactive: true));
+        var skill = skills.FirstOrDefault(s => s.Id == skillId);
+        if (skill is null) return NotFound();
+        ViewBag.PageTitle = skill.Name;
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Skills", "/Skill/Index"), new("Detail", "") };
+        return View(skill);
+    }
+
     [HttpPost]
     public async Task<IActionResult> ToggleActive(
         [FromForm] int skillId,

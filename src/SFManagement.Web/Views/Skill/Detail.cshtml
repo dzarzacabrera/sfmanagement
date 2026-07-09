@@ -1,0 +1,40 @@
+@model SkillDto
+
+<h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">@Model.Name</h1>
+
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">ID</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">@Model.Id</dd>
+        </div>
+        <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Position</dt>
+            <dd class="mt-1 text-sm font-mono text-gray-900 dark:text-gray-100">@Model.VectorPosition</dd>
+        </div>
+        <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
+            <dd class="mt-1">
+                @if (Model.IsActive)
+                {
+                    <span class="px-2 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-700">Active</span>
+                }
+                else
+                {
+                    <span class="px-2 py-0.5 rounded-full text-sm font-medium bg-red-100 text-red-700">Inactive</span>
+                }
+            </dd>
+        </div>
+    </dl>
+</div>
+
+<div class="flex items-center gap-2 mt-6">
+    <a href="/Skill/Edit?skillId=@Model.Id"
+       class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">
+        Edit
+    </a>
+    <a href="/Skill/Index"
+       class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+        Back to Skills
+    </a>
+</div>
