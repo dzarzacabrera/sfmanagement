@@ -21,7 +21,7 @@ internal sealed class GetAllTasksQueryHandler(INpgsqlConnectionFactory connectio
             "(SELECT COUNT(1) FROM task_assignments ta WHERE ta.task_id = t.id) AS assigned_count " +
             "FROM tasks t " +
             "INNER JOIN projects p ON p.id = t.project_id " +
-            "ORDER BY t.id", connection);
+            "ORDER BY t.project_id DESC, t.status, t.id", connection);
 
         var tasks = new List<(int Id, int ProjectId, string Title, string? Description,
             Domain.Enums.Criticality Criticality, Domain.Enums.ProjectTaskStatus Status, float[] Vector,
