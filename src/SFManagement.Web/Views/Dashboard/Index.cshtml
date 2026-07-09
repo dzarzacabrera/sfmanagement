@@ -1,7 +1,7 @@
 @model DashboardViewModel
 
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6 dark:bg-gray-800">
-    <h1 class="text-2xl font-bold dark:text-white">@Model.ProjectName</h1>
+    <h1 class="text-2xl font-bold text-brand dark:text-white">@Model.ProjectName</h1>
     <div class="flex gap-2">
         <a href="/Task/Create?projectId=@Model.ProjectId"
            class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep">
@@ -56,9 +56,9 @@
                                 <div class="flex flex-wrap gap-1.5">
                                     @foreach (var skill in task.Skills)
                                     {
-                                        <span class="inline-flex items-center text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
-                                            <span class="px-2 py-0.5 bg-brand-light text-brand dark:bg-brand-light/20 dark:text-blue-100">@skill.SkillName</span>
-                                            <span class="px-1.5 py-0.5 bg-brand-dark text-white font-bold border-l border-brand-dark">@skill.RequiredLevel.ToString("0")</span>
+                                        <span class="inline-flex items-stretch text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
+                                            <span class="px-2 py-0.5 bg-brand-light text-brand dark:bg-brand-light/20 dark:text-blue-100 self-center">@skill.SkillName</span>
+                                            <span class="px-1.5 bg-brand-dark text-white font-bold border-l border-brand-dark flex items-center self-stretch">@skill.RequiredLevel.ToString("0")</span>
                                         </span>
                                     }
                                 </div>

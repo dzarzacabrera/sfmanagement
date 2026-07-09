@@ -17,6 +17,16 @@ public record CreateTaskViewModel(
     IReadOnlyList<SkillCatalogueItem> Skills,
     IReadOnlyList<CriticalityOption> Criticalities);
 
+public record EditTaskViewModel(
+    int TaskId,
+    int ProjectId,
+    string Title,
+    string? Description,
+    Criticality Criticality,
+    IReadOnlyList<ProjectDto> Projects,
+    IReadOnlyList<SkillCatalogueItem> Skills,
+    IReadOnlyList<CriticalityOption> Criticalities);
+
 public record SkillCatalogueItem(int Id, string Name, int Position);
 
 public record CriticalityOption(Criticality Value, string Label);

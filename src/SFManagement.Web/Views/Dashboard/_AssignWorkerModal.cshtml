@@ -45,9 +45,9 @@
         <div class="flex flex-wrap gap-1.5">
             @foreach (var skill in Model.Skills)
             {
-                <span class="inline-flex items-center text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
-                    <span class="px-2 py-0.5 bg-brand-light text-brand">@skill.SkillName</span>
-                    <span class="px-1.5 py-0.5 bg-brand-dark text-white font-bold border-l border-brand-dark">@skill.RequiredLevel.ToString("0")</span>
+                <span class="inline-flex items-stretch text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
+                    <span class="px-2 py-0.5 bg-brand-light text-brand self-center">@skill.SkillName</span>
+                    <span class="px-1.5 bg-brand-dark text-white font-bold border-l border-brand-dark flex items-center self-stretch">@skill.RequiredLevel.ToString("0")</span>
                 </span>
             }
         </div>

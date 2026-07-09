@@ -27,8 +27,8 @@ public class ProjectTask
 
     public void UpdateDetails(string title, string? description, Criticality criticality, SkillVector requiredSkillsVector)
     {
-        if (Status != ProjectTaskStatus.Queued)
-            throw new InvalidOperationException("Only queued tasks can be edited.");
+        if (Status is not (ProjectTaskStatus.Queued or ProjectTaskStatus.InProgress))
+            throw new InvalidOperationException("Only queued or in-progress tasks can be edited.");
 
         Title = title;
         Description = description;

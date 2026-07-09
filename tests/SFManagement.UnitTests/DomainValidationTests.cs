@@ -24,15 +24,28 @@ public class DomainValidationTests
     }
 
     [Fact]
-    public void ProjectTask_UpdateDetails_WhenInProgress_Throws()
+    public void ProjectTask_UpdateDetails_WhenInProgress_Succeeds()
     {
         var task = CreateQueuedTask();
         task.ChangeStatus(ProjectTaskStatus.InProgress);
+        var newVector = new SkillVector([8.0f, 8.0f]);
+
+        task.UpdateDetails("Updated Title", "Updated desc", Criticality.High, newVector);
+
+        task.Title.Should().Be("Updated Title");
+        task.Criticality.Should().Be(Criticality.High);
+    }
+
+    [Fact]
+    public void ProjectTask_UpdateDetails_WhenBlocked_Throws()
+    {
+        var task = CreateQueuedTask();
+        task.ChangeStatus(ProjectTaskStatus.Blocked);
 
         Action act = () => task.UpdateDetails("x", null, Criticality.Low, new SkillVector([1.0f]));
 
         act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*queued*");
+            .WithMessage("*queued*in-progress*");
     }
 
     [Fact]
