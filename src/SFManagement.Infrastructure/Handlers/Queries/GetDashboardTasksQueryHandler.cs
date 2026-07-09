@@ -19,16 +19,17 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
 
         await using var cmd = new NpgsqlCommand(
             "SELECT t.id, t.project_id, t.title, t.description, t.criticality, t.status, " +
-            "t.required_skills_vector, " +
+            "t.required_skills_vector, p.name AS project_name, " +
             "(SELECT COUNT(DISTINCT pe.worker_id) FROM performance_evaluations pe WHERE pe.task_id = t.id) AS evaluated_count, " +
             "(SELECT COUNT(1) FROM task_assignments ta WHERE ta.task_id = t.id) AS assigned_count " +
             "FROM tasks t " +
+            "INNER JOIN projects p ON p.id = t.project_id " +
             "WHERE t.project_id = $1 AND t.status != 'Archived' " +
             "ORDER BY t.id", connection);
         cmd.Parameters.Add(new() { Value = query.ProjectId });
 
         var tasks = new List<(int Id, int ProjectId, string Title, string? Description,
-            Criticality Criticality, ProjectTaskStatus Status, float[] Vector, bool AllWorkersEvaluated)>();
+            Criticality Criticality, ProjectTaskStatus Status, float[] Vector, bool AllWorkersEvaluated, string ProjectName)>();
 
         await using (var reader = await cmd.ExecuteReaderAsync())
         {
@@ -42,7 +43,8 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
                     mapper.GetEnum<Criticality>("criticality"),
                     mapper.GetEnum<ProjectTaskStatus>("status"),
                     mapper.GetVector("required_skills_vector"),
-                    assignedCount > 0 && evaluatedCount >= assignedCount));
+                    assignedCount > 0 && evaluatedCount >= assignedCount,
+                    mapper.GetString("project_name")));
             }
         }
 
@@ -53,7 +55,8 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
             t.Criticality, t.Status, t.Vector,
             assigned.GetValueOrDefault(t.Id),
             DecodeSkills(t.Vector, skills),
-            t.AllWorkersEvaluated)).ToList();
+            t.AllWorkersEvaluated,
+            t.ProjectName)).ToList();
     }
 
     private static async Task<Dictionary<int, List<AssignedWorkerDto>>> LoadAssignmentsAsync(

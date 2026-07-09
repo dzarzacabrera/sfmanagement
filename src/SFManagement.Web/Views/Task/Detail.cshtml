@@ -1,0 +1,93 @@
+@model TaskDto
+
+<div class="mb-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold dark:text-white">@Model.Title</h1>
+        <a href="/Dashboard/Index?projectId=@Model.ProjectId"
+           class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep whitespace-nowrap">
+            View on Board
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-4">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 dark:bg-gray-800 dark:border-gray-700">
+            <h2 class="text-lg font-semibold mb-3 dark:text-white">Details</h2>
+            <dl class="space-y-2 text-sm">
+                <div class="flex gap-2">
+                    <dt class="text-gray-500 dark:text-gray-400 w-24">Status</dt>
+                    <dd>
+                        <span class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
+                            @(Model.Status == ProjectTaskStatus.InProgress ? "bg-amber-100 text-amber-700" :
+                              Model.Status == ProjectTaskStatus.Blocked ? "bg-red-100 text-red-700" :
+                              Model.Status == ProjectTaskStatus.Finish ? "bg-green-100 text-green-700" :
+                              Model.Status == ProjectTaskStatus.Archived ? "bg-gray-100 text-gray-500" :
+                              "bg-blue-100 text-blue-700")">
+                            @Model.Status
+                        </span>
+                    </dd>
+                </div>
+                <div class="flex gap-2">
+                    <dt class="text-gray-500 dark:text-gray-400 w-24">Criticality</dt>
+                    <dd>
+                        <span class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
+                            @(Model.Criticality == Criticality.Critical ? "bg-red-100 text-red-700" :
+                              Model.Criticality == Criticality.High ? "bg-orange-100 text-orange-700" :
+                              Model.Criticality == Criticality.Medium ? "bg-blue-100 text-blue-700" :
+                              "bg-gray-100 text-gray-600")">
+                            @Model.Criticality
+                        </span>
+                    </dd>
+                </div>
+                <div class="flex gap-2">
+                    <dt class="text-gray-500 dark:text-gray-400 w-24">Project</dt>
+                    <dd class="text-gray-700 dark:text-gray-300">@Model.ProjectName</dd>
+                </div>
+                <div class="flex gap-2">
+                    <dt class="text-gray-500 dark:text-gray-400 w-24">Description</dt>
+                    <dd class="text-gray-700 dark:text-gray-300">@(Model.Description ?? "—")</dd>
+                </div>
+            </dl>
+        </div>
+
+        @if (Model.Skills?.Count > 0)
+        {
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 dark:bg-gray-800 dark:border-gray-700">
+                <h2 class="text-lg font-semibold mb-3 dark:text-white">Required Skills</h2>
+                <div class="flex flex-wrap gap-2">
+                    @foreach (var skill in Model.Skills)
+                    {
+                        <span class="px-2.5 py-1 rounded-full text-sm sm:text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                            @skill.SkillName (@skill.RequiredLevel.ToString("0.00"))
+                        </span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div>
+        @if (Model.AssignedWorkers?.Count > 0)
+        {
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 dark:bg-gray-800 dark:border-gray-700">
+                <h2 class="text-lg font-semibold mb-3 dark:text-white">Assigned Workers</h2>
+                <ul class="space-y-2">
+                    @foreach (var w in Model.AssignedWorkers)
+                    {
+                        <li class="text-sm">
+                            <a href="/Worker/Detail?workerId=@w.WorkerId"
+                               class="text-brand hover:text-brand-deep dark:text-brand dark:hover:text-brand">
+                                @w.WorkerName
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>
+
+<a href="/Task/Index" class="inline-block mt-6 text-sm text-brand hover:text-brand-deep dark:text-brand dark:hover:text-brand">
+    &larr; Back to Tasks
+</a>

@@ -46,6 +46,19 @@ public class TaskController : Controller
         return View(new CreateTaskViewModel(defaultProjectId, projects, skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition)).ToList(), criticalities));
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Detail(
+        [FromQuery] int taskId,
+        [FromServices] IGetTaskByIdQueryHandler handler)
+    {
+        var task = await handler.HandleAsync(new GetTaskByIdQuery(taskId));
+        if (task is null) return NotFound();
+
+        ViewBag.PageTitle = task.Title;
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "/Task/Index"), new(task.Title, "") };
+        return View(task);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create(
         [FromForm] int projectId,

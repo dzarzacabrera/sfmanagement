@@ -15,22 +15,32 @@ internal sealed class GetAllTasksQueryHandler(INpgsqlConnectionFactory connectio
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
 
         await using var cmd = new NpgsqlCommand(
-            "SELECT id, project_id, title, description, criticality, status, " +
-            "required_skills_vector FROM tasks ORDER BY id", connection);
+            "SELECT t.id, t.project_id, t.title, t.description, t.criticality, t.status, " +
+            "t.required_skills_vector, p.name AS project_name, " +
+            "(SELECT COUNT(DISTINCT pe.worker_id) FROM performance_evaluations pe WHERE pe.task_id = t.id) AS evaluated_count, " +
+            "(SELECT COUNT(1) FROM task_assignments ta WHERE ta.task_id = t.id) AS assigned_count " +
+            "FROM tasks t " +
+            "INNER JOIN projects p ON p.id = t.project_id " +
+            "ORDER BY t.id", connection);
 
         var tasks = new List<(int Id, int ProjectId, string Title, string? Description,
-            Domain.Enums.Criticality Criticality, Domain.Enums.ProjectTaskStatus Status, float[] Vector)>();
+            Domain.Enums.Criticality Criticality, Domain.Enums.ProjectTaskStatus Status, float[] Vector,
+            string ProjectName, bool AllWorkersEvaluated)>();
 
         await using (var reader = await cmd.ExecuteReaderAsync())
         {
             while (await reader.ReadAsync())
             {
                 var m = new DataReaderMapper(reader);
+                var assignedCount = reader.GetInt32(reader.GetOrdinal("assigned_count"));
+                var evaluatedCount = reader.GetInt32(reader.GetOrdinal("evaluated_count"));
                 tasks.Add((m.GetInt32("id"), m.GetInt32("project_id"),
                     m.GetString("title"), m.GetStringOrNull("description"),
                     m.GetEnum<Domain.Enums.Criticality>("criticality"),
                     m.GetEnum<Domain.Enums.ProjectTaskStatus>("status"),
-                    m.GetVector("required_skills_vector")));
+                    m.GetVector("required_skills_vector"),
+                    m.GetString("project_name"),
+                    assignedCount > 0 && evaluatedCount >= assignedCount));
             }
         }
 
@@ -39,7 +49,8 @@ internal sealed class GetAllTasksQueryHandler(INpgsqlConnectionFactory connectio
         return tasks.Select(t => new TaskDto(
             t.Id, t.ProjectId, t.Title, t.Description,
             t.Criticality, t.Status, t.Vector,
-            assigned.GetValueOrDefault(t.Id))).ToList();
+            assigned.GetValueOrDefault(t.Id),
+            null, t.AllWorkersEvaluated, t.ProjectName)).ToList();
     }
 
     private static async Task<Dictionary<int, List<AssignedWorkerDto>>> LoadAssignmentsAsync(
