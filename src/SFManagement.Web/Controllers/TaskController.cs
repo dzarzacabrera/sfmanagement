@@ -14,9 +14,12 @@ public class TaskController : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(
-        [FromServices] IGetAllTasksQueryHandler handler)
+        [FromServices] IGetAllTasksQueryHandler handler,
+        [FromServices] IGetAllProjectsQueryHandler projectsHandler)
     {
         var tasks = await handler.HandleAsync(new GetAllTasksQuery());
+        var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
+        ViewBag.Projects = projects;
         ViewBag.PageTitle = "Tasks";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "") };
         return View(tasks);
