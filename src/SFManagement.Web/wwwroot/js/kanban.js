@@ -260,51 +260,54 @@ function updateColumnCounts() {
 }
 
 // Event delegation for drag events (works with dynamically refreshed cards)
-document.getElementById('kanban-grid').addEventListener('dragstart', function (e) {
-    var card = e.target.closest('.task-card');
-    if (!card) return;
-    e.dataTransfer.setData('text/plain', card.dataset.taskId);
-    card.style.opacity = '0.5';
-});
+var kanbanGrid = document.getElementById('kanban-grid');
+if (kanbanGrid) {
+    kanbanGrid.addEventListener('dragstart', function (e) {
+        var card = e.target.closest('.task-card');
+        if (!card) return;
+        e.dataTransfer.setData('text/plain', card.dataset.taskId);
+        card.style.opacity = '0.5';
+    });
 
-document.getElementById('kanban-grid').addEventListener('dragend', function (e) {
-    var card = e.target.closest('.task-card');
-    if (!card) return;
-    card.style.opacity = '';
-});
+    kanbanGrid.addEventListener('dragend', function (e) {
+        var card = e.target.closest('.task-card');
+        if (!card) return;
+        card.style.opacity = '';
+    });
 
-document.getElementById('kanban-grid').addEventListener('dragover', function (e) {
-    var col = e.target.closest('.kanban-column');
-    if (col) e.preventDefault();
-});
+    kanbanGrid.addEventListener('dragover', function (e) {
+        var col = e.target.closest('.kanban-column');
+        if (col) e.preventDefault();
+    });
 
-document.getElementById('kanban-grid').addEventListener('drop', function (e) {
-    var col = e.target.closest('.kanban-column');
-    if (!col) return;
-    e.preventDefault();
-    var taskId = e.dataTransfer.getData('text/plain');
-    var newStatus = col.dataset.status;
+    kanbanGrid.addEventListener('drop', function (e) {
+        var col = e.target.closest('.kanban-column');
+        if (!col) return;
+        e.preventDefault();
+        var taskId = e.dataTransfer.getData('text/plain');
+        var newStatus = col.dataset.status;
 
-    if (!taskId || !newStatus) return;
+        if (!taskId || !newStatus) return;
 
-    var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
-    if (card && card.getAttribute('data-status') === newStatus) return;
+        var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
+        if (card && card.getAttribute('data-status') === newStatus) return;
 
-    var formData = new FormData();
-    formData.append('taskId', taskId);
-    formData.append('newStatus', newStatus);
+        var formData = new FormData();
+        formData.append('taskId', taskId);
+        formData.append('newStatus', newStatus);
 
-    fetch('/Dashboard/ChangeStatus', { method: 'POST', body: formData })
-        .then(function (r) {
-            if (r.ok) {
-                refreshTaskCard(taskId, newStatus);
-                showToast('Task moved to ' + newStatus, 'success');
-            } else {
-                showToast('Status change failed: ' + r.status, 'error');
-            }
-        })
-        .catch(function (err) { showToast('Status change error: ' + err.message, 'error'); });
-});
+        fetch('/Dashboard/ChangeStatus', { method: 'POST', body: formData })
+            .then(function (r) {
+                if (r.ok) {
+                    refreshTaskCard(taskId, newStatus);
+                    showToast('Task moved to ' + newStatus, 'success');
+                } else {
+                    showToast('Status change failed: ' + r.status, 'error');
+                }
+            })
+            .catch(function (err) { showToast('Status change error: ' + err.message, 'error'); });
+    });
+}
 
 function archiveTask(taskId, projectId, btn) {
     var card = btn.closest('.task-card');
