@@ -11,11 +11,11 @@
 <div class="flex mb-6">
     <div class="flex items-stretch flex-1">
         <input type="text" id="projectSearch"
-               class="flex-1 min-w-0 border border-gray-300 rounded-lg xl:rounded-l-lg xl:rounded-tr-none xl:rounded-br-none px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand focus:border-brand dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+               class="flex-1 min-w-0 border border-gray-300 rounded-lg xl:rounded-l-lg xl:rounded-tr-none xl:rounded-br-none px-4 py-2.5 text-sm focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                placeholder="Search projects...">
-        <div class="hidden xl:flex border border-l-0 border-gray-300 rounded-r-lg overflow-hidden dark:border-gray-600">
+        <div class="hidden xl:flex border border-l-0 border-gray-300 rounded-r-lg dark:border-gray-600">
             <button type="button" id="viewList"
-                    class="p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700"
+                    class="p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                     title="List view">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -23,7 +23,7 @@
             </button>
             <div class="w-px bg-gray-300 dark:bg-gray-600"></div>
             <button type="button" id="viewCards"
-                    class="p-2.5 transition-colors bg-blue-50 text-brand"
+                    class="p-2.5 transition-colors bg-blue-50 text-brand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                     title="Card view">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
@@ -52,7 +52,7 @@ else
                  data-name="@project.Name.ToLower()"
                  onclick="location.href='/Project/Detail?projectId=@project.Id'">
                 <a href="/Project/Edit?projectId=@project.Id"
-                   class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                   class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                    onclick="event.stopPropagation()"
                    aria-label="Edit @project.Name">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,7 +110,7 @@ else
                     <div class="col-span-3 flex items-center justify-end">
                         <div class="flex items-center gap-1 pr-2 border-r border-gray-200 dark:border-gray-600">
                             <a href="/Project/Detail?projectId=@project.Id"
-                               class="p-2 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                               class="p-2 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                title="View details">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -118,14 +118,14 @@ else
                                 </svg>
                             </a>
                             <a href="/Task/Create?projectId=@project.Id"
-                               class="p-2 rounded-lg text-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                               class="p-2 rounded-lg text-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                title="Add task">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
                             </a>
                             <button onclick="openAddWorkerPopup(@project.Id)"
-                                    class="p-2 rounded-lg text-purple-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+                                    class="p-2 rounded-lg text-purple-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                     title="Add worker">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
@@ -134,14 +134,14 @@ else
                         </div>
                         <div class="flex items-center gap-1 pl-2">
                             <a href="/Project/Edit?projectId=@project.Id"
-                               class="p-2 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                               class="p-2 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                title="Edit">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                 </svg>
                             </a>
                             <a href="/Dashboard/Index?projectId=@project.Id"
-                               class="p-2 rounded-lg text-gray-400 hover:text-brand hover:bg-brand-light/20 dark:hover:bg-brand/20 transition-colors"
+                               class="p-2 rounded-lg text-gray-400 hover:text-brand hover:bg-brand-light/20 dark:hover:bg-brand/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                title="Dashboard">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
