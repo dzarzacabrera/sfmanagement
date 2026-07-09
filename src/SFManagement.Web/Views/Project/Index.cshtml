@@ -22,7 +22,7 @@
                 </svg>
             </button>
             <button type="button" id="viewCards"
-                    class="p-2.5 transition-colors bg-blue-50 text-brand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
+                    class="p-2.5 transition-colors bg-blue-50 text-brand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9] rounded-r-lg"
                     title="Card view">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
@@ -164,6 +164,7 @@ else
         document.getElementById('projectList').classList.add('hidden');
         document.getElementById('viewCards').className = 'p-2.5 transition-colors bg-blue-50 text-brand';
         document.getElementById('viewList').className = 'p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700';
+        localStorage.setItem('projectViewMode', 'cards');
     }
 
     function switchToList() {
@@ -171,12 +172,14 @@ else
         document.getElementById('projectList').classList.remove('hidden');
         document.getElementById('viewList').className = 'p-2.5 transition-colors bg-blue-50 text-brand';
         document.getElementById('viewCards').className = 'p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700';
+        localStorage.setItem('projectViewMode', 'list');
     }
 
     var searchInput = document.getElementById('projectSearch');
     if (searchInput) {
         searchInput.addEventListener('input', function () {
             var q = this.value.toLowerCase().trim();
+            localStorage.setItem('projectSearchQuery', this.value);
             document.querySelectorAll('.project-card, .project-row').forEach(function (el) {
                 var match = !q || el.dataset.name.includes(q);
                 el.style.display = match ? '' : 'none';
@@ -209,5 +212,19 @@ else
             }
         }
     });
-    if (mql.matches) switchToCards();
+
+    var savedView = localStorage.getItem('projectViewMode');
+    var savedQuery = localStorage.getItem('projectSearchQuery');
+
+    if (savedView === 'list' && !mql.matches) {
+        switchToList();
+    } else {
+        if (mql.matches) switchToCards();
+    }
+
+    if (savedQuery && searchInput) {
+        searchInput.value = savedQuery;
+        var evt = new Event('input', { bubbles: true });
+        searchInput.dispatchEvent(evt);
+    }
 </script>
