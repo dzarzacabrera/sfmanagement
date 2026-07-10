@@ -15,21 +15,24 @@ public class TaskController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(
         [FromServices] IGetAllTasksQueryHandler handler,
-        [FromServices] IGetAllProjectsQueryHandler projectsHandler)
+        [FromServices] IGetAllProjectsQueryHandler projectsHandler,
+        [FromServices] IIdEncryptionService enc)
     {
         var tasks = await handler.HandleAsync(new GetAllTasksQuery());
         var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
-        ViewBag.Projects = projects;
+        ViewBag.Projects = projects.Select(p => p with { IdEncrypted = enc.Encrypt(p.Id) }).ToList();
+        ViewBag.DefaultProjectIdEncrypted = projects.Count > 0 ? enc.Encrypt(projects[0].Id) : enc.Encrypt(1);
         ViewBag.PageTitle = "Tasks";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "") };
-        return View(tasks);
+        return View(tasks.Select(t => t with { IdEncrypted = enc.Encrypt(t.Id), ProjectIdEncrypted = enc.Encrypt(t.ProjectId) }).ToList());
     }
 
     [HttpGet]
     public async Task<IActionResult> Create(
-        [FromQuery] int? projectId,
+        [FromQuery] string? projectId,
         [FromServices] IGetAllProjectsQueryHandler projectsHandler,
-        [FromServices] IGetAllSkillsQueryHandler skillsHandler)
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler,
+        [FromServices] IIdEncryptionService enc)
     {
         var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
         var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
@@ -45,31 +48,45 @@ public class TaskController : Controller
         ViewBag.PageTitle = "Create Task";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "/Task/Index"), new("Create Task", "") };
 
-        var defaultProjectId = projectId ?? (projects.Count > 0 ? projects[0].Id : 1);
-        return View(new CreateTaskViewModel(defaultProjectId, projects, skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition)).ToList(), criticalities));
+        int defaultPid;
+        if (projectId != null && enc.TryDecrypt(projectId, out var pid))
+            defaultPid = pid;
+        else if (projectId != null && int.TryParse(projectId, out var ppid))
+            defaultPid = ppid;
+        else
+            defaultPid = projects.Count > 0 ? projects[0].Id : 1;
+
+        return View(new CreateTaskViewModel(defaultPid, projects.Select(p => p with { IdEncrypted = enc.Encrypt(p.Id) }).ToList(), skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition) { IdEncrypted = enc.Encrypt(s.Id) }).ToList(), criticalities)
+        {
+            ProjectIdEncrypted = enc.Encrypt(defaultPid)
+        });
     }
 
     [HttpGet]
     public async Task<IActionResult> Detail(
-        [FromQuery] int taskId,
-        [FromServices] IGetTaskByIdQueryHandler handler)
+        [FromQuery] string taskId,
+        [FromServices] IGetTaskByIdQueryHandler handler,
+        [FromServices] IIdEncryptionService enc)
     {
-        var task = await handler.HandleAsync(new GetTaskByIdQuery(taskId));
+        if (!enc.TryDecrypt(taskId, out var tid)) return NotFound();
+        var task = await handler.HandleAsync(new GetTaskByIdQuery(tid));
         if (task is null) return NotFound();
 
         ViewBag.PageTitle = task.Title;
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "/Task/Index"), new("Detail", "") };
-        return View(task);
+        return View(task with { IdEncrypted = enc.Encrypt(tid) });
     }
 
     [HttpGet]
     public async Task<IActionResult> Edit(
-        [FromQuery] int taskId,
+        [FromQuery] string taskId,
         [FromServices] IGetTaskByIdQueryHandler taskHandler,
         [FromServices] IGetAllProjectsQueryHandler projectsHandler,
-        [FromServices] IGetAllSkillsQueryHandler skillsHandler)
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler,
+        [FromServices] IIdEncryptionService enc)
     {
-        var task = await taskHandler.HandleAsync(new GetTaskByIdQuery(taskId));
+        if (!enc.TryDecrypt(taskId, out var tid)) return NotFound();
+        var task = await taskHandler.HandleAsync(new GetTaskByIdQuery(tid));
         if (task is null) return NotFound();
 
         if (task.Status is not (ProjectTaskStatus.Queued or ProjectTaskStatus.InProgress))
@@ -97,27 +114,36 @@ public class TaskController : Controller
             new("Edit", ""),
         };
 
-        // Pre-fill skill selector with current task skills
         var skillsJson = task.Skills?.Select(s => new { pos = s.SkillPosition, level = (double)s.RequiredLevel });
         ViewBag.TaskSkillsJson = System.Text.Json.JsonSerializer.Serialize(skillsJson ?? Enumerable.Empty<object>());
 
+        var encryptedPid = enc.Encrypt(task.ProjectId);
         return View(new EditTaskViewModel(
-            task.Id, task.ProjectId, task.Title, task.Description, task.Criticality,
-            projects, skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition)).ToList(),
-            criticalities));
+            tid, task.ProjectId, task.Title, task.Description, task.Criticality,
+            projects.Select(p => p with { IdEncrypted = enc.Encrypt(p.Id) }).ToList(),
+            skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition) { IdEncrypted = enc.Encrypt(s.Id) }).ToList(),
+            criticalities)
+        {
+            TaskIdEncrypted = taskId,
+            ProjectIdEncrypted = encryptedPid
+        });
     }
 
     [HttpPost]
     public async Task<IActionResult> Edit(
-        [FromForm] int taskId,
-        [FromForm] int projectId,
+        [FromForm] string taskIdEncrypted,
+        [FromForm] string projectIdEncrypted,
         [FromForm] string title,
         [FromForm] string? description,
         [FromForm] string criticality,
         [FromForm] int[] skillPositions,
         [FromForm] float[] skillLevels,
-        [FromServices] ICommandHandler<UpdateTaskCommand> handler)
+        [FromServices] ICommandHandler<UpdateTaskCommand> handler,
+        [FromServices] IIdEncryptionService enc)
     {
+        if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return NotFound();
+        if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return NotFound();
+
         var vector = new float[1024];
         for (int i = 0; i < skillPositions.Length && i < skillLevels.Length; i++)
         {
@@ -127,7 +153,7 @@ public class TaskController : Controller
         }
 
         var command = new UpdateTaskCommand(
-            taskId, projectId, title, description,
+            tid, pid, title, description,
             Enum.Parse<Criticality>(criticality, ignoreCase: true),
             vector);
 
@@ -135,7 +161,7 @@ public class TaskController : Controller
         {
             await handler.HandleAsync(command);
             TempData["ToastSuccess"] = "Task updated successfully.";
-            return RedirectToAction("Detail", new { taskId });
+            return RedirectToAction("Detail", new { taskId = taskIdEncrypted });
         }
         catch (InvalidOperationException ex)
         {
@@ -146,14 +172,16 @@ public class TaskController : Controller
 
     [HttpPost]
     public async Task<IActionResult> Create(
-        [FromForm] int projectId,
+        [FromForm] string projectIdEncrypted,
         [FromForm] string title,
         [FromForm] string? description,
         [FromForm] string criticality,
         [FromForm] int[] skillPositions,
         [FromForm] float[] skillLevels,
-        [FromServices] ICommandHandler<CreateTaskCommand> handler)
+        [FromServices] ICommandHandler<CreateTaskCommand> handler,
+        [FromServices] IIdEncryptionService enc)
     {
+        if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return NotFound();
         var vector = new float[1024];
         for (int i = 0; i < skillPositions.Length && i < skillLevels.Length; i++)
         {
@@ -163,10 +191,10 @@ public class TaskController : Controller
         }
 
         var command = new CreateTaskCommand(
-            projectId, title, description,
+            pid, title, description,
             Enum.Parse<Criticality>(criticality, ignoreCase: true),
             vector);
         await handler.HandleAsync(command);
-        return RedirectToAction("Index", "Dashboard", new { projectId });
+        return RedirectToAction("Index", "Dashboard", new { projectId = projectIdEncrypted });
     }
 }

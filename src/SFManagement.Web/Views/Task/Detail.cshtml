@@ -3,7 +3,7 @@
 <div class="mb-6">
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-brand dark:text-white">@Model.Title</h1>
-        <a href="/Dashboard/Index?projectId=@Model.ProjectId"
+        <a href="/Dashboard/Index?projectId=@Model.ProjectIdEncrypted"
            class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep whitespace-nowrap">
             View on Board
         </a>
@@ -76,7 +76,7 @@
                     @foreach (var w in Model.AssignedWorkers)
                     {
                         <li class="text-sm">
-                            <a href="/Worker/Detail?workerId=@w.WorkerId"
+                            <a href="/Worker/Detail?workerId=@w.WorkerIdEncrypted"
                                class="text-brand hover:text-brand-deep dark:text-brand dark:hover:text-brand">
                                 @w.WorkerName
                             </a>

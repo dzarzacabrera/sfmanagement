@@ -59,8 +59,8 @@ else
         {
             <div class="project-card bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative flex flex-col justify-between"
                  data-name="@project.Name.ToLower()"
-                 onclick="location.href='/Project/Detail?projectId=@project.Id'">
-                <a href="/Project/Edit?projectId=@project.Id"
+                 onclick="location.href='/Project/Detail?projectId=@project.IdEncrypted'">
+                <a href="/Project/Edit?projectId=@project.IdEncrypted"
                    class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                    onclick="event.stopPropagation()"
                    aria-label="Edit @project.Name">
@@ -77,17 +77,17 @@ else
                     }
                 </div>
                 <div class="flex flex-wrap gap-2 pt-3">
-                    <a href="/Dashboard/Index?projectId=@project.Id"
+                    <a href="/Dashboard/Index?projectId=@project.IdEncrypted"
                        class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep whitespace-nowrap"
                        onclick="event.stopPropagation()">
                         Dashboard
                     </a>
-                    <a href="/Task/Create?projectId=@project.Id"
+                    <a href="/Task/Create?projectId=@project.IdEncrypted"
                        class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap"
                        onclick="event.stopPropagation()">
                         + Task
                     </a>
-                    <button onclick="event.stopPropagation(); openAddWorkerPopup(@project.Id)"
+                    <button onclick="event.stopPropagation(); openAddWorkerPopup('@project.IdEncrypted')"
                             class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap">
                         Add Worker
                     </button>
@@ -118,7 +118,7 @@ else
                     </div>
                     <div class="col-span-3 flex items-center justify-end">
                         <div class="flex items-center gap-1 pr-2 border-r border-gray-200 dark:border-gray-600">
-                            <a href="/Project/Detail?projectId=@project.Id"
+                            <a href="/Project/Detail?projectId=@project.IdEncrypted"
                                class="p-2 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                title="View details">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,14 +126,14 @@ else
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                 </svg>
                             </a>
-                            <a href="/Task/Create?projectId=@project.Id"
+                            <a href="/Task/Create?projectId=@project.IdEncrypted"
                                class="p-2 rounded-lg text-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                title="Add task">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
                             </a>
-                            <button onclick="openAddWorkerPopup(@project.Id)"
+                            <button onclick="openAddWorkerPopup('@project.IdEncrypted')"
                                     class="p-2 rounded-lg text-purple-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                     title="Add worker">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,14 +142,14 @@ else
                             </button>
                         </div>
                         <div class="flex items-center gap-1 pl-2">
-                            <a href="/Project/Edit?projectId=@project.Id"
+                            <a href="/Project/Edit?projectId=@project.IdEncrypted"
                                class="p-2 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                title="Edit">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                 </svg>
                             </a>
-                            <a href="/Dashboard/Index?projectId=@project.Id"
+                            <a href="/Dashboard/Index?projectId=@project.IdEncrypted"
                                class="p-2 rounded-lg text-gray-400 hover:text-brand hover:bg-brand-light/20 dark:hover:bg-brand/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                title="Dashboard">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -6,11 +6,15 @@ function showSkeleton(container) {
     return skeleton;
 }
 
-function openAssignModal(taskId, projectId) {
+function findCard(idOrEnc) {
+    return document.querySelector('.task-card[data-task-id-encrypted="' + idOrEnc + '"]');
+}
+
+function openAssignModal(taskIdEnc, projectIdEnc) {
     var col = document.querySelector('.kanban-column[data-status="InProgress"]');
     var skel = col ? showSkeleton(col) : null;
 
-    fetch('/Dashboard/AssignPopup?taskId=' + taskId + '&projectId=' + projectId)
+    fetch('/Dashboard/AssignPopup?taskId=' + taskIdEnc + '&projectId=' + projectIdEnc)
         .then(function (r) { return r.text(); })
         .then(function (html) {
             if (skel) skel.remove();
@@ -24,7 +28,7 @@ function openAssignModal(taskId, projectId) {
                     .then(function (r) {
                         if (r.ok) {
                             closeModal();
-                            refreshTaskCard(taskId);
+                            refreshTaskCard(taskIdEnc);
                             showToast('Worker assigned successfully', 'success');
                         } else {
                             showToast('Assign failed: ' + r.status, 'error');
@@ -43,10 +47,10 @@ function openAssignModal(taskId, projectId) {
         });
 }
 
-function removeWorker(taskId, workerId, btn) {
+function removeWorker(taskIdEnc, workerIdEnc, btn) {
     var formData = new FormData();
-    formData.append('taskId', taskId);
-    formData.append('workerId', workerId);
+    formData.append('taskIdEncrypted', taskIdEnc);
+    formData.append('workerIdEncrypted', workerIdEnc);
 
     var card = btn.closest('.task-card');
     if (card) card.style.opacity = '0.5';
@@ -54,7 +58,7 @@ function removeWorker(taskId, workerId, btn) {
     fetch('/Dashboard/RemoveWorker', { method: 'POST', body: formData })
         .then(function (r) {
             if (r.ok) {
-                refreshTaskCard(taskId);
+                refreshTaskCard(taskIdEnc);
                 showToast('Worker removed', 'success');
             } else {
                 showToast('Remove failed: ' + r.status, 'error');
@@ -67,12 +71,12 @@ function removeWorker(taskId, workerId, btn) {
         });
 }
 
-function openEvaluationModal(taskId, projectId) {
+function openEvaluationModal(taskIdEnc, projectIdEnc) {
     var col = document.querySelector('.kanban-column[data-status="Finish"]');
     var skel = col ? showSkeleton(col) : null;
 
-    fetch('/Dashboard/EvaluationPopup?taskId=' + taskId + '&projectId=' + (projectId || 1))
-        .then(function (r) { return r.text(); })
+    fetch('/Dashboard/EvaluationPopup?taskId=' + taskIdEnc + '&projectId=' + (projectIdEnc || window.__dashboardProjectIdEncrypted || ''))
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
         .then(function (html) {
             if (skel) skel.remove();
             openModal(html);
@@ -89,9 +93,11 @@ document.getElementById('modal-root').addEventListener('submit', function (e) {
     if (!form) return;
     e.preventDefault();
 
-    var taskId = form.querySelector('[name="taskId"]').value;
-    var workerSelect = form.querySelector('[name="workerId"]');
-    var workerId = workerSelect ? workerSelect.value : 0;
+    var taskIdEncInput = form.querySelector('[name="taskIdEncrypted"]');
+    if (!taskIdEncInput) return;
+    var taskIdEnc = taskIdEncInput.value;
+    var workerSelect = form.querySelector('[name="workerIdEncrypted"]');
+    var workerIdEnc = workerSelect ? workerSelect.value : '';
     var sliders = form.querySelectorAll('#skillSliders input[type="range"]');
     var skillPositions = [];
     var basePoints = [];
@@ -107,8 +113,8 @@ document.getElementById('modal-root').addEventListener('submit', function (e) {
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Submitting...'; }
 
     var formData = new FormData();
-    formData.append('taskId', taskId);
-    formData.append('workerId', workerId);
+    formData.append('taskIdEncrypted', taskIdEnc);
+    formData.append('workerIdEncrypted', workerIdEnc);
     for (var i = 0; i < skillPositions.length; i++) {
         formData.append('skillPositions', skillPositions[i]);
         formData.append('basePoints', basePoints[i]);
@@ -119,10 +125,10 @@ document.getElementById('modal-root').addEventListener('submit', function (e) {
         .then(function (data) {
             if (data.hasMore) {
                 showToast('Evaluation submitted. Select next worker.', 'success');
-                openEvaluationModal(parseInt(taskId), window.__dashboardProjectId || 1);
+                openEvaluationModal(taskIdEnc, window.__dashboardProjectIdEncrypted || '');
             } else {
                 closeModal();
-                refreshTaskCard(parseInt(taskId));
+                refreshTaskCard(taskIdEnc);
                 showToast('All evaluations submitted successfully', 'success');
             }
         })
@@ -132,10 +138,10 @@ document.getElementById('modal-root').addEventListener('submit', function (e) {
         });
 });
 
-function reloadEvaluationPopup(taskId, workerId) {
-    var projectId = window.__dashboardProjectId || 1;
-    fetch('/Dashboard/EvaluationPopup?taskId=' + taskId + '&projectId=' + projectId + '&workerId=' + workerId)
-        .then(function (r) { return r.text(); })
+function reloadEvaluationPopup(taskIdEnc, workerIdEnc) {
+    var projectIdEnc = window.__dashboardProjectIdEncrypted || '';
+    fetch('/Dashboard/EvaluationPopup?taskId=' + taskIdEnc + '&projectId=' + projectIdEnc + '&workerId=' + workerIdEnc)
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
         .then(function (html) {
             var content = document.getElementById('modal-content');
             if (content) content.innerHTML = html;
@@ -166,7 +172,6 @@ function updateSliderPreview(input) {
     var form = document.getElementById('evaluationForm');
     var multiplier = form ? parseFloat(form.getAttribute('data-crit-multiplier')) || 1.0 : 1.0;
 
-    // Update preview table
     var currentEl = document.getElementById('current-' + pos);
     var newEl = document.getElementById('new-' + pos);
     var diffEl = document.getElementById('diff-' + pos);
@@ -188,8 +193,8 @@ function updateSliderPreview(input) {
     else diffEl.classList.add('bg-gray-100', 'text-gray-500');
 }
 
-function refreshTaskCard(taskId, newStatus) {
-    var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
+function refreshTaskCard(taskIdEnc, newStatus) {
+    var card = findCard(taskIdEnc);
     if (!card) return;
 
     // Clean up orphaned tooltips before removing old card
@@ -200,9 +205,9 @@ function refreshTaskCard(taskId, newStatus) {
         }
     });
 
-    var projectId = window.__dashboardProjectId || 1;
+    var projectIdEnc = window.__dashboardProjectIdEncrypted || '';
 
-    fetch('/Dashboard/GetTaskCardHtml?taskId=' + taskId + '&projectId=' + projectId)
+    fetch('/Dashboard/GetTaskCardHtml?taskId=' + taskIdEnc + '&projectId=' + projectIdEnc)
         .then(function (r) { if (!r.ok) return null; return r.text(); })
         .then(function (html) {
             if (!html) return;
@@ -228,8 +233,8 @@ function refreshTaskCard(taskId, newStatus) {
         .catch(function () { /* silently fail */ });
 }
 
-function updateTaskCard(taskId, newStatus) {
-    var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
+function updateTaskCard(taskIdEnc, newStatus) {
+    var card = findCard(taskIdEnc);
     if (!card) return;
 
     if (newStatus) {
@@ -265,7 +270,7 @@ if (kanbanGrid) {
     kanbanGrid.addEventListener('dragstart', function (e) {
         var card = e.target.closest('.task-card');
         if (!card) return;
-        e.dataTransfer.setData('text/plain', card.dataset.taskId);
+        e.dataTransfer.setData('text/plain', card.dataset.taskIdEncrypted);
         card.style.opacity = '0.5';
     });
 
@@ -285,21 +290,25 @@ if (kanbanGrid) {
         if (!col) return;
         e.preventDefault();
         var taskId = e.dataTransfer.getData('text/plain');
+
+        // Look up encrypted ID from the card
+        var card = document.querySelector('.task-card[data-task-id-encrypted="' + taskId + '"]');
+        var taskIdEnc = card ? card.dataset.taskIdEncrypted : taskId;
+
         var newStatus = col.dataset.status;
 
         if (!taskId || !newStatus) return;
 
-        var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
         if (card && card.getAttribute('data-status') === newStatus) return;
 
         var formData = new FormData();
-        formData.append('taskId', taskId);
+        formData.append('taskIdEncrypted', taskIdEnc);
         formData.append('newStatus', newStatus);
 
         fetch('/Dashboard/ChangeStatus', { method: 'POST', body: formData })
             .then(function (r) {
                 if (r.ok) {
-                    refreshTaskCard(taskId, newStatus);
+                    refreshTaskCard(taskIdEnc, newStatus);
                     showToast('Task moved to ' + newStatus, 'success');
                 } else {
                     showToast('Status change failed: ' + r.status, 'error');
@@ -309,7 +318,7 @@ if (kanbanGrid) {
     });
 }
 
-function archiveTask(taskId, projectId, btn) {
+function archiveTask(taskIdEnc, btn) {
     var card = btn.closest('.task-card');
     if (!card) return;
 
@@ -326,7 +335,7 @@ function archiveTask(taskId, projectId, btn) {
     card.style.margin = '0';
     card.style.padding = '0';
 
-    var undoKey = 'archive-undo-' + taskId;
+    var undoKey = 'archive-undo-' + taskIdEnc;
 
     showUndoToast('Task archived.', function () {
         // Undo: restore the card with reverse animation
@@ -344,7 +353,7 @@ function archiveTask(taskId, projectId, btn) {
     // After 2 seconds, actually archive
     window[undoKey] = setTimeout(function () {
         var formData = new FormData();
-        formData.append('taskId', taskId);
+        formData.append('taskIdEncrypted', taskIdEnc);
         fetch('/Dashboard/ArchiveTask', { method: 'POST', body: formData })
             .then(function (r) {
                 if (r.ok) {
@@ -375,11 +384,11 @@ function archiveTask(taskId, projectId, btn) {
     }, 2000);
 }
 
-function openAddWorkerPopup(projectId) {
+function openAddWorkerPopup(projectIdEnc) {
     var col = document.querySelector('.kanban-column');
     var skel = col ? showSkeleton(col) : null;
 
-    fetch('/Dashboard/AddWorkerPopup?projectId=' + projectId)
+    fetch('/Dashboard/AddWorkerPopup?projectId=' + projectIdEnc)
         .then(function (r) { return r.text(); })
         .then(function (html) {
             if (skel) skel.remove();
@@ -416,23 +425,22 @@ function openAddWorkerPopup(projectId) {
 var STATUS_FLOW = ['Queued', 'InProgress', 'Finish'];
 var STATUS_LABELS = { Queued: 'Queued', InProgress: 'In Progress', Finish: 'Finished', Blocked: 'Blocked' };
 
-function moveTaskStatus(taskId, direction) {
-    var card = document.querySelector('.task-card[data-task-id="' + taskId + '"]');
+function moveTaskStatus(taskIdEnc, direction) {
+    var card = findCard(taskIdEnc);
     if (!card) return;
     var current = card.getAttribute('data-status');
     if (current === 'Blocked') {
-        // Blocked can only go back to InProgress
-        if (direction === -1) changeStatus(taskId, 'InProgress');
+        if (direction === -1) changeStatus(taskIdEnc, 'InProgress');
         return;
     }
     var idx = STATUS_FLOW.indexOf(current);
     if (idx === -1) return;
     var nextIdx = idx + direction;
     if (nextIdx < 0 || nextIdx >= STATUS_FLOW.length) return;
-    changeStatus(taskId, STATUS_FLOW[nextIdx]);
+    changeStatus(taskIdEnc, STATUS_FLOW[nextIdx]);
 }
 
-function openStatusSheet(taskId, currentStatus, btn) {
+function openStatusSheet(taskIdEnc, currentStatus, btn) {
     var sheet = document.getElementById('status-bottom-sheet');
     var body = document.getElementById('sheet-body');
     var handle = document.getElementById('sheet-handle');
@@ -498,7 +506,7 @@ function openStatusSheet(taskId, currentStatus, btn) {
         if (!isCurrent) {
             el.onclick = function () {
                 closeStatusSheet();
-                changeStatus(taskId, s);
+                changeStatus(taskIdEnc, s);
             };
         }
         opts.appendChild(el);
@@ -521,15 +529,15 @@ document.addEventListener('click', function (e) {
     closeStatusSheet();
 });
 
-function changeStatus(taskId, newStatus) {
+function changeStatus(taskIdEnc, newStatus) {
     var formData = new FormData();
-    formData.append('taskId', taskId);
+    formData.append('taskIdEncrypted', taskIdEnc);
     formData.append('newStatus', newStatus);
 
     fetch('/Dashboard/ChangeStatus', { method: 'POST', body: formData })
         .then(function (r) {
             if (r.ok) {
-                refreshTaskCard(taskId, newStatus);
+                refreshTaskCard(taskIdEnc, newStatus);
                 showToast('Task moved to ' + (STATUS_LABELS[newStatus] || newStatus), 'success');
             } else {
                 return r.text().then(function (txt) {

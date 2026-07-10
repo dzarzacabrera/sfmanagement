@@ -45,8 +45,8 @@ else
 
             <div class="worker-card bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow cursor-pointer dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative"
                  data-name="@worker.Name.ToLower()"
-                 onclick="location.href='/Worker/Detail?workerId=@worker.Id'">
-                <a href="/Worker/Edit?workerId=@worker.Id"
+                 onclick="location.href='/Worker/Detail?workerId=@worker.IdEncrypted'">
+                <a href="/Worker/Edit?workerId=@worker.IdEncrypted"
                    onclick="event.stopPropagation()"
                    class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                    aria-label="Edit @worker.Name">
