@@ -3,12 +3,12 @@
 <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Add Worker to Project</h2>
 
 <form id="addWorkerToProjectForm">
-    <input type="hidden" name="projectId" value="@Model.ProjectId">
+    <input type="hidden" name="projectIdEncrypted" value="@Model.ProjectIdEncrypted">
     <div class="space-y-2 max-h-[40vh] sm:max-h-60 overflow-y-auto">
         @foreach (var worker in Model.Workers)
         {
             <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-brand-light/20 has-[:checked]:bg-brand-light/20 has-[:checked]:border-brand-dark/50 dark:border-gray-600 dark:hover:bg-gray-700">
-                <input type="radio" name="workerId" value="@worker.Id" class="accent-brand">
+                <input type="radio" name="workerIdEncrypted" value="@worker.IdEncrypted" class="accent-brand">
                 <div>
                     <div class="text-sm font-medium text-gray-900 dark:text-gray-200">@worker.Name</div>
                     <div class="text-sm text-gray-400">@worker.Role</div>

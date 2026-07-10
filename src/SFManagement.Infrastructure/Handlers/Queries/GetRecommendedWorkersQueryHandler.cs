@@ -19,7 +19,7 @@ internal sealed class GetRecommendedWorkersQueryHandler(INpgsqlConnectionFactory
         {
             vectorCmd.Parameters.Add(new() { Value = query.TaskId });
             var raw = await vectorCmd.ExecuteScalarAsync() as Pgvector.Vector;
-            taskVector = raw!.ToArray();
+            taskVector = raw?.ToArray() ?? [];
         }
 
         var taskSelfDot = taskVector.Sum(v => v * v);

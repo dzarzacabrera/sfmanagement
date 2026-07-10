@@ -13,7 +13,8 @@ public class WorkerController : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Create(
-        [FromServices] IGetAllSkillsQueryHandler skillsHandler)
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler,
+        [FromServices] IIdEncryptionService enc)
     {
         var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
         ViewBag.AllSkills = skills;
@@ -50,35 +51,43 @@ public class WorkerController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(
         [FromServices] IGetAllWorkersQueryHandler handler,
-        [FromServices] IGetAllSkillsQueryHandler skillsHandler)
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler,
+        [FromServices] IIdEncryptionService enc)
     {
         var workers = await handler.HandleAsync(new GetAllWorkersQuery());
         var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
         ViewBag.AllSkills = skills;
         ViewBag.PageTitle = "Workers";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "") };
-        return View(workers);
+        return View(workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList());
     }
 
     [HttpGet]
     public async Task<IActionResult> Detail(
-        [FromQuery] int workerId,
+        [FromQuery] string workerId,
         [FromServices] IGetAllWorkersQueryHandler allWorkersHandler,
         [FromServices] IGetWorkerHistoryQueryHandler historyHandler,
-        [FromServices] IGetWorkerTasksQueryHandler tasksHandler)
+        [FromServices] IGetWorkerTasksQueryHandler tasksHandler,
+        [FromServices] IIdEncryptionService enc)
     {
+        if (!enc.TryDecrypt(workerId, out var wid)) return NotFound();
         var workers = await allWorkersHandler.HandleAsync(new GetAllWorkersQuery());
-        var worker = workers.FirstOrDefault(w => w.Id == workerId);
+        var worker = workers.FirstOrDefault(w => w.Id == wid);
         if (worker is null) return NotFound();
 
-        var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(workerId));
-        var tasks = await tasksHandler.HandleAsync(new GetWorkerTasksQuery(workerId));
+        var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(wid));
+        var tasks = (await tasksHandler.HandleAsync(new GetWorkerTasksQuery(wid)))
+            .Select(t => t with { TaskIdEncrypted = enc.Encrypt(t.TaskId), ProjectIdEncrypted = enc.Encrypt(t.ProjectId) })
+            .ToList();
 
         var vm = new WorkerHistoryViewModel(
-            workerId,
+            wid,
             worker.Name,
             evaluations,
-            tasks);
+            tasks)
+        {
+            WorkerIdEncrypted = enc.Encrypt(wid)
+        };
 
         ViewBag.PageTitle = worker.Name;
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "/Worker/Index"), new("Detail", "") };
@@ -88,17 +97,19 @@ public class WorkerController : Controller
 
     [HttpGet]
     public async Task<IActionResult> Edit(
-        [FromQuery] int workerId,
+        [FromQuery] string workerId,
         [FromServices] IGetAllWorkersQueryHandler allWorkersHandler,
         [FromServices] IGetAllSkillsQueryHandler skillsHandler,
-        [FromServices] IGetWorkerHistoryQueryHandler historyHandler)
+        [FromServices] IGetWorkerHistoryQueryHandler historyHandler,
+        [FromServices] IIdEncryptionService enc)
     {
+        if (!enc.TryDecrypt(workerId, out var wid)) return NotFound();
         var workers = await allWorkersHandler.HandleAsync(new GetAllWorkersQuery());
-        var worker = workers.FirstOrDefault(w => w.Id == workerId);
+        var worker = workers.FirstOrDefault(w => w.Id == wid);
         if (worker is null) return NotFound();
 
-        var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(workerId));
-        var vm = new WorkerHistoryViewModel(workerId, worker.Name, evaluations);
+        var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(wid));
+        var vm = new WorkerHistoryViewModel(wid, worker.Name, evaluations);
 
         var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
         ViewBag.AllSkills = skills;
@@ -118,13 +129,15 @@ public class WorkerController : Controller
 
     [HttpPost]
     public async Task<IActionResult> Edit(
-        [FromForm] int workerId,
+        [FromForm] string workerIdEncrypted,
         [FromForm] string name,
         [FromForm] string? role,
         [FromForm] int[]? skillPositions,
         [FromForm] float[]? skillLevels,
-        [FromServices] ICommandHandler<UpdateWorkerCommand> handler)
+        [FromServices] ICommandHandler<UpdateWorkerCommand> handler,
+        [FromServices] IIdEncryptionService enc)
     {
+        if (!enc.TryDecrypt(workerIdEncrypted, out var wid)) return NotFound();
         var vector = new float[1024];
         if (skillPositions is not null && skillLevels is not null)
         {
@@ -137,7 +150,7 @@ public class WorkerController : Controller
             }
         }
 
-        await handler.HandleAsync(new UpdateWorkerCommand(workerId, name, role ?? string.Empty, vector));
-        return RedirectToAction("Detail", new { workerId });
+        await handler.HandleAsync(new UpdateWorkerCommand(wid, name, role ?? string.Empty, vector));
+        return RedirectToAction("Detail", new { workerId = workerIdEncrypted });
     }
 }

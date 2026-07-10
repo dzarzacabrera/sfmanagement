@@ -21,7 +21,8 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
             "SELECT t.id, t.project_id, t.title, t.description, t.criticality, t.status, " +
             "t.required_skills_vector, p.name AS project_name, " +
             "(SELECT COUNT(DISTINCT pe.worker_id) FROM performance_evaluations pe WHERE pe.task_id = t.id) AS evaluated_count, " +
-            "(SELECT COUNT(1) FROM task_assignments ta WHERE ta.task_id = t.id) AS assigned_count " +
+            "(SELECT COUNT(1) FROM task_assignments ta WHERE ta.task_id = t.id) AS assigned_count, " +
+            "(SELECT COUNT(1) FROM project_workers pw WHERE pw.project_id = t.project_id) AS project_worker_count " +
             "FROM tasks t " +
             "INNER JOIN projects p ON p.id = t.project_id " +
             "WHERE t.project_id = $1 AND t.status != 'Archived' " +
@@ -29,7 +30,7 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
         cmd.Parameters.Add(new() { Value = query.ProjectId });
 
         var tasks = new List<(int Id, int ProjectId, string Title, string? Description,
-            Criticality Criticality, ProjectTaskStatus Status, float[] Vector, bool AllWorkersEvaluated, string ProjectName)>();
+            Criticality Criticality, ProjectTaskStatus Status, float[] Vector, bool AllWorkersEvaluated, string ProjectName, int ProjectWorkerCount)>();
 
         await using (var reader = await cmd.ExecuteReaderAsync())
         {
@@ -38,13 +39,15 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
                 var mapper = new DataReaderMapper(reader);
                 var assignedCount = reader.GetInt32(reader.GetOrdinal("assigned_count"));
                 var evaluatedCount = reader.GetInt32(reader.GetOrdinal("evaluated_count"));
+                var projectWorkerCount = reader.GetInt32(reader.GetOrdinal("project_worker_count"));
                 tasks.Add((mapper.GetInt32("id"), mapper.GetInt32("project_id"),
                     mapper.GetString("title"), mapper.GetStringOrNull("description"),
                     mapper.GetEnum<Criticality>("criticality"),
                     mapper.GetEnum<ProjectTaskStatus>("status"),
                     mapper.GetVector("required_skills_vector"),
                     assignedCount > 0 && evaluatedCount >= assignedCount,
-                    mapper.GetString("project_name")));
+                    mapper.GetString("project_name"),
+                    projectWorkerCount));
             }
         }
 
@@ -56,7 +59,8 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
             assigned.GetValueOrDefault(t.Id),
             DecodeSkills(t.Vector, skills),
             t.AllWorkersEvaluated,
-            t.ProjectName)).ToList();
+            t.ProjectName,
+            t.ProjectWorkerCount > (assigned.GetValueOrDefault(t.Id)?.Count ?? 0))).ToList();
     }
 
     private static async Task<Dictionary<int, List<AssignedWorkerDto>>> LoadAssignmentsAsync(

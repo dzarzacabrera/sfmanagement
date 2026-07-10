@@ -9,13 +9,19 @@ public record ProjectDetailViewModel(
     int Id,
     string Name,
     string? DescriptionMd,
-    IReadOnlyList<WorkerDto>? Workers = null);
+    IReadOnlyList<WorkerDto>? Workers = null)
+{
+    public string IdEncrypted { get; init; } = "";
+}
 
 public record CreateTaskViewModel(
     int ProjectId,
     IReadOnlyList<ProjectDto> Projects,
     IReadOnlyList<SkillCatalogueItem> Skills,
-    IReadOnlyList<CriticalityOption> Criticalities);
+    IReadOnlyList<CriticalityOption> Criticalities)
+{
+    public string ProjectIdEncrypted { get; init; } = "";
+}
 
 public record EditTaskViewModel(
     int TaskId,
@@ -25,8 +31,15 @@ public record EditTaskViewModel(
     Criticality Criticality,
     IReadOnlyList<ProjectDto> Projects,
     IReadOnlyList<SkillCatalogueItem> Skills,
-    IReadOnlyList<CriticalityOption> Criticalities);
+    IReadOnlyList<CriticalityOption> Criticalities)
+{
+    public string TaskIdEncrypted { get; init; } = "";
+    public string ProjectIdEncrypted { get; init; } = "";
+}
 
-public record SkillCatalogueItem(int Id, string Name, int Position);
+public record SkillCatalogueItem(int Id, string Name, int Position)
+{
+    public string IdEncrypted { get; init; } = "";
+}
 
 public record CriticalityOption(Criticality Value, string Label);

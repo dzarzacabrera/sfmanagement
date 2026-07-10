@@ -1,13 +1,16 @@
 @model DashboardViewModel
+@{
+    ViewBag.ProjectIdEncrypted = Model.ProjectIdEncrypted;
+}
 
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6 dark:bg-gray-800">
     <h1 class="text-2xl font-bold text-brand dark:text-white">@Model.ProjectName</h1>
     <div class="flex gap-2">
-        <a href="/Task/Create?projectId=@Model.ProjectId"
+        <a href="/Task/Create?projectId=@Model.ProjectIdEncrypted"
            class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep">
             + New Task
         </a>
-        <button onclick="openAddWorkerPopup(@Model.ProjectId)"
+        <button onclick="openAddWorkerPopup('@Model.ProjectIdEncrypted')"
                 class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
             Add Worker
         </button>
@@ -15,15 +18,15 @@
 </div>
 
 <script>
-    window.__dashboardProjectId = @Model.ProjectId;
+    window.__dashboardProjectIdEncrypted = '@Model.ProjectIdEncrypted';
 </script>
 
 <div id="kanban-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    @foreach (var (status, label, color, tasks) in new[] {
-        ("Queued", "Queued", "border-l-blue-500", Model.QueuedTasks),
-        ("InProgress", "In Progress", "border-l-amber-500", Model.InProgressTasks),
-        ("Finish", "Finished", "border-l-green-500", Model.FinishedTasks),
-        ("Blocked", "Blocked", "border-l-red-500", Model.BlockedTasks) })
+    @foreach (var (status, label, tasks) in new[] {
+        ("Queued", "Queued", Model.QueuedTasks),
+        ("InProgress", "In Progress", Model.InProgressTasks),
+        ("Finish", "Finished", Model.FinishedTasks),
+        ("Blocked", "Blocked", Model.BlockedTasks) })
     {
         <div class="bg-gray-100 rounded-xl p-3 kanban-column dark:bg-gray-800 dark:text-gray-100" data-status="@status">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-brand mb-3 px-1 dark:text-brand">
@@ -32,119 +35,7 @@
             <div class="space-y-4">
                 @foreach (var task in tasks)
                 {
-                    var isQueuedAndUnassigned = task.Status == ProjectTaskStatus.Queued && (task.AssignedWorkers?.Count ?? 0) == 0;
-                    <div class="task-card bg-white rounded-xl border border-gray-200 border-l-4 @color p-4 shadow-sm hover:shadow-md transition-shadow duration-200 @(isQueuedAndUnassigned ? "cursor-default" : "cursor-move") dark:bg-gray-800 dark:border-gray-700"
-                         data-task-id="@task.Id" data-status="@task.Status" draggable="@(!isQueuedAndUnassigned)">
-                        <div class="flex items-start justify-between gap-3">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">@task.Title</h3>
-                                    <span class="text-sm sm:text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0
-                                @(task.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
-                                  task.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
-                                  task.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-200" :
-                                  "bg-gray-50 text-gray-600 border border-gray-200")">
-                                @task.Criticality
-                            </span>
-                        </div>
-                        @if (!string.IsNullOrEmpty(task.Description))
-                        {
-                            <p class="text-base sm:text-sm text-gray-500 mt-2 line-clamp-2 dark:text-gray-400 leading-relaxed">@task.Description</p>
-                        }
-                        @if (task.Skills?.Count > 0)
-                        {
-                            <div class="flex flex-col gap-1.5 mt-3">
-                                <span class="text-sm sm:text-pill font-bold uppercase tracking-wider text-brand dark:text-brand">Skills</span>
-                                <div class="flex flex-wrap gap-1.5">
-                                    @foreach (var skill in task.Skills)
-                                    {
-                                        <span class="inline-flex items-stretch text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
-                                            <span class="px-2 py-0.5 bg-brand-light text-brand dark:bg-brand-light/20 dark:text-blue-100 self-center">@skill.SkillName</span>
-                                            <span class="px-1.5 bg-brand-dark text-white font-bold border-l border-brand-dark flex items-center self-stretch">@skill.RequiredLevel.ToString("0")</span>
-                                        </span>
-                                    }
-                                </div>
-                            </div>
-                        }
-                        <div class="my-3.5 border-t border-gray-100 dark:border-gray-700/60"></div>
-                        <div class="flex flex-col gap-2.5">
-                            <div class="flex flex-col gap-1.5">
-                                <span class="text-sm sm:text-pill font-bold uppercase tracking-wider text-brand dark:text-brand">Assigned Team</span>
-                                <div class="flex flex-wrap gap-1.5 items-center">
-                                    @if (task.AssignedWorkers?.Count > 0)
-                                    {
-                                        foreach (var worker in task.AssignedWorkers)
-                                        {
-                                            <span class="inline-flex items-center gap-1 text-sm sm:text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50">
-                                                @worker.WorkerName
-                                                @if (task.Status != ProjectTaskStatus.Finish)
-                                                {
-                                                    <button type="button" class="text-blue-400 hover:text-red-500 font-bold text-sm leading-none ml-0.5 transition-colors"
-                                                            data-tooltip="Remove @worker.WorkerName"
-                                                            onclick="removeWorker(@task.Id, @worker.WorkerId, this)">
-                                                        &times;
-                                                    </button>
-                                                }
-                                            </span>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <span class="text-sm italic text-gray-400 dark:text-gray-500">Unassigned</span>
-                                    }
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center justify-between gap-2 mt-1">
-                                <div class="flex items-center gap-1.5">
-                                    @if (!isQueuedAndUnassigned && !(task.Status == ProjectTaskStatus.Finish && task.AllWorkersEvaluated))
-                                    {
-                                        var canBack = task.Status != ProjectTaskStatus.Queued;
-                                        <button type="button" class="text-sm font-medium px-2 py-1.5 rounded border @(canBack ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canBack ? "" : "pointer-events-none")"
-                                                onclick="@(canBack ? "moveTaskStatus(" + task.Id + ", -1)" : "")"
-                                                data-tooltip="Move to previous status">&larr;</button>
-                                        <button type="button" class="flex items-center gap-1.5 px-2.5 py-1.5 border border-brand rounded-lg text-sm font-semibold text-brand hover:bg-brand hover:text-white transition-colors"
-                                                onclick="openStatusSheet(@task.Id, '@task.Status', this)">
-                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                            </svg>
-                                            <span>Status</span>
-                                        </button>
-                                        var canForward = task.Status == ProjectTaskStatus.Queued || task.Status == ProjectTaskStatus.InProgress;
-                                        <button type="button" class="text-sm font-medium px-2 py-1.5 rounded border @(canForward ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canForward ? "" : "pointer-events-none")"
-                                                onclick="@(canForward ? "moveTaskStatus(" + task.Id + ", 1)" : "")"
-                                                data-tooltip="Move to next status">&rarr;</button>
-                                    }
-                                </div>
-                                <div class="flex items-center gap-1.5 ml-auto">
-                                    @if (task.Status != ProjectTaskStatus.Finish)
-                                    {
-                                        <button class="btn-assign text-sm font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm border border-transparent"
-                                                data-task-id="@task.Id"
-                                                data-tooltip="Assign a worker to this task"
-                                                onclick="openAssignModal(@task.Id, @Model.ProjectId)">
-                                            Assign
-                                        </button>
-                                    }
-                                    @if (task.Status == ProjectTaskStatus.Finish && !task.AllWorkersEvaluated)
-                                    {
-                                        <button class="btn-evaluate text-sm font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors shadow-sm border border-transparent"
-                                                data-task-id="@task.Id"
-                                                data-tooltip="Evaluate this completed task"
-                                                onclick="openEvaluationModal(@task.Id, @Model.ProjectId)">
-                                            Evaluate
-                                        </button>
-                                    }
-                                    @if (task.Status == ProjectTaskStatus.Finish && task.AllWorkersEvaluated)
-                                    {
-                                        <button class="btn-archive text-sm font-medium px-3 py-1.5 rounded-lg bg-gray-600 text-white hover:bg-gray-700 transition-colors shadow-sm border border-transparent"
-                                                data-task-id="@task.Id"
-                                                data-tooltip="Archive this task"
-                                                onclick="archiveTask(@task.Id, @Model.ProjectId, this)">
-                                            Archive
-                                        </button>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <partial name="_TaskCard" model="task" />
                 }
             </div>
         </div>

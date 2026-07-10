@@ -13,12 +13,13 @@ public class ProjectController : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(
-        [FromServices] IGetAllProjectsQueryHandler handler)
+        [FromServices] IGetAllProjectsQueryHandler handler,
+        [FromServices] IIdEncryptionService enc)
     {
         var projects = await handler.HandleAsync(new GetAllProjectsQuery());
         ViewBag.PageTitle = "Projects";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "") };
-        return View(projects);
+        return View(projects.Select(p => p with { IdEncrypted = enc.Encrypt(p.Id) }).ToList());
     }
 
     [HttpGet]
@@ -33,7 +34,8 @@ public class ProjectController : Controller
     public async Task<IActionResult> Create(
         [FromForm] string name,
         [FromForm] IFormFile? descriptionFile,
-        [FromServices] ICommandHandler<CreateProjectCommand> handler)
+        [FromServices] ICommandHandler<CreateProjectCommand> handler,
+        [FromServices] IIdEncryptionService enc)
     {
         string? descriptionMd = null;
 
@@ -45,76 +47,94 @@ public class ProjectController : Controller
 
         var command = new CreateProjectCommand(name, descriptionMd);
         await handler.HandleAsync(command);
-        return RedirectToAction("Index", "Dashboard", new { projectId = command.CreatedId });
+        return RedirectToAction("Index", "Dashboard", new { projectId = enc.Encrypt(command.CreatedId) });
     }
 
     [HttpGet]
     public async Task<IActionResult> Edit(
-        [FromQuery] int projectId,
-        [FromServices] IGetAllProjectsQueryHandler handler)
+        [FromQuery] string projectId,
+        [FromServices] IGetAllProjectsQueryHandler handler,
+        [FromServices] IIdEncryptionService enc)
     {
+        if (!enc.TryDecrypt(projectId, out var pid)) return NotFound();
         var projects = await handler.HandleAsync(new GetAllProjectsQuery());
-        var project = projects.FirstOrDefault(p => p.Id == projectId);
+        var project = projects.FirstOrDefault(p => p.Id == pid);
         if (project is null) return NotFound();
 
         ViewBag.PageTitle = "Edit Project";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new("Edit", "") };
-        return View(project);
+        return View(project with { IdEncrypted = enc.Encrypt(pid) });
     }
 
     [HttpPost]
     public async Task<IActionResult> Edit(
-        [FromForm] int projectId,
+        [FromForm] string projectIdEncrypted,
         [FromForm] string name,
         [FromForm] string? descriptionMd,
-        [FromServices] ICommandHandler<UpdateProjectCommand> handler)
+        [FromServices] ICommandHandler<UpdateProjectCommand> handler,
+        [FromServices] IIdEncryptionService enc)
     {
-        var command = new UpdateProjectCommand(projectId, name, descriptionMd);
+        if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return NotFound();
+        var command = new UpdateProjectCommand(pid, name, descriptionMd);
         await handler.HandleAsync(command);
-        return RedirectToAction("Detail", new { projectId });
+        return RedirectToAction("Detail", new { projectId = projectIdEncrypted });
     }
 
     [HttpGet]
     public async Task<IActionResult> Detail(
-        [FromQuery] int projectId,
+        [FromQuery] string projectId,
         [FromServices] IGetAllProjectsQueryHandler projectHandler,
-        [FromServices] IGetWorkersByProjectQueryHandler workersHandler)
+        [FromServices] IGetWorkersByProjectQueryHandler workersHandler,
+        [FromServices] IIdEncryptionService enc)
     {
+        if (!enc.TryDecrypt(projectId, out var pid)) return NotFound();
         var projects = await projectHandler.HandleAsync(new GetAllProjectsQuery());
-        var project = projects.FirstOrDefault(p => p.Id == projectId);
+        var project = projects.FirstOrDefault(p => p.Id == pid);
 
-        var workers = await workersHandler.HandleAsync(new GetWorkersByProjectQuery(projectId));
+        var workers = await workersHandler.HandleAsync(new GetWorkersByProjectQuery(pid));
 
-        ViewBag.PageTitle = $"Project #{projectId}";
-        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new($"Project #{projectId}", "") };
+        ViewBag.PageTitle = $"Project #{pid}";
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new($"Project #{pid}", "") };
 
         var vm = new ProjectDetailViewModel(
-            projectId,
-            project?.Name ?? $"Project #{projectId}",
+            pid,
+            project?.Name ?? $"Project #{pid}",
             project?.DescriptionMd,
-            workers);
+            workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList())
+        {
+            IdEncrypted = projectId
+        };
 
         return View(vm);
     }
 
     [HttpGet]
     public async Task<IActionResult> AddWorkerPopup(
-        [FromQuery] int projectId,
-        [FromServices] IGetWorkersNotInProjectQueryHandler handler)
+        [FromQuery] string projectId,
+        [FromServices] IGetWorkersNotInProjectQueryHandler handler,
+        [FromServices] IIdEncryptionService enc)
     {
-        var workers = await handler.HandleAsync(new GetWorkersNotInProjectQuery(projectId));
-        var vm = new AddWorkerToProjectPopupViewModel(projectId, workers);
+        if (!enc.TryDecrypt(projectId, out var pid)) return NotFound();
+        var workers = await handler.HandleAsync(new GetWorkersNotInProjectQuery(pid));
+        var vm = new AddWorkerToProjectPopupViewModel(pid,
+            workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList())
+        {
+            ProjectIdEncrypted = projectId
+        };
         return PartialView("~/Views/Dashboard/_AddWorkerToProjectModal.cshtml", vm);
     }
 
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AddWorkerToProject(
-        [FromForm] int projectId,
-        [FromForm] int workerId,
-        [FromServices] ICommandHandler<AddWorkerToProjectCommand> handler)
+        [FromForm] string projectIdEncrypted,
+        [FromForm] string workerIdEncrypted,
+        [FromServices] ICommandHandler<AddWorkerToProjectCommand> handler,
+        [FromServices] IIdEncryptionService enc)
     {
-        await handler.HandleAsync(new AddWorkerToProjectCommand(projectId, workerId));
+        if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return BadRequest();
+        if (!enc.TryDecrypt(workerIdEncrypted, out var wid)) return BadRequest();
+        await handler.HandleAsync(new AddWorkerToProjectCommand(pid, wid));
         return Ok();
     }
 }

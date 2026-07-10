@@ -13,4 +13,7 @@ public record EvaluationHistoryDto(
     double Impact,
     double PreviousLevel,
     double NewLevel,
-    DateTime CreatedAt);
+    DateTime CreatedAt)
+{
+    public string IdEncrypted { get; init; } = "";
+}

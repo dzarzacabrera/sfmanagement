@@ -59,7 +59,7 @@ else
         {
             <div class="skill-card bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative flex flex-col justify-between"
                  data-name="@skill.Name.ToLower()">
-                <a href="/Skill/Edit?skillId=@skill.Id"
+                <a href="/Skill/Edit?skillId=@skill.IdEncrypted"
                    class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                    aria-label="Edit @skill.Name">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,12 +80,12 @@ else
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2 pt-3 justify-end">
-                    <a href="/Skill/Detail?skillId=@skill.Id"
+                    <a href="/Skill/Detail?skillId=@skill.IdEncrypted"
                        class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap">
                         Detail
                     </a>
                     <form method="post" action="/Skill/ToggleActive" class="inline">
-                        <input type="hidden" name="skillId" value="@skill.Id">
+                        <input type="hidden" name="skillIdEncrypted" value="@skill.IdEncrypted">
                         <button type="submit"
                                 class="px-3 py-1.5 rounded-lg text-sm font-medium border @(skill.IsActive ? "border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/30" : "border-green-300 text-green-600 hover:bg-green-50 dark:border-green-800 dark:hover:bg-green-900/30") whitespace-nowrap">
                             @(skill.IsActive ? "Deactivate" : "Activate")
@@ -121,7 +121,7 @@ else
                         }
                     </div>
                     <div class="col-span-4 flex items-center justify-end gap-1">
-                        <a href="/Skill/Detail?skillId=@skill.Id"
+                        <a href="/Skill/Detail?skillId=@skill.IdEncrypted"
                            class="p-2 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                            title="View details">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +129,7 @@ else
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             </svg>
                         </a>
-                        <a href="/Skill/Edit?skillId=@skill.Id"
+                        <a href="/Skill/Edit?skillId=@skill.IdEncrypted"
                            class="p-2 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                            title="Edit">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@ else
                             </svg>
                         </a>
                         <form method="post" action="/Skill/ToggleActive" class="inline">
-                            <input type="hidden" name="skillId" value="@skill.Id">
+                            <input type="hidden" name="skillIdEncrypted" value="@skill.IdEncrypted">
                             <button type="submit"
                                     class="p-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9] @(skill.IsActive ? "text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" : "text-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20")"
                                     title="@(skill.IsActive ? "Deactivate" : "Activate")">

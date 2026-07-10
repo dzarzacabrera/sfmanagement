@@ -4,7 +4,10 @@ namespace SFManagement.Application.DTOs;
 
 public record TaskSkillDto(string SkillName, int SkillPosition, float RequiredLevel);
 
-public record AssignedWorkerDto(int WorkerId, string WorkerName);
+public record AssignedWorkerDto(int WorkerId, string WorkerName)
+{
+    public string WorkerIdEncrypted { get; init; } = "";
+}
 
 public record TaskDto(
     int Id,
@@ -17,4 +20,9 @@ public record TaskDto(
     IReadOnlyList<AssignedWorkerDto>? AssignedWorkers = null,
     IReadOnlyList<TaskSkillDto>? Skills = null,
     bool AllWorkersEvaluated = false,
-    string ProjectName = "");
+    string ProjectName = "",
+    bool HasAssignableWorkers = true)
+{
+    public string IdEncrypted { get; init; } = "";
+    public string ProjectIdEncrypted { get; init; } = "";
+}

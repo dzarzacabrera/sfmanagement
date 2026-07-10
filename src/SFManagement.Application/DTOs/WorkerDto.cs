@@ -6,5 +6,8 @@ public record WorkerDto(
     string Role,
     int EvaluationCount,
     int ActiveTaskCount,
-    float[] SkillsVector);
+    float[] SkillsVector)
+{
+    public string IdEncrypted { get; init; } = "";
+}
 

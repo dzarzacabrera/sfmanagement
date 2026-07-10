@@ -41,7 +41,7 @@
     }
 
     <form id="evaluationForm" data-crit-multiplier="@multiplier.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)">
-        <input type="hidden" name="taskId" value="@Model.TaskId">
+        <input type="hidden" name="taskIdEncrypted" value="@Model.TaskIdEncrypted">
 
         <div class="flex flex-col lg:flex-row gap-6">
             @* LEFT COLUMN *@
@@ -52,18 +52,18 @@
                         <label class="block text-sm font-medium text-gray-600 mb-1 dark:text-gray-400">Worker</label>
                         @if (Model.AssignedWorkers.Count > 1)
                         {
-                            <select id="evalWorkerSelect" name="workerId" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                                    onchange="reloadEvaluationPopup(@Model.TaskId, this.value)">
+                            <select id="evalWorkerSelect" name="workerIdEncrypted" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+                                    onchange="reloadEvaluationPopup('@Model.TaskIdEncrypted', this.value)">
                                 @foreach (var w in Model.AssignedWorkers)
                                 {
-                                    <option value="@w.WorkerId" selected="@(w.WorkerId == Model.WorkerId)">@w.WorkerName</option>
+                                    <option value="@w.WorkerIdEncrypted" selected="@(w.WorkerIdEncrypted == Model.WorkerIdEncrypted)">@w.WorkerName</option>
                                 }
                             </select>
                         }
                         else
                         {
                             <p class="text-sm font-medium text-gray-900 dark:text-gray-100">@Model.WorkerName</p>
-                            <input type="hidden" name="workerId" value="@Model.WorkerId">
+                            <input type="hidden" name="workerIdEncrypted" value="@Model.WorkerIdEncrypted">
                         }
                     </div>
                 </div>
