@@ -115,8 +115,8 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
             "(task_id, worker_id, skill_position, rating, criticality, base_points, impact, " +
             "previous_level, new_level) " +
             "VALUES ($1, $2, $3, $4, $5::criticality, $6, $7, $8, $9)", connection)
-            {
-                Parameters =
+        {
+            Parameters =
                 {
                     new() { Value = taskId },
                     new() { Value = workerId },
