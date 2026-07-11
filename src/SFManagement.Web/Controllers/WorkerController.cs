@@ -208,7 +208,7 @@ public class WorkerController : Controller
             var oldVector = raw?.ToArray() ?? new float[1024];
 
             // Get or create the "Manual Adjustment" project and task
-            int taskId;
+            long taskId;
             await using (var findCmd = new NpgsqlCommand(
                 "SELECT t.id FROM tasks t " +
                 "INNER JOIN projects p ON p.id = t.project_id " +
@@ -216,7 +216,7 @@ public class WorkerController : Controller
                 "LIMIT 1", conn))
             {
                 var result = await findCmd.ExecuteScalarAsync();
-                if (result is int existingTaskId)
+                if (result is long existingTaskId)
                 {
                     taskId = existingTaskId;
                 }
@@ -224,14 +224,14 @@ public class WorkerController : Controller
                 {
                     await using var insProj = new NpgsqlCommand(
                         "INSERT INTO projects (name) VALUES ('Manual Adjustment') RETURNING id", conn);
-                    var projectId = (int)(await insProj.ExecuteScalarAsync())!;
+                    var projectId = (long)(await insProj.ExecuteScalarAsync())!;
 
                     await using var insTask = new NpgsqlCommand(
                         "INSERT INTO tasks (project_id, title, criticality, status, required_skills_vector) " +
                         "VALUES ($1, 'User Skill Edit', 'low', 'Finish', " +
                         "array_fill(0.0::float, ARRAY[1024])::vector(1024)) RETURNING id", conn);
                     insTask.Parameters.Add(new() { Value = projectId });
-                    taskId = (int)(await insTask.ExecuteScalarAsync())!;
+                    taskId = (long)(await insTask.ExecuteScalarAsync())!;
                 }
             }
 

@@ -23,7 +23,7 @@ internal sealed class GetAllTasksQueryHandler(INpgsqlConnectionFactory connectio
             "INNER JOIN projects p ON p.id = t.project_id " +
             "ORDER BY t.project_id DESC, t.status, t.id", connection);
 
-        var tasks = new List<(int Id, int ProjectId, string Title, string? Description,
+        var tasks = new List<(long Id, long ProjectId, string Title, string? Description,
             Domain.Enums.Criticality Criticality, Domain.Enums.ProjectTaskStatus Status, float[] Vector,
             string ProjectName, bool AllWorkersEvaluated)>();
 
@@ -53,10 +53,10 @@ internal sealed class GetAllTasksQueryHandler(INpgsqlConnectionFactory connectio
             null, t.AllWorkersEvaluated, t.ProjectName)).ToList();
     }
 
-    private static async Task<Dictionary<int, List<AssignedWorkerDto>>> LoadAssignmentsAsync(
-        NpgsqlConnection connection, int[] taskIds)
+    private static async Task<Dictionary<long, List<AssignedWorkerDto>>> LoadAssignmentsAsync(
+        NpgsqlConnection connection, long[] taskIds)
     {
-        var result = new Dictionary<int, List<AssignedWorkerDto>>();
+        var result = new Dictionary<long, List<AssignedWorkerDto>>();
         if (taskIds.Length == 0) return result;
 
         await using var cmd = new NpgsqlCommand(
@@ -65,7 +65,7 @@ internal sealed class GetAllTasksQueryHandler(INpgsqlConnectionFactory connectio
             "INNER JOIN workers w ON w.id = ta.worker_id " +
             "WHERE ta.task_id = ANY($1) " +
             "ORDER BY ta.assigned_at", connection);
-        cmd.Parameters.Add(new() { Value = taskIds, NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Integer });
+        cmd.Parameters.Add(new() { Value = taskIds, NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Bigint });
 
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())

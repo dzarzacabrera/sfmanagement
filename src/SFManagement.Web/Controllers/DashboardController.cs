@@ -24,7 +24,7 @@ public class DashboardController : Controller
     {
         if (projectId == null || !enc.TryDecrypt(projectId, out var pid))
         {
-            if (!int.TryParse(projectId, out pid)) pid = 1;
+            if (!long.TryParse(projectId, out pid)) pid = 1;
         }
         var tasks = await handler.HandleAsync(new GetDashboardTasksQuery(pid));
         var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
@@ -156,7 +156,7 @@ public class DashboardController : Controller
         var task = tasks.FirstOrDefault(t => t.Id == tid);
         var workers = task?.AssignedWorkers;
 
-        HashSet<int> evaluatedWorkerIds = [];
+        HashSet<long> evaluatedWorkerIds = [];
         if (workers?.Count > 0)
         {
             await using var conn = await connFactory.GetOpenConnectionAsync();
@@ -165,7 +165,7 @@ public class DashboardController : Controller
             cmd.Parameters.AddWithValue("@taskId", tid);
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
-                evaluatedWorkerIds.Add(reader.GetInt32(0));
+                evaluatedWorkerIds.Add(reader.GetInt64(0));
         }
 
         var remainingWorkers = workers?.Where(w => !evaluatedWorkerIds.Contains(w.WorkerId)).ToList();

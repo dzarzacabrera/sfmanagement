@@ -2,9 +2,9 @@ using SFManagement.Application.DTOs;
 
 namespace SFManagement.Application.Queries;
 
-public record GetWorkerTasksQuery(int WorkerId);
+public record GetWorkerTasksQuery(long WorkerId);
 
-public record WorkerTaskDto(int TaskId, string TaskTitle, string ProjectName, int ProjectId)
+public record WorkerTaskDto(long TaskId, string TaskTitle, string ProjectName, long ProjectId)
 {
     public string TaskIdEncrypted { get; init; } = "";
     public string ProjectIdEncrypted { get; init; } = "";

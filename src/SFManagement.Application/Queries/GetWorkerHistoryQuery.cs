@@ -2,7 +2,7 @@ using SFManagement.Application.DTOs;
 
 namespace SFManagement.Application.Queries;
 
-public record GetWorkerHistoryQuery(int WorkerId);
+public record GetWorkerHistoryQuery(long WorkerId);
 
 public interface IGetWorkerHistoryQueryHandler
 {

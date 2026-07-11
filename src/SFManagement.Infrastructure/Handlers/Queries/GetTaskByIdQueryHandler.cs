@@ -50,7 +50,7 @@ internal sealed class GetTaskByIdQueryHandler(INpgsqlConnectionFactory connectio
     }
 
     private static async Task<List<AssignedWorkerDto>?> LoadAssignmentsAsync(
-        NpgsqlConnection connection, int taskId)
+        NpgsqlConnection connection, long taskId)
     {
         await using var cmd = new NpgsqlCommand(
             "SELECT w.id AS worker_id, w.name AS worker_name " +

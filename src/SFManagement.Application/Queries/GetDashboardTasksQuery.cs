@@ -2,7 +2,7 @@ using SFManagement.Application.DTOs;
 
 namespace SFManagement.Application.Queries;
 
-public record GetDashboardTasksQuery(int ProjectId);
+public record GetDashboardTasksQuery(long ProjectId);
 
 public interface IGetDashboardTasksQueryHandler
 {

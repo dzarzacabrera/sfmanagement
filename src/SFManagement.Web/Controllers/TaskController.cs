@@ -49,10 +49,10 @@ public class TaskController : Controller
         ViewBag.PageTitle = "Create Task";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "/Task/Index"), new("Create Task", "") };
 
-        int defaultPid;
+        long defaultPid;
         if (projectId != null && enc.TryDecrypt(projectId, out var pid))
             defaultPid = pid;
-        else if (projectId != null && int.TryParse(projectId, out var ppid))
+        else if (projectId != null && long.TryParse(projectId, out var ppid))
             defaultPid = ppid;
         else
             defaultPid = projects.Count > 0 ? projects[0].Id : 1;

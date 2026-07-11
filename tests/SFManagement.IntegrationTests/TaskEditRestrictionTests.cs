@@ -64,7 +64,7 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
             .Should().ThrowAsync<InvalidOperationException>();
     }
 
-    private static async Task<(int ProjectId, int TaskId)> CreateProjectWithQueuedTaskAsync(IServiceProvider services)
+    private static async Task<(long ProjectId, long TaskId)> CreateProjectWithQueuedTaskAsync(IServiceProvider services)
     {
         var createProject = services.GetRequiredService<ICommandHandler<CreateProjectCommand>>();
         var projectCmd = new CreateProjectCommand("Edit Test Project", null);

@@ -62,7 +62,7 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
     }
 
     private static async Task<(ProjectTask Task, TaskAssignment Assignment)> LoadTaskAndAssignmentAsync(
-        int taskId, int workerId, NpgsqlConnection connection)
+        long taskId, long workerId, NpgsqlConnection connection)
     {
         await using var cmd = new NpgsqlCommand(
             "SELECT t.id, t.project_id, t.title, t.description, t.criticality, t.status, " +
@@ -96,7 +96,7 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
         return (task, assignment);
     }
 
-    private static async Task<float[]> LoadWorkerSkillsAsync(int workerId, NpgsqlConnection connection)
+    private static async Task<float[]> LoadWorkerSkillsAsync(long workerId, NpgsqlConnection connection)
     {
         await using var cmd = new NpgsqlCommand(
             "SELECT skills_vector FROM workers WHERE id = $1", connection);
@@ -106,7 +106,7 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
         return result!.ToArray();
     }
 
-    private static async Task InsertEvaluationAsync(NpgsqlConnection connection, int taskId, int workerId,
+    private static async Task InsertEvaluationAsync(NpgsqlConnection connection, long taskId, long workerId,
         SkillEvaluation evaluation, Criticality criticality, double basePoints, double impact,
         double previousLevel, double newLevel)
     {
@@ -133,7 +133,7 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
         await cmd.ExecuteNonQueryAsync();
     }
 
-    private static async Task UpdateWorkerSkillsAsync(NpgsqlConnection connection, int workerId,
+    private static async Task UpdateWorkerSkillsAsync(NpgsqlConnection connection, long workerId,
         SkillVector newVector)
     {
         await using var cmd = new NpgsqlCommand(

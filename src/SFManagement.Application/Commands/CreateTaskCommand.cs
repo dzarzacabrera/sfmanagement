@@ -3,11 +3,11 @@ using SFManagement.Domain.Enums;
 namespace SFManagement.Application.Commands;
 
 public record CreateTaskCommand(
-    int ProjectId,
+    long ProjectId,
     string Title,
     string? Description,
     Criticality Criticality,
     float[] RequiredSkillsVector)
 {
-    public int CreatedId { get; set; }
+    public long CreatedId { get; set; }
 }

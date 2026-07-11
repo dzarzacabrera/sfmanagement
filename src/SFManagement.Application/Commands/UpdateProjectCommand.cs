@@ -1,3 +1,3 @@
 namespace SFManagement.Application.Commands;
 
-public record UpdateProjectCommand(int ProjectId, string Name, string? DescriptionMd);
+public record UpdateProjectCommand(long ProjectId, string Name, string? DescriptionMd);

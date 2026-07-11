@@ -1,3 +1,3 @@
 namespace SFManagement.Application.Commands;
 
-public record AddWorkerToProjectCommand(int ProjectId, int WorkerId);
+public record AddWorkerToProjectCommand(long ProjectId, long WorkerId);

@@ -5,7 +5,7 @@ using SFManagement.Domain.Enums;
 namespace SFManagement.Web.ViewModels;
 
 public record DashboardViewModel(
-    int ProjectId,
+    long ProjectId,
     string ProjectName,
     IReadOnlyList<TaskCardDto> QueuedTasks,
     IReadOnlyList<TaskCardDto> InProgressTasks,
@@ -18,7 +18,7 @@ public record DashboardViewModel(
 }
 
 public record TaskCardDto(
-    int Id,
+    long Id,
     string Title,
     string? Description,
     Criticality Criticality,
@@ -32,7 +32,7 @@ public record TaskCardDto(
 }
 
 public record AssignWorkerViewModel(
-    int TaskId,
+    long TaskId,
     string TaskTitle,
     string? Description,
     Criticality Criticality,
@@ -43,11 +43,11 @@ public record AssignWorkerViewModel(
 }
 
 public record EvaluationViewModel(
-    int TaskId,
+    long TaskId,
     string TaskTitle,
     string? Description,
     Criticality Criticality,
-    int WorkerId,
+    long WorkerId,
     string WorkerName,
     IReadOnlyList<SkillPositionDto> SkillPositions,
     IReadOnlyList<AssignedWorkerDto>? AssignedWorkers = null,
@@ -60,14 +60,14 @@ public record EvaluationViewModel(
 public record SkillPositionDto(int Position, string SkillName);
 
 public record AddWorkerToProjectPopupViewModel(
-    int ProjectId,
+    long ProjectId,
     IReadOnlyList<WorkerDto> Workers)
 {
     public string ProjectIdEncrypted { get; init; } = "";
 }
 
 public record WorkerHistoryViewModel(
-    int WorkerId,
+    long WorkerId,
     string WorkerName,
     IReadOnlyList<EvaluationHistoryDto> Evaluations,
     IReadOnlyList<WorkerTaskDto>? AssignedTasks = null)
