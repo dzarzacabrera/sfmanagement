@@ -7,7 +7,7 @@ public record EvaluationHistoryDto(
     string TaskTitle,
     string SkillName,
     int SkillPosition,
-    PerformanceRating Rating,
+    double Rating,
     Criticality Criticality,
     double BasePoints,
     double Impact,

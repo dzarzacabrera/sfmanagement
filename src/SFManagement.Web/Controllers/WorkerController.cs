@@ -244,14 +244,6 @@ public class WorkerController : Controller
                 return Math.Round(diff / 0.05) * 0.05;
             }
 
-            string RatingFromBasePoints(double basePoints) => basePoints switch
-            {
-                < -0.25 => "Poor",
-                < 0.1 => "Average",
-                < 0.35 => "Good",
-                _ => "Excellent"
-            };
-
             // Create evaluation records for modified skills that had evaluations
             var evaluatedPositions = (await historyHandler.HandleAsync(new GetWorkerHistoryQuery(wid)))
                 .Select(e => e.SkillPosition)
@@ -264,7 +256,6 @@ public class WorkerController : Controller
                 if (!evaluatedPositions.Contains(pos)) continue;
                 var oldVal = oldVector.ElementAtOrDefault(pos);
                 var newVal = vector.ElementAtOrDefault(pos);
-                if (Math.Abs(newVal - oldVal) < 0.001) continue;
 
                 var basePoints = BasePointsFromDelta(oldVal, newVal);
 
@@ -272,14 +263,14 @@ public class WorkerController : Controller
                     "INSERT INTO performance_evaluations " +
                     "(task_id, worker_id, skill_position, rating, criticality, base_points, impact, " +
                     "previous_level, new_level) " +
-                    "VALUES ($1, $2, $3, $4::performance_rating, $5::criticality, $6, $7, $8, $9)", conn)
+                    "VALUES ($1, $2, $3, $4, $5::criticality, $6, $7, $8, $9)", conn)
                 {
                     Parameters =
                     {
                         new() { Value = taskId },
                         new() { Value = wid },
                         new() { Value = pos },
-                        new() { Value = RatingFromBasePoints(basePoints) },
+                        new() { Value = newVal },
                         new() { Value = "low" },
                         new() { Value = basePoints },
                         new() { Value = newVal - oldVal },

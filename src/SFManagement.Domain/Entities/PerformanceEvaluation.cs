@@ -8,7 +8,7 @@ public class PerformanceEvaluation
     public int TaskId { get; init; }
     public int WorkerId { get; init; }
     public int SkillPosition { get; init; }
-    public PerformanceRating Rating { get; init; }
+    public double Rating { get; init; }
     public Criticality Criticality { get; init; }
     public double BasePoints { get; init; }
     public double Impact { get; init; }
@@ -17,7 +17,7 @@ public class PerformanceEvaluation
     public DateTime CreatedAt { get; init; }
 
     public PerformanceEvaluation(int id, int taskId, int workerId, int skillPosition,
-        PerformanceRating rating, Criticality criticality, double basePoints,
+        double rating, Criticality criticality, double basePoints,
         double impact, double previousLevel, double newLevel, DateTime createdAt)
     {
         Id = id;

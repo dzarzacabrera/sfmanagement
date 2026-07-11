@@ -40,7 +40,7 @@ public class SkillVectorTests
     public void ApplyImpact_PoorHigh_DecreasesSkill()
     {
         var vector = new SkillVector([6.0f]);
-        var result = vector.ApplyImpact(0, PerformanceRating.Poor.ToBasePoints(),
+        var result = vector.ApplyImpact(0, -0.5,
             SkillVector.CalculateCriticalityMultiplier(Criticality.High));
 
         result[0].Should().Be(5.25f);
@@ -50,7 +50,7 @@ public class SkillVectorTests
     public void ApplyImpact_ExcellentCritical_ClampsToTen()
     {
         var vector = new SkillVector([9.5f]);
-        var result = vector.ApplyImpact(0, PerformanceRating.Excellent.ToBasePoints(),
+        var result = vector.ApplyImpact(0, 0.5,
             SkillVector.CalculateCriticalityMultiplier(Criticality.Critical));
 
         result[0].Should().Be(10.0f);
@@ -60,7 +60,7 @@ public class SkillVectorTests
     public void ApplyImpact_PoorCritical_ClampsToZero()
     {
         var vector = new SkillVector([0.5f]);
-        var result = vector.ApplyImpact(0, PerformanceRating.Poor.ToBasePoints(),
+        var result = vector.ApplyImpact(0, -0.5,
             SkillVector.CalculateCriticalityMultiplier(Criticality.Critical));
 
         result[0].Should().Be(0.0f);
@@ -70,7 +70,7 @@ public class SkillVectorTests
     public void ApplyImpact_Average_DoesNotChange()
     {
         var vector = new SkillVector([6.0f]);
-        var result = vector.ApplyImpact(0, PerformanceRating.Average.ToBasePoints(),
+        var result = vector.ApplyImpact(0, 0.0,
             SkillVector.CalculateCriticalityMultiplier(Criticality.Medium));
 
         result[0].Should().Be(6.0f);
