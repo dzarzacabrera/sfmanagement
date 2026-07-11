@@ -17,7 +17,7 @@ internal sealed class GetWorkersByProjectQueryHandler(INpgsqlConnectionFactory c
             "(SELECT COUNT(*) FROM performance_evaluations WHERE worker_id = w.id) AS evaluation_count, " +
             "(SELECT COUNT(*) FROM task_assignments ta " +
             "INNER JOIN tasks t ON t.id = ta.task_id " +
-            "WHERE ta.worker_id = w.id AND t.status <> 'Finish') AS active_task_count " +
+            "WHERE ta.worker_id = w.id AND t.status NOT IN ('Finish', 'Archived')) AS active_task_count " +
             "FROM workers w " +
             "INNER JOIN project_workers pw ON pw.worker_id = w.id " +
             "WHERE pw.project_id = $1 " +
