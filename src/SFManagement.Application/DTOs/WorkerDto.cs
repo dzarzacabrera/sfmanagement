@@ -1,7 +1,7 @@
 namespace SFManagement.Application.DTOs;
 
 public record WorkerDto(
-    int Id,
+    long Id,
     string Name,
     string Role,
     int EvaluationCount,

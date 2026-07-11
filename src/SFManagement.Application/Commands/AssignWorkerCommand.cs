@@ -1,3 +1,3 @@
 namespace SFManagement.Application.Commands;
 
-public record AssignWorkerCommand(int TaskId, int WorkerId);
+public record AssignWorkerCommand(long TaskId, long WorkerId);

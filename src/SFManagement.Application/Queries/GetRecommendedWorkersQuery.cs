@@ -2,7 +2,7 @@ using SFManagement.Application.DTOs;
 
 namespace SFManagement.Application.Queries;
 
-public record GetRecommendedWorkersQuery(int ProjectId, int TaskId);
+public record GetRecommendedWorkersQuery(long ProjectId, long TaskId);
 
 public interface IGetRecommendedWorkersQueryHandler
 {

@@ -6,7 +6,7 @@ namespace SFManagement.Web.ViewModels;
 public record CreateProjectViewModel();
 
 public record ProjectDetailViewModel(
-    int Id,
+    long Id,
     string Name,
     string? DescriptionMd,
     IReadOnlyList<WorkerDto>? Workers = null,
@@ -16,7 +16,7 @@ public record ProjectDetailViewModel(
 }
 
 public record CreateTaskViewModel(
-    int ProjectId,
+    long ProjectId,
     IReadOnlyList<ProjectDto> Projects,
     IReadOnlyList<SkillCatalogueItem> Skills,
     IReadOnlyList<CriticalityOption> Criticalities)
@@ -25,8 +25,8 @@ public record CreateTaskViewModel(
 }
 
 public record EditTaskViewModel(
-    int TaskId,
-    int ProjectId,
+    long TaskId,
+    long ProjectId,
     string Title,
     string? Description,
     Criticality Criticality,
@@ -38,7 +38,7 @@ public record EditTaskViewModel(
     public string ProjectIdEncrypted { get; init; } = "";
 }
 
-public record SkillCatalogueItem(int Id, string Name, int Position)
+public record SkillCatalogueItem(long Id, string Name, int Position)
 {
     public string IdEncrypted { get; init; } = "";
 }

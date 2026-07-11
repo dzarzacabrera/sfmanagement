@@ -1,3 +1,3 @@
 namespace SFManagement.Application.Commands;
 
-public record ArchiveTaskCommand(int TaskId);
+public record ArchiveTaskCommand(long TaskId);

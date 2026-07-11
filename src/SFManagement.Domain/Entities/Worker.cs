@@ -4,11 +4,11 @@ namespace SFManagement.Domain.Entities;
 
 public class Worker
 {
-    public int Id { get; init; }
+    public long Id { get; init; }
     public string Name { get; private set; }
     public SkillVector SkillsVector { get; private set; }
 
-    public Worker(int id, string name, SkillVector skillsVector)
+    public Worker(long id, string name, SkillVector skillsVector)
     {
         Id = id;
         Name = name;

@@ -4,14 +4,14 @@ namespace SFManagement.Application.DTOs;
 
 public record TaskSkillDto(string SkillName, int SkillPosition, float RequiredLevel);
 
-public record AssignedWorkerDto(int WorkerId, string WorkerName)
+public record AssignedWorkerDto(long WorkerId, string WorkerName)
 {
     public string WorkerIdEncrypted { get; init; } = "";
 }
 
 public record TaskDto(
-    int Id,
-    int ProjectId,
+    long Id,
+    long ProjectId,
     string Title,
     string? Description,
     Criticality Criticality,

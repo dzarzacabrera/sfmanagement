@@ -3,7 +3,7 @@ using SFManagement.Domain.Enums;
 namespace SFManagement.Application.DTOs;
 
 public record EvaluationHistoryDto(
-    int Id,
+    long Id,
     string TaskTitle,
     string SkillName,
     int SkillPosition,

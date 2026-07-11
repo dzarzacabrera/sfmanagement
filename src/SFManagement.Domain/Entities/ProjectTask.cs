@@ -5,15 +5,15 @@ namespace SFManagement.Domain.Entities;
 
 public class ProjectTask
 {
-    public int Id { get; init; }
-    public int ProjectId { get; init; }
+    public long Id { get; init; }
+    public long ProjectId { get; init; }
     public string Title { get; private set; }
     public string? Description { get; private set; }
     public Criticality Criticality { get; private set; }
     public ProjectTaskStatus Status { get; private set; }
     public SkillVector RequiredSkillsVector { get; private set; }
 
-    public ProjectTask(int id, int projectId, string title, string? description,
+    public ProjectTask(long id, long projectId, string title, string? description,
         Criticality criticality, ProjectTaskStatus status, SkillVector requiredSkillsVector)
     {
         Id = id;

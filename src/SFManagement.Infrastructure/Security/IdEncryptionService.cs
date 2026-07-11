@@ -10,17 +10,17 @@ public sealed class IdEncryptionService : IIdEncryptionService
 
     private const int NonceSize = 12;
     private const int TagSize = 16;
-    private const int PlaintextSize = 4;
+    private const int PlaintextSize = 8;
 
     public IdEncryptionService(byte[] key)
     {
         _key = key;
     }
 
-    public string Encrypt(int id)
+    public string Encrypt(long id)
     {
         Span<byte> plaintext = stackalloc byte[PlaintextSize];
-        BinaryPrimitives.WriteInt32LittleEndian(plaintext, id);
+        BinaryPrimitives.WriteInt64LittleEndian(plaintext, id);
 
         Span<byte> nonce = stackalloc byte[NonceSize];
         RandomNumberGenerator.Fill(nonce);
@@ -42,14 +42,14 @@ public sealed class IdEncryptionService : IIdEncryptionService
             .TrimEnd('=');
     }
 
-    public int Decrypt(string encrypted)
+    public long Decrypt(string encrypted)
     {
         if (!TryDecrypt(encrypted, out var id))
             throw new CryptographicException("Invalid encrypted ID.");
         return id;
     }
 
-    public bool TryDecrypt(string encrypted, out int id)
+    public bool TryDecrypt(string encrypted, out long id)
     {
         id = 0;
         try
@@ -77,7 +77,7 @@ public sealed class IdEncryptionService : IIdEncryptionService
             using var aes = new AesGcm(_key, TagSize);
             aes.Decrypt(nonce, ciphertext, tag, plaintext);
 
-            id = BinaryPrimitives.ReadInt32LittleEndian(plaintext);
+            id = BinaryPrimitives.ReadInt64LittleEndian(plaintext);
             return true;
         }
         catch

@@ -1,3 +1,3 @@
 namespace SFManagement.Application.Commands;
 
-public record UpdateSkillCatalogueCommand(int SkillId, string Name);
+public record UpdateSkillCatalogueCommand(long SkillId, string Name);

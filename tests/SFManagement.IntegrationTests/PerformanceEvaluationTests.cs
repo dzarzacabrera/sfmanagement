@@ -37,7 +37,7 @@ public sealed class PerformanceEvaluationTests(SfManagementFixture fixture)
             .Should().ThrowAsync<InvalidOperationException>();
     }
 
-    private static async Task<(int ProjectId, int TaskId)> CreateInProgressTaskAsync(IServiceProvider services)
+    private static async Task<(long ProjectId, long TaskId)> CreateInProgressTaskAsync(IServiceProvider services)
     {
         var (projectId, taskId) = await CreateProjectWithQueuedTaskAsync(services);
 
@@ -50,7 +50,7 @@ public sealed class PerformanceEvaluationTests(SfManagementFixture fixture)
         return (projectId, taskId);
     }
 
-    private static async Task<(int ProjectId, int TaskId)> CreateFinishedTaskAsync(IServiceProvider services)
+    private static async Task<(long ProjectId, long TaskId)> CreateFinishedTaskAsync(IServiceProvider services)
     {
         var (projectId, taskId) = await CreateInProgressTaskAsync(services);
 
@@ -60,7 +60,7 @@ public sealed class PerformanceEvaluationTests(SfManagementFixture fixture)
         return (projectId, taskId);
     }
 
-    private static async Task<(int ProjectId, int TaskId)> CreateProjectWithQueuedTaskAsync(IServiceProvider services)
+    private static async Task<(long ProjectId, long TaskId)> CreateProjectWithQueuedTaskAsync(IServiceProvider services)
     {
         var createProject = services.GetRequiredService<ICommandHandler<CreateProjectCommand>>();
         var projectCmd = new CreateProjectCommand("Eval Test Project", null);

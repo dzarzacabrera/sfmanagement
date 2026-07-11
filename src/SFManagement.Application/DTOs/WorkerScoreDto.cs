@@ -1,7 +1,7 @@
 namespace SFManagement.Application.DTOs;
 
 public record WorkerScoreDto(
-    int Id,
+    long Id,
     string Name,
     string Role,
     double CompatibilityScore,

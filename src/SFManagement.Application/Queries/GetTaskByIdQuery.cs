@@ -2,7 +2,7 @@ using SFManagement.Application.DTOs;
 
 namespace SFManagement.Application.Queries;
 
-public record GetTaskByIdQuery(int TaskId);
+public record GetTaskByIdQuery(long TaskId);
 
 public interface IGetTaskByIdQueryHandler
 {

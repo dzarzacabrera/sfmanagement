@@ -20,7 +20,7 @@ public class ProjectController : Controller
     {
         var projects = await handler.HandleAsync(new GetAllProjectsQuery());
 
-        var availableWorkersPerProject = new Dictionary<int, bool>();
+        var availableWorkersPerProject = new Dictionary<long, bool>();
         await using (var conn = await connFactory.GetOpenConnectionAsync())
         await using (var cmd = conn.CreateCommand())
         {
@@ -28,7 +28,7 @@ public class ProjectController : Controller
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                var pid = reader.GetInt32(0);
+                var pid = reader.GetInt64(0);
                 var available = reader.GetInt64(1) > 0;
                 availableWorkersPerProject[pid] = available;
             }
