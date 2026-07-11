@@ -54,18 +54,11 @@
 </form>
 
 <script>
-    window.__taskSkills = @Html.Raw(ViewBag.TaskSkillsJson ?? "[]");
-    document.addEventListener('DOMContentLoaded', function () {
-        var container = document.querySelector('.skill-selector');
-        if (!container || !window.__taskSkills) return;
-        window.__taskSkills.forEach(function (s) {
-            var pill = container.querySelector('.skill-pill[data-pos="' + s.pos + '"]');
-            if (pill) pill.click();
-            var input = container.querySelector('.skill-selected-item[data-pos="' + s.pos + '"] .skill-level');
-            if (input) {
-                input.value = s.level;
-                input.dispatchEvent(new Event('change'));
-            }
-        });
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (this.querySelectorAll('input[name="skillPositions"]').length === 0) {
+            e.preventDefault();
+            window.showToast('Please select at least one required skill.', 'error');
+        }
     });
 </script>
+

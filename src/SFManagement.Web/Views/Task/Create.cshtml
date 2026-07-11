@@ -54,7 +54,7 @@
     document.querySelector('form').addEventListener('submit', function(e) {
         if (this.querySelectorAll('input[name="skillPositions"]').length === 0) {
             e.preventDefault();
-            window.showToast('error', 'Please select at least one required skill.');
+            window.showToast('Please select at least one required skill.', 'error');
         }
     });
 </script>

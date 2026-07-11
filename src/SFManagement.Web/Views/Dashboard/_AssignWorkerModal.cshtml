@@ -23,7 +23,7 @@
 }
 
 <div class="flex flex-col h-full">
-    <div class="shrink-0">
+    <div class="shrink-0 pr-12">
         <div class="flex items-center gap-2 mb-4">
             <span class="text-sm sm:text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0
                 @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
@@ -34,7 +34,9 @@
             </span>
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate">@Model.TaskTitle</h2>
         </div>
+    </div>
 
+    <div class="flex flex-col flex-1 min-h-0">
         @if (!string.IsNullOrEmpty(Model.Description))
         {
             <p class="text-base sm:text-sm text-gray-500 mb-3 line-clamp-4 dark:text-gray-400 leading-relaxed">@Model.Description</p>
@@ -59,9 +61,8 @@
         <div class="border-t border-gray-200 dark:border-gray-700 my-3"></div>
 
         <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">Cosine Similarity Ranking</h3>
-    </div>
 
-    <form id="assignForm" class="flex-1 overflow-y-auto min-h-0 space-y-3">
+        <form id="assignForm" class="flex-1 overflow-y-auto min-h-0 space-y-3">
     <input type="hidden" name="taskIdEncrypted" value="@Model.TaskIdEncrypted">
     @foreach (var worker in Model.Workers)
     {
@@ -129,4 +130,5 @@
         </div>
     }
 </form>
+    </div>
 </div>

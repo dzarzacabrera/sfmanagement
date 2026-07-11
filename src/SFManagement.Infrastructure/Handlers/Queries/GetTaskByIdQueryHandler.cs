@@ -23,12 +23,13 @@ internal sealed class GetTaskByIdQueryHandler(INpgsqlConnectionFactory connectio
         cmd.Parameters.Add(new() { Value = query.TaskId });
 
         TaskDto? task = null;
+        float[] vector = [];
         await using (var reader = await cmd.ExecuteReaderAsync())
         {
             if (await reader.ReadAsync())
             {
                 var m = new DataReaderMapper(reader);
-                var vector = m.GetVector("required_skills_vector");
+                vector = m.GetVector("required_skills_vector");
                 task = new TaskDto(
                     m.GetInt32("id"), m.GetInt32("project_id"),
                     m.GetString("title"), m.GetStringOrNull("description"),
@@ -41,8 +42,10 @@ internal sealed class GetTaskByIdQueryHandler(INpgsqlConnectionFactory connectio
 
         if (task is null) return null;
 
+        var catalogue = await LoadSkillsAsync(connection);
+        var skills = DecodeSkills(vector, catalogue);
         var assigned = await LoadAssignmentsAsync(connection, task.Id);
-        return task with { AssignedWorkers = assigned };
+        return task with { AssignedWorkers = assigned, Skills = skills };
 
     }
 
@@ -67,5 +70,39 @@ internal sealed class GetTaskByIdQueryHandler(INpgsqlConnectionFactory connectio
         }
 
         return result.Count > 0 ? result : null;
+    }
+
+    private static async Task<List<SkillDto>> LoadSkillsAsync(NpgsqlConnection connection)
+    {
+        await using var cmd = new NpgsqlCommand(
+            "SELECT id, name, vector_position, is_active FROM skills_catalogue ORDER BY vector_position", connection);
+        var skills = new List<SkillDto>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var m = new DataReaderMapper(reader);
+            var isActive = reader.GetFieldValue<bool>(reader.GetOrdinal("is_active"));
+            skills.Add(new SkillDto(
+                m.GetInt32("id"),
+                m.GetString("name"),
+                m.GetInt32("vector_position"),
+                isActive));
+        }
+        return skills;
+    }
+
+    private static List<TaskSkillDto> DecodeSkills(float[] vector, List<SkillDto> catalogue)
+    {
+        var result = new List<TaskSkillDto>();
+        for (int i = 0; i < vector.Length; i++)
+        {
+            if (vector[i] > 0)
+            {
+                var skill = catalogue.FirstOrDefault(s => s.VectorPosition == i);
+                var name = skill?.Name ?? $"Skill #{i}";
+                result.Add(new TaskSkillDto(name, i, vector[i]));
+            }
+        }
+        return result;
     }
 }

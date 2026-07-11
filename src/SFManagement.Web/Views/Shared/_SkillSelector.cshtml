@@ -5,7 +5,7 @@
     var skillsJson = JsonSerializer.Serialize(Model.Select(s => new { id = s.Id, name = s.Name, vectorPosition = s.VectorPosition, isActive = s.IsActive }));
 }
 
-<div class="skill-selector" data-field-prefix="@(ViewBag.SkillFieldPrefix ?? "")" data-skills='@skillsJson'>
+<div class="skill-selector" data-field-prefix="@(ViewBag.SkillFieldPrefix ?? "")" data-skills='@skillsJson' data-initial-skills='@(ViewBag.InitialSkillsJson ?? "[]")'>
     <input type="text" class="skill-filter w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3 focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
            placeholder="Search skills...">
 
