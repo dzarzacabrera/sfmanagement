@@ -30,11 +30,6 @@
         .dark .sidebar-link:hover { background: rgba(33,102,143,0.15); }
         .dark .sidebar-link.active { background: rgba(33,102,143,0.2); }
         .dark .modal-backdrop { background: rgba(0,0,0,0.6); }
-        #modal-content > :first-child { padding-right: 3rem; }
-        @@media (min-width: 640px) {
-            #modal-content { padding-right: 3rem; }
-            #modal-content > :first-child { padding-right: 0; }
-        }
         @@media (max-width: 1023px) {
             #sidebar { transition: transform 0.3s ease-in-out; }
             body.sidebar-open #sidebar { transform: translateX(0); }
@@ -131,12 +126,12 @@
 
     <div id="modal-root" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4">
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg lg:max-w-3xl xl:max-w-4xl dark:bg-gray-800 dark:text-gray-100">
-            <button type="button" onclick="closeModal()" class="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white dark:bg-gray-800 shadow-sm text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors" aria-label="Close">
+            <button type="button" onclick="closeModal()" class="absolute top-3 right-3 z-20 p-1.5 rounded-full bg-white dark:bg-gray-800 shadow-sm text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors" aria-label="Close">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
-            <div id="modal-content" class="p-6 h-[85vh] sm:h-[75vh]"></div>
+            <div id="modal-content" class="p-6 h-[85vh] sm:h-[75vh] max-h-[90vh] overflow-y-auto"></div>
         </div>
     </div>
 

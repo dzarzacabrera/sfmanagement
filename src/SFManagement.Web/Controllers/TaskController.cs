@@ -115,7 +115,7 @@ public class TaskController : Controller
         };
 
         var skillsJson = task.Skills?.Select(s => new { pos = s.SkillPosition, level = (double)s.RequiredLevel });
-        ViewBag.TaskSkillsJson = System.Text.Json.JsonSerializer.Serialize(skillsJson ?? Enumerable.Empty<object>());
+        ViewBag.InitialSkillsJson = System.Text.Json.JsonSerializer.Serialize(skillsJson ?? Enumerable.Empty<object>());
 
         var encryptedPid = enc.Encrypt(task.ProjectId);
         return View(new EditTaskViewModel(

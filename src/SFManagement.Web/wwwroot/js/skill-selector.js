@@ -13,6 +13,16 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
 
     var selected = new Map();
 
+    // Pre-populate selected from initial-skills (used when editing a task)
+    var initialSkills = [];
+    try {
+        var raw = container.dataset.initialSkills;
+        if (raw && raw !== '[]') initialSkills = JSON.parse(raw);
+    } catch (e) { }
+    initialSkills.forEach(function (s) {
+        selected.set(s.pos, s.level);
+    });
+
     function render() {
         var filter = filterInput.value.toLowerCase();
 
@@ -36,7 +46,7 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
             selectedHtml += '<div class="skill-selected-item flex items-center gap-1 px-2 rounded-lg border border-brand-dark/30 bg-brand-light/20 h-[40px] min-w-0" data-pos="' + pos + '">';
             selectedHtml += '<span class="skill-selected-pill text-xs font-medium text-brand flex-1 min-w-0 truncate">' + name + '</span>';
             selectedHtml += '<input type="number" class="skill-level w-12 border border-gray-300 rounded px-1 py-1 text-xs text-center" min="0" max="10" step="0.5" value="' + level + '">';
-            selectedHtml += '<button type="button" class="skill-remove text-gray-400 hover:text-red-500 text-xl font-bold px-1 flex items-center">&times;</button>';
+            selectedHtml += '<button type="button" class="skill-remove text-gray-400 hover:text-red-500 text-xl font-bold px-1 flex items-center' + (selected.size <= 1 ? ' hidden' : '') + '">&times;</button>';
             selectedHtml += '</div>';
         });
         selectedBox.innerHTML = selectedHtml;
