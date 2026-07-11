@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using SFManagement.Application.Abstractions;
@@ -137,7 +138,7 @@ public class TaskController : Controller
         [FromForm] string? description,
         [FromForm] string criticality,
         [FromForm] int[] skillPositions,
-        [FromForm] float[] skillLevels,
+        [FromForm] string[] skillLevels,
         [FromServices] ICommandHandler<UpdateTaskCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
@@ -145,14 +146,17 @@ public class TaskController : Controller
         if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return NotFound();
 
         skillPositions = skillPositions ?? [];
-        skillLevels = skillLevels ?? [];
+
+        var parsed = new float[skillLevels?.Length ?? 0];
+        for (int i = 0; i < (skillLevels?.Length ?? 0); i++)
+            float.TryParse(skillLevels![i], NumberStyles.Float, CultureInfo.InvariantCulture, out parsed[i]);
 
         var vector = new float[1024];
-        for (int i = 0; i < skillPositions.Length && i < skillLevels.Length; i++)
+        for (int i = 0; i < skillPositions.Length && i < parsed.Length; i++)
         {
             var pos = skillPositions[i];
             if (pos >= 0 && pos < 1024)
-                vector[pos] = Math.Clamp(skillLevels[i], 0.0f, 10.0f);
+                vector[pos] = Math.Clamp(parsed[i], 0.0f, 10.0f);
         }
 
         var command = new UpdateTaskCommand(
@@ -180,19 +184,21 @@ public class TaskController : Controller
         [FromForm] string? description,
         [FromForm] string criticality,
         [FromForm] int[] skillPositions,
-        [FromForm] float[] skillLevels,
+        [FromForm] string[] skillLevels,
         [FromServices] ICommandHandler<CreateTaskCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
         if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return NotFound();
         skillPositions = skillPositions ?? [];
-        skillLevels = skillLevels ?? [];
+        var parsed = new float[skillLevels?.Length ?? 0];
+        for (int i = 0; i < (skillLevels?.Length ?? 0); i++)
+            float.TryParse(skillLevels![i], NumberStyles.Float, CultureInfo.InvariantCulture, out parsed[i]);
         var vector = new float[1024];
-        for (int i = 0; i < skillPositions.Length && i < skillLevels.Length; i++)
+        for (int i = 0; i < skillPositions.Length && i < parsed.Length; i++)
         {
             var pos = skillPositions[i];
             if (pos >= 0 && pos < 1024)
-                vector[pos] = Math.Clamp(skillLevels[i], 0.0f, 10.0f);
+                vector[pos] = Math.Clamp(parsed[i], 0.0f, 10.0f);
         }
 
         var command = new CreateTaskCommand(

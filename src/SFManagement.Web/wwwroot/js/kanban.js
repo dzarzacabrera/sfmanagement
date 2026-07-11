@@ -165,6 +165,10 @@ function updateSliderPreview(input) {
     var valEl = document.getElementById('val-' + pos);
     if (valEl) valEl.textContent = val.toFixed(1);
 
+    // Fill left portion of slider with brand color
+    var pct = (val / 10) * 100;
+    input.style.background = 'linear-gradient(to right, #21668f 0%, #21668f ' + pct + '%, #dbeafe ' + pct + '%, #dbeafe 100%)';
+
     var basePoints = val / 10.0 - 0.5;
     var bpHidden = document.getElementById('bp-' + pos);
     if (bpHidden) bpHidden.value = Math.round(basePoints * 10000);

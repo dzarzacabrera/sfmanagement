@@ -45,7 +45,7 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
             var name = skill ? skill.name : 'Skill #' + pos;
             selectedHtml += '<div class="skill-selected-item flex items-center gap-1 px-2 rounded-lg border border-brand-dark/30 bg-brand-light/20 h-[40px] min-w-0" data-pos="' + pos + '">';
             selectedHtml += '<span class="skill-selected-pill text-xs font-medium text-brand flex-1 min-w-0 truncate">' + name + '</span>';
-            selectedHtml += '<input type="number" class="skill-level w-12 border border-gray-300 rounded px-1 py-1 text-xs text-center" min="0" max="10" step="0.5" value="' + level + '">';
+            selectedHtml += '<input type="number" class="skill-level w-16 border border-gray-300 rounded px-1 py-1 text-xs text-center" min="0" max="10" step="any" value="' + level + '">';
             selectedHtml += '<button type="button" class="skill-remove text-gray-400 hover:text-red-500 text-xl font-bold px-1 flex items-center' + (selected.size <= 1 ? ' hidden' : '') + '">&times;</button>';
             selectedHtml += '</div>';
         });
@@ -97,7 +97,26 @@ document.querySelectorAll('.skill-selector').forEach(function (container) {
         var pos = parseInt(item.dataset.pos);
         var val = parseFloat(input.value);
         if (isNaN(val)) val = 0;
-        selected.set(pos, Math.min(10, Math.max(0, val)));
+        var newVal = Math.min(10, Math.max(0, Math.round(val * 100) / 100));
+        if (Math.abs(newVal - selected.get(pos)) < 0.001) return;
+        selected.set(pos, newVal);
+        render();
+    });
+
+    // Arrow keys step by 0.5 on skill-level inputs
+    selectedBox.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+        var input = e.target.closest('.skill-level');
+        if (!input) return;
+        e.preventDefault();
+        var item = input.closest('.skill-selected-item');
+        var pos = parseInt(item.dataset.pos);
+        var val = parseFloat(input.value);
+        if (isNaN(val)) val = 0;
+        var step = e.key === 'ArrowUp' ? 0.5 : -0.5;
+        var newVal = Math.min(10, Math.max(0, Math.round((val + step) * 100) / 100));
+        if (Math.abs(newVal - selected.get(pos)) < 0.001) return;
+        selected.set(pos, newVal);
         render();
     });
 

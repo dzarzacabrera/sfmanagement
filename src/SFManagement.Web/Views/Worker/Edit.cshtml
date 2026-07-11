@@ -1,6 +1,6 @@
 <h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Edit Worker</h1>
 
-<form method="post" class="max-w-2xl space-y-4 dark:text-gray-100">
+<form method="post" class="max-w-2xl space-y-4 dark:text-gray-100" data-evaluated-positions='@(ViewBag.EvaluatedSkillPositionsJson ?? "[]")'>
     <input type="hidden" name="workerIdEncrypted" value="@Model.WorkerIdEncrypted">
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -32,13 +32,143 @@
             Cancel
         </a>
     </div>
+
+    <input type="hidden" name="confirmedSkillEdit" value="false">
 </form>
 
 <script>
     document.querySelector('form').addEventListener('submit', function(e) {
+        // Sync visible skill levels to hidden inputs before anything else
+        document.querySelectorAll('.skill-selected-item').forEach(function(item) {
+            var pos = parseInt(item.dataset.pos);
+            var lvlInput = item.querySelector('.skill-level');
+            if (!lvlInput) return;
+            var val = parseFloat(lvlInput.value);
+            if (isNaN(val)) val = 0;
+            val = Math.min(10, Math.max(0, Math.round(val * 100) / 100));
+            var hid = document.querySelector('input[type="hidden"][name="skillLevels"]');
+            // Find the right hidden input by matching index with skillPositions
+            var posHids = document.querySelectorAll('input[type="hidden"][name="skillPositions"]');
+            var lvlHids = document.querySelectorAll('input[type="hidden"][name="skillLevels"]');
+            posHids.forEach(function(ph, i) {
+                if (parseInt(ph.value) === pos && lvlHids[i]) lvlHids[i].value = val;
+            });
+        });
+
         if (this.querySelectorAll('input[name="skillPositions"]').length === 0) {
             e.preventDefault();
             window.showToast('Please select at least one skill.', 'error');
+            return;
         }
+
+        var confirmedHid = this.querySelector('input[name="confirmedSkillEdit"]');
+        if (confirmedHid && confirmedHid.value === 'true') return;
+
+        var evaluatedRaw = this.dataset.evaluatedPositions;
+        if (!evaluatedRaw || evaluatedRaw === '[]') return;
+
+        var evaluatedPositions;
+        try { evaluatedPositions = JSON.parse(evaluatedRaw); } catch (ex) { return; }
+        if (evaluatedPositions.length === 0) return;
+
+        var allPositions = [];
+        var allLevels = [];
+        this.querySelectorAll('input[name="skillPositions"]').forEach(function(inp) {
+            allPositions.push(parseInt(inp.value));
+        });
+        // Read levels from visible inputs (always has latest user input)
+        var levelByPos = {};
+        document.querySelectorAll('.skill-selected-item').forEach(function(item) {
+            var p = parseInt(item.dataset.pos);
+            var lvl = item.querySelector('.skill-level');
+            if (lvl) levelByPos[p] = parseFloat(lvl.value);
+        });
+        allPositions.forEach(function(pos) {
+            allLevels.push(levelByPos[pos] !== undefined ? levelByPos[pos] : 0);
+        });
+
+        var initialSkills = [];
+        var sel = document.querySelector('.skill-selector');
+        if (sel) {
+            try { initialSkills = JSON.parse(sel.dataset.initialSkills || '[]'); } catch (ex) {}
+        }
+
+        var changedWithEval = [];
+        allPositions.forEach(function(pos, idx) {
+            if (evaluatedPositions.indexOf(pos) === -1) return;
+            var orig = initialSkills.find(function(s) { return s.pos === pos; });
+            var origLevel = orig ? orig.level : 0;
+            var newLevel = allLevels[idx];
+            if (Math.abs(origLevel - newLevel) > 0.001) {
+                changedWithEval.push(pos);
+            }
+        });
+        if (changedWithEval.length === 0) return;
+
+        e.preventDefault();
+
+        var skillsData = [];
+        if (sel) {
+            try { skillsData = JSON.parse(sel.dataset.skills || '[]'); } catch (ex) {}
+        }
+        var names = changedWithEval.map(function(p) {
+            var s = skillsData.find(function(sk) { return sk.vectorPosition === p; });
+            return s ? s.name : 'Skill #' + p;
+        });
+
+        showConfirmEvalDialog(names, function () {
+            confirmedHid.value = 'true';
+            document.querySelector('form').submit();
+        });
     });
+</script>
+
+<script>
+    function showConfirmEvalDialog(skillNames, onConfirm) {
+        var overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/40 transition-opacity duration-200';
+        overlay.style.opacity = '0';
+
+        var dialog = document.createElement('div');
+        dialog.className = 'bg-white rounded-xl shadow-2xl p-6 max-w-sm mx-4 w-full transition-all duration-200 scale-95 dark:bg-gray-800';
+        dialog.style.transform = 'scale(0.95)';
+
+        dialog.innerHTML =
+            '<div class="flex items-start gap-3 mb-4">' +
+                '<div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0 dark:bg-amber-900/40">' +
+                    '<svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>' +
+                '</div>' +
+                '<div class="flex-1 min-w-0">' +
+                    '<p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Skills with evaluations</p>' +
+                    '<p class="text-sm text-gray-600 mt-1 dark:text-gray-400">The following skills have existing evaluation records. Editing them will create new evaluation entries in the worker history.</p>' +
+                '</div>' +
+            '</div>' +
+            '<div class="mb-4 flex flex-wrap gap-1.5">' +
+                skillNames.map(function (n) {
+                    return '<span class="inline-block px-2.5 py-1 rounded-md text-xs font-medium bg-brand-light/40 text-brand dark:bg-brand-deep dark:text-brand">' + n + '</span>';
+                }).join('') +
+            '</div>' +
+            '<div class="flex gap-2 justify-end">' +
+                '<button type="button" class="cancel-btn px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Cancel</button>' +
+                '<button type="button" class="confirm-btn px-4 py-2 rounded-lg text-sm font-medium bg-brand text-white hover:bg-brand-deep transition-colors">Continue</button>' +
+            '</div>';
+
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(function () {
+            overlay.style.opacity = '1';
+            dialog.style.transform = 'scale(1)';
+        });
+
+        function close() {
+            overlay.style.opacity = '0';
+            dialog.style.transform = 'scale(0.95)';
+            setTimeout(function () { overlay.remove(); }, 200);
+        }
+
+        dialog.querySelector('.confirm-btn').addEventListener('click', function () { close(); if (onConfirm) onConfirm(); });
+        dialog.querySelector('.cancel-btn').addEventListener('click', close);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    }
 </script>

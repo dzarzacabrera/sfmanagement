@@ -18,7 +18,7 @@ internal sealed class GetAllWorkersQueryHandler(INpgsqlConnectionFactory connect
             "(SELECT COUNT(*) FROM performance_evaluations WHERE worker_id = w.id) AS evaluation_count, " +
             "(SELECT COUNT(*) FROM task_assignments ta " +
             "INNER JOIN tasks t ON t.id = ta.task_id " +
-            "WHERE ta.worker_id = w.id AND t.status <> 'Finish') AS active_task_count " +
+            "WHERE ta.worker_id = w.id AND t.status NOT IN ('Finish', 'Archived')) AS active_task_count " +
             "FROM workers w ORDER BY w.id", connection);
         await using var reader = await cmd.ExecuteReaderAsync();
 

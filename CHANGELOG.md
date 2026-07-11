@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-07-11
+
+### Added
+
+- **Worker detail skills display:**
+  - Added skills section below worker name in `Views/Worker/Detail.cshtml` matching Index card style (skill bar + name + value) with all skills visible (no "show more").
+  - `WorkerController.Detail` GET action now injects `IGetAllSkillsQueryHandler` and passes `ViewBag.AllSkills` and `ViewBag.WorkerSkillsVector`.
+- **Skill level decimal input:**
+  - `skill-selector.js`: changed `step="0.5"` to `step="any"` for manual decimal entry (up to 2 decimals) while keeping arrow-key stepping at 0.5 via custom `keydown` handler.
+  - Input width increased from `w-12` to `w-16` to accommodate wider values.
+- **Worker edit evaluation confirmation:**
+  - `WorkerController.Edit` GET: passes `ViewBag.EvaluatedSkillPositionsJson` with distinct skill position IDs that have existing evaluations.
+  - `Worker.Edit.cshtml`: on form submit, JS checks if any modified skills have evaluations; shows `confirm()` dialog listing affected skill names; on confirmation, resubmits with `confirmedSkillEdit=true`.
+  - `WorkerController.Edit` POST: when `confirmedSkillEdit=true` and modified skills have evaluations, fetches old worker vector, creates/gets "Manual Adjustment" project and "User Skill Edit" task, then inserts `performance_evaluations` records with `criticality='low'` for each modified evaluated skill. Rating and base points are derived from the delta (new - old).
+- **Active task count now excludes Archived tasks:**
+  - `GetAllWorkersQueryHandler`, `GetWorkersByProjectQueryHandler`, `GetWorkersNotInProjectQueryHandler`: changed `t.status <> 'Finish'` to `t.status NOT IN ('Finish', 'Archived')` in the `active_task_count` subquery, matching the Detail page task list filter.
+
+### Changed
+
+- **Worker detail view refactored:** Added `@using System.Linq` and dynamic skills rendering block before Assigned Tasks section.
+
 ## [0.6.0] - 2026-06-28
 
 ### Added
