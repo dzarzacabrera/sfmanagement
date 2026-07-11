@@ -35,7 +35,7 @@ internal sealed class GetWorkerHistoryQueryHandler(INpgsqlConnectionFactory conn
                 mapper.GetString("task_title"),
                 mapper.GetString("skill_name"),
                 mapper.GetInt32("skill_position"),
-                mapper.GetEnum<PerformanceRating>("rating"),
+                mapper.GetDouble("rating"),
                 mapper.GetEnum<Criticality>("criticality"),
                 mapper.GetDouble("base_points"),
                 mapper.GetDouble("impact"),

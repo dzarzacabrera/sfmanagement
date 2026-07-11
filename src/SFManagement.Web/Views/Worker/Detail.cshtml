@@ -84,15 +84,7 @@ else
                         <td class="px-4 py-2 text-gray-500 dark:text-gray-300">@eval.CreatedAt.ToString("g")</td>
                         <td class="px-4 py-2 dark:text-gray-300">@eval.TaskTitle</td>
                         <td class="px-4 py-2 dark:text-gray-300">@eval.SkillName</td>
-                        <td class="px-4 py-2 dark:text-gray-300">
-                            <span class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
-                                @(eval.Rating == PerformanceRating.Excellent ? "bg-green-100 text-green-700" :
-                                  eval.Rating == PerformanceRating.Good ? "bg-blue-100 text-blue-700" :
-                                  eval.Rating == PerformanceRating.Average ? "bg-gray-100 text-gray-600" :
-                                  "bg-red-100 text-red-700")">
-                                @eval.Rating
-                            </span>
-                        </td>
+                        <td class="px-4 py-2 font-mono dark:text-gray-300">@eval.Rating.ToString("0.00")</td>
                         <td class="px-4 py-2 font-mono dark:text-gray-300">@eval.BasePoints.ToString("+0.00;-0.00")</td>
                         <td class="px-4 py-2 dark:text-gray-300">@eval.Criticality</td>
                         <td class="px-4 py-2 font-mono dark:text-gray-300 @(eval.Impact >= 0 ? "text-green-600" : "text-red-600")">

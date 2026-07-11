@@ -18,10 +18,7 @@ DO $$ BEGIN
     CREATE TYPE criticality AS ENUM ('low', 'medium', 'high', 'critical');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
-DO $$ BEGIN
-    CREATE TYPE performance_rating AS ENUM ('Poor', 'Average', 'Good', 'Excellent');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
+
 DO $$ BEGIN
     ALTER TYPE task_status ADD VALUE IF NOT EXISTS 'Archived';
 EXCEPTION WHEN duplicate_object THEN NULL;
@@ -92,7 +89,7 @@ CREATE TABLE IF NOT EXISTS performance_evaluations (
     task_id           INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
     worker_id         INT NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
     skill_position    INT NOT NULL,
-    rating            performance_rating NOT NULL,
+    rating            DOUBLE PRECISION NOT NULL,
     criticality       criticality NOT NULL,
     base_points       DOUBLE PRECISION NOT NULL,
     impact            DOUBLE PRECISION NOT NULL,

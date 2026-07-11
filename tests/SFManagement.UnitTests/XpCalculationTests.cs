@@ -18,23 +18,11 @@ public class XpCalculationTests
     }
 
     [Theory]
-    [InlineData(PerformanceRating.Poor, -0.5)]
-    [InlineData(PerformanceRating.Average, 0.0)]
-    [InlineData(PerformanceRating.Good, 0.2)]
-    [InlineData(PerformanceRating.Excellent, 0.5)]
-    public void PerformanceRating_ToBasePoints_ReturnsCorrectValue(PerformanceRating rating, double expected)
+    [InlineData(-0.5, Criticality.High, -0.75)]
+    [InlineData(0.2, Criticality.Critical, 0.4)]
+    [InlineData(0.5, Criticality.Low, 0.25)]
+    public void Impact_BasePointsTimesMultiplier_IsCorrect(double basePoints, Criticality criticality, double expectedImpact)
     {
-        var result = rating.ToBasePoints();
-        result.Should().Be(expected);
-    }
-
-    [Theory]
-    [InlineData(PerformanceRating.Poor, Criticality.High, -0.75)]
-    [InlineData(PerformanceRating.Good, Criticality.Critical, 0.4)]
-    [InlineData(PerformanceRating.Excellent, Criticality.Low, 0.25)]
-    public void Impact_BasePointsTimesMultiplier_IsCorrect(PerformanceRating rating, Criticality criticality, double expectedImpact)
-    {
-        var basePoints = rating.ToBasePoints();
         var multiplier = SkillVector.CalculateCriticalityMultiplier(criticality);
         var impact = basePoints * multiplier;
         impact.Should().Be(expectedImpact);
