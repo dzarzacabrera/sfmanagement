@@ -3,6 +3,16 @@
     ViewBag.ProjectIdEncrypted = Model.ProjectIdEncrypted;
 }
 
+<style>
+    @@keyframes pulse-add-worker {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59,130,246,.4); }
+        50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(59,130,246,0); }
+    }
+    .pulse-add-worker {
+        animation: pulse-add-worker 1.2s ease-in-out 3;
+    }
+</style>
+
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6 dark:bg-gray-800">
     <h1 class="text-2xl font-bold text-brand dark:text-white">@Model.ProjectName</h1>
     <div class="flex gap-2">
@@ -10,15 +20,26 @@
            class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep">
             + New Task
         </a>
-        <button onclick="openAddWorkerPopup('@Model.ProjectIdEncrypted')"
-                class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-            Add Worker
-        </button>
+        @if (Model.HasWorkersToAssignToProject)
+        {
+            <button id="btn-add-worker" onclick="openAddWorkerPopup('@Model.ProjectIdEncrypted')"
+                    class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 @(!Model.HasProjectWorkers ? "pulse-add-worker" : "")">
+                Add Worker
+            </button>
+        }
     </div>
 </div>
 
 <script>
     window.__dashboardProjectIdEncrypted = '@Model.ProjectIdEncrypted';
+    (function() {
+        var btn = document.getElementById('btn-add-worker');
+        if (btn && btn.classList.contains('pulse-add-worker')) {
+            btn.addEventListener('animationend', function() {
+                btn.classList.remove('pulse-add-worker');
+            }, { once: true });
+        }
+    })();
 </script>
 
 <div id="kanban-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

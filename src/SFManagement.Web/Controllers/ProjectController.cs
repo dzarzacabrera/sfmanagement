@@ -5,6 +5,7 @@ using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
 using SFManagement.Application.DTOs;
 using SFManagement.Application.Queries;
+using SFManagement.Infrastructure.Data;
 using SFManagement.Web.ViewModels;
 
 namespace SFManagement.Web.Controllers;
@@ -14,9 +15,26 @@ public class ProjectController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(
         [FromServices] IGetAllProjectsQueryHandler handler,
-        [FromServices] IIdEncryptionService enc)
+        [FromServices] IIdEncryptionService enc,
+        [FromServices] INpgsqlConnectionFactory connFactory)
     {
         var projects = await handler.HandleAsync(new GetAllProjectsQuery());
+
+        var availableWorkersPerProject = new Dictionary<int, bool>();
+        await using (var conn = await connFactory.GetOpenConnectionAsync())
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = "SELECT p.id, (SELECT COUNT(1) FROM workers WHERE id NOT IN (SELECT worker_id FROM project_workers WHERE project_id = p.id)) AS available FROM projects p";
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var pid = reader.GetInt32(0);
+                var available = reader.GetInt64(1) > 0;
+                availableWorkersPerProject[pid] = available;
+            }
+        }
+
+        ViewBag.AvailableWorkersPerProject = availableWorkersPerProject;
         ViewBag.PageTitle = "Projects";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "") };
         return View(projects.Select(p => p with { IdEncrypted = enc.Encrypt(p.Id) }).ToList());
@@ -85,13 +103,24 @@ public class ProjectController : Controller
         [FromQuery] string projectId,
         [FromServices] IGetAllProjectsQueryHandler projectHandler,
         [FromServices] IGetWorkersByProjectQueryHandler workersHandler,
-        [FromServices] IIdEncryptionService enc)
+        [FromServices] IIdEncryptionService enc,
+        [FromServices] INpgsqlConnectionFactory connFactory)
     {
         if (!enc.TryDecrypt(projectId, out var pid)) return NotFound();
         var projects = await projectHandler.HandleAsync(new GetAllProjectsQuery());
         var project = projects.FirstOrDefault(p => p.Id == pid);
 
         var workers = await workersHandler.HandleAsync(new GetWorkersByProjectQuery(pid));
+
+        var hasWorkersToAssignToProject = true;
+        await using (var conn = await connFactory.GetOpenConnectionAsync())
+        await using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = "SELECT COUNT(1) FROM workers WHERE id NOT IN (SELECT worker_id FROM project_workers WHERE project_id = $1)";
+            cmd.Parameters.Add(new() { Value = pid });
+            var available = (long)(await cmd.ExecuteScalarAsync() ?? 0);
+            hasWorkersToAssignToProject = available > 0;
+        }
 
         ViewBag.PageTitle = $"Project #{pid}";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new($"Project #{pid}", "") };
@@ -100,7 +129,8 @@ public class ProjectController : Controller
             pid,
             project?.Name ?? $"Project #{pid}",
             project?.DescriptionMd,
-            workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList())
+            workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList(),
+            hasWorkersToAssignToProject)
         {
             IdEncrypted = projectId
         };

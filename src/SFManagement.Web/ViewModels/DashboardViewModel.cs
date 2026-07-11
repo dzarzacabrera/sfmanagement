@@ -10,7 +10,9 @@ public record DashboardViewModel(
     IReadOnlyList<TaskCardDto> QueuedTasks,
     IReadOnlyList<TaskCardDto> InProgressTasks,
     IReadOnlyList<TaskCardDto> BlockedTasks,
-    IReadOnlyList<TaskCardDto> FinishedTasks)
+    IReadOnlyList<TaskCardDto> FinishedTasks,
+    bool HasProjectWorkers = true,
+    bool HasWorkersToAssignToProject = true)
 {
     public string ProjectIdEncrypted { get; init; } = "";
 }

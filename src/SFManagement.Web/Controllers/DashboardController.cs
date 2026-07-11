@@ -19,7 +19,8 @@ public class DashboardController : Controller
         [FromQuery] string? projectId,
         [FromServices] IGetDashboardTasksQueryHandler handler,
         [FromServices] IGetAllProjectsQueryHandler projectsHandler,
-        [FromServices] IIdEncryptionService enc)
+        [FromServices] IIdEncryptionService enc,
+        [FromServices] INpgsqlConnectionFactory connFactory)
     {
         if (projectId == null || !enc.TryDecrypt(projectId, out var pid))
         {
@@ -30,12 +31,34 @@ public class DashboardController : Controller
         var project = projects.FirstOrDefault(p => p.Id == pid);
         var projectName = project?.Name ?? $"Project #{pid}";
 
+        var hasProjectWorkers = true;
+        var hasWorkersToAssignToProject = true;
+        await using (var conn = await connFactory.GetOpenConnectionAsync())
+        {
+            await using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = "SELECT COUNT(1) FROM project_workers WHERE project_id = $1";
+                cmd.Parameters.Add(new() { Value = pid });
+                var count = (long)(await cmd.ExecuteScalarAsync() ?? 0);
+                hasProjectWorkers = count > 0;
+            }
+            await using (var cmd2 = conn.CreateCommand())
+            {
+                cmd2.CommandText = "SELECT COUNT(1) FROM workers WHERE id NOT IN (SELECT worker_id FROM project_workers WHERE project_id = $1)";
+                cmd2.Parameters.Add(new() { Value = pid });
+                var available = (long)(await cmd2.ExecuteScalarAsync() ?? 0);
+                hasWorkersToAssignToProject = available > 0;
+            }
+        }
+
         var vm = new DashboardViewModel(
             pid, projectName,
             tasks.Where(t => t.Status == ProjectTaskStatus.Queued).Select(t => MapToCard(t, enc)).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.InProgress).Select(t => MapToCard(t, enc)).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.Blocked).Select(t => MapToCard(t, enc)).ToList(),
-            tasks.Where(t => t.Status == ProjectTaskStatus.Finish).Select(t => MapToCard(t, enc)).ToList())
+            tasks.Where(t => t.Status == ProjectTaskStatus.Finish).Select(t => MapToCard(t, enc)).ToList(),
+            hasProjectWorkers,
+            hasWorkersToAssignToProject)
         {
             ProjectIdEncrypted = enc.Encrypt(pid)
         };

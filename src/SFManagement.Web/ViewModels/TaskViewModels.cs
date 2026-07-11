@@ -9,7 +9,8 @@ public record ProjectDetailViewModel(
     int Id,
     string Name,
     string? DescriptionMd,
-    IReadOnlyList<WorkerDto>? Workers = null)
+    IReadOnlyList<WorkerDto>? Workers = null,
+    bool HasWorkersToAssignToProject = true)
 {
     public string IdEncrypted { get; init; } = "";
 }
