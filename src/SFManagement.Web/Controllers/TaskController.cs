@@ -144,6 +144,9 @@ public class TaskController : Controller
         if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return NotFound();
         if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return NotFound();
 
+        skillPositions = skillPositions ?? [];
+        skillLevels = skillLevels ?? [];
+
         var vector = new float[1024];
         for (int i = 0; i < skillPositions.Length && i < skillLevels.Length; i++)
         {
@@ -182,6 +185,8 @@ public class TaskController : Controller
         [FromServices] IIdEncryptionService enc)
     {
         if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return NotFound();
+        skillPositions = skillPositions ?? [];
+        skillLevels = skillLevels ?? [];
         var vector = new float[1024];
         for (int i = 0; i < skillPositions.Length && i < skillLevels.Length; i++)
         {

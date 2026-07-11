@@ -109,7 +109,10 @@ public class WorkerController : Controller
         if (worker is null) return NotFound();
 
         var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(wid));
-        var vm = new WorkerHistoryViewModel(wid, worker.Name, evaluations);
+        var vm = new WorkerHistoryViewModel(wid, worker.Name, evaluations)
+        {
+            WorkerIdEncrypted = enc.Encrypt(wid)
+        };
 
         var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
         ViewBag.AllSkills = skills;
@@ -119,7 +122,7 @@ public class WorkerController : Controller
             .Select(s => new { pos = s.VectorPosition, level = Math.Round(worker.SkillsVector.ElementAtOrDefault(s.VectorPosition), 1) })
             .Where(s => s.level > 0)
             .ToList();
-        ViewBag.WorkerSkillsJson = JsonSerializer.Serialize(activeSkills);
+        ViewBag.InitialSkillsJson = JsonSerializer.Serialize(activeSkills);
 
         ViewBag.PageTitle = "Edit Worker";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "/Worker/Index"), new("Edit", "") };
