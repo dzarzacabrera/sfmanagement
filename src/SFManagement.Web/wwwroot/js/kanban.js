@@ -128,8 +128,8 @@ document.getElementById('modal-root').addEventListener('submit', function (e) {
                 openEvaluationModal(taskIdEnc, window.__dashboardProjectIdEncrypted || '');
             } else {
                 closeModal();
-                refreshTaskCard(taskIdEnc);
                 showToast('All evaluations submitted successfully', 'success');
+                setTimeout(function () { location.reload(); }, 300);
             }
         })
         .catch(function (err) {

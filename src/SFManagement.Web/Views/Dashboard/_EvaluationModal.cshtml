@@ -62,7 +62,7 @@
                                             onchange="reloadEvaluationPopup('@Model.TaskIdEncrypted', this.value)">
                                         @foreach (var w in Model.AssignedWorkers)
                                         {
-                                            <option value="@w.WorkerIdEncrypted" selected="@(w.WorkerIdEncrypted == Model.WorkerIdEncrypted)">@w.WorkerName</option>
+                                            <option value="@w.WorkerIdEncrypted" selected="@(w.WorkerId == Model.WorkerId)">@w.WorkerName</option>
                                         }
                                     </select>
                                 }
