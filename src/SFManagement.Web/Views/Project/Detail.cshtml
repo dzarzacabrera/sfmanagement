@@ -19,10 +19,13 @@
        class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">
         Add Task
     </a>
-    <button onclick="openAddWorkerPopup('@Model.IdEncrypted')"
-            class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-        Add Worker
-    </button>
+    @if (Model.HasWorkersToAssignToProject)
+    {
+        <button onclick="openAddWorkerPopup('@Model.IdEncrypted')"
+                class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            Add Worker
+        </button>
+    }
 </div>
 
 @if (Model.Workers?.Count > 0)

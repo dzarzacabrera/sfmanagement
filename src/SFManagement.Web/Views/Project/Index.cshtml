@@ -87,10 +87,17 @@ else
                        onclick="event.stopPropagation()">
                         + Task
                     </a>
-                    <button onclick="event.stopPropagation(); openAddWorkerPopup('@project.IdEncrypted')"
-                            class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap">
-                        Add Worker
-                    </button>
+                    @{
+                        var availMap = ViewBag.AvailableWorkersPerProject as Dictionary<int, bool>;
+                        var hasWorkers = availMap?.GetValueOrDefault(project.Id) ?? true;
+                    }
+                    @if (hasWorkers)
+                    {
+                        <button onclick="event.stopPropagation(); openAddWorkerPopup('@project.IdEncrypted')"
+                                class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap">
+                            Add Worker
+                        </button>
+                    }
                 </div>
             </div>
         }

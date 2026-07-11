@@ -22,147 +22,154 @@
     }
 }
 
-@if (Model.AssignedWorkers?.Count > 0)
-{
-    <div class="flex items-center gap-2 mb-4">
-        <span class="text-sm sm:text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0
-            @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
-              Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
-              Model.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-200" :
-              "bg-gray-50 text-gray-600 border border-gray-200")">
-            @Model.Criticality
-        </span>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate">@Model.TaskTitle</h2>
-    </div>
-
-    @if (!string.IsNullOrEmpty(Model.Description))
+<div class="flex flex-col h-full">
+    @if (Model.AssignedWorkers?.Count > 0)
     {
-        <p class="text-base sm:text-sm text-gray-500 mb-4 line-clamp-4 dark:text-gray-400 leading-relaxed">@Model.Description</p>
-    }
+        <div class="shrink-0">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-sm sm:text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0
+                    @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
+                      Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
+                      Model.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-200" :
+                      "bg-gray-50 text-gray-600 border border-gray-200")">
+                    @Model.Criticality
+                </span>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate">@Model.TaskTitle</h2>
+            </div>
 
-    <form id="evaluationForm" data-crit-multiplier="@multiplier.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)">
-        <input type="hidden" name="taskIdEncrypted" value="@Model.TaskIdEncrypted">
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="text-base sm:text-sm text-gray-500 mb-4 line-clamp-4 dark:text-gray-400 leading-relaxed">@Model.Description</p>
+            }
+        </div>
 
-        <div class="flex flex-col lg:flex-row gap-6">
-            @* LEFT COLUMN *@
-            <div class="flex-1 min-w-0">
-                @* Worker row *@
-                <div class="flex items-start gap-4 mb-5">
-                    <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-600 mb-1 dark:text-gray-400">Worker</label>
-                        @if (Model.AssignedWorkers.Count > 1)
-                        {
-                            <select id="evalWorkerSelect" name="workerIdEncrypted" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                                    onchange="reloadEvaluationPopup('@Model.TaskIdEncrypted', this.value)">
-                                @foreach (var w in Model.AssignedWorkers)
+        <form id="evaluationForm" data-crit-multiplier="@multiplier.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)"
+              class="flex flex-col flex-1 min-h-0">
+            <input type="hidden" name="taskIdEncrypted" value="@Model.TaskIdEncrypted">
+
+            <div class="flex-1 overflow-y-auto min-h-0">
+                <div class="flex flex-col lg:flex-row gap-6">
+                    @* LEFT COLUMN *@
+                    <div class="flex-1 min-w-0">
+                        @* Worker row *@
+                        <div class="flex items-start gap-4 mb-5">
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-600 mb-1 dark:text-gray-400">Worker</label>
+                                @if (Model.AssignedWorkers.Count > 1)
                                 {
-                                    <option value="@w.WorkerIdEncrypted" selected="@(w.WorkerIdEncrypted == Model.WorkerIdEncrypted)">@w.WorkerName</option>
+                                    <select id="evalWorkerSelect" name="workerIdEncrypted" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+                                            onchange="reloadEvaluationPopup('@Model.TaskIdEncrypted', this.value)">
+                                        @foreach (var w in Model.AssignedWorkers)
+                                        {
+                                            <option value="@w.WorkerIdEncrypted" selected="@(w.WorkerIdEncrypted == Model.WorkerIdEncrypted)">@w.WorkerName</option>
+                                        }
+                                    </select>
                                 }
-                            </select>
-                        }
-                        else
-                        {
-                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">@Model.WorkerName</p>
-                            <input type="hidden" name="workerIdEncrypted" value="@Model.WorkerIdEncrypted">
-                        }
-                    </div>
-                </div>
-
-                @* Quick action buttons *@
-                <div class="mb-4">
-                    <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 block mb-2">Quick Rating</span>
-                    <div class="flex gap-2">
-                        <button type="button" onclick="setAllSliders(2.5)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 transition-colors">Poor</button>
-                        <button type="button" onclick="setAllSliders(5.0)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors">Average</button>
-                        <button type="button" onclick="setAllSliders(7.5)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">Good</button>
-                        <button type="button" onclick="setAllSliders(10.0)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-green-300 text-green-700 bg-green-50 hover:bg-green-100 transition-colors">Excellent</button>
-                    </div>
-                </div>
-
-                @* Skill sliders *@
-                <div class="space-y-2" id="skillSliders">
-                    @for (int i = 0; i < Model.SkillPositions.Count; i++)
-                    {
-                        var pos = Model.SkillPositions[i];
-                        var currentLevel = Model.CurrentWorkerVector != null && pos.Position < Model.CurrentWorkerVector.Length
-                            ? Model.CurrentWorkerVector[pos.Position] : 0f;
-                        <div class="flex items-center gap-3 py-1.5">
-                            <span class="text-sm font-medium w-24 shrink-0 dark:text-gray-200">@pos.SkillName</span>
-                            <div class="flex-1 relative">
-                                <input type="range" min="0" max="10" step="0.5" value="5"
-                                       data-position="@pos.Position"
-                                       data-current="@currentLevel.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
-                                       oninput="updateSliderPreview(this)"
-                                       class="w-full h-2 bg-blue-100 rounded-full appearance-none cursor-pointer accent-brand
-                                              [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
-                                              [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-brand [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer" />
+                                else
+                                {
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">@Model.WorkerName</p>
+                                    <input type="hidden" name="workerIdEncrypted" value="@Model.WorkerIdEncrypted">
+                                }
                             </div>
-                            <span class="text-sm font-bold text-gray-800 w-10 text-right dark:text-gray-200" id="val-@pos.Position">5.0</span>
-                            <input type="hidden" name="skillPositions" value="@pos.Position">
-                            <input type="hidden" name="basePoints" value="0" id="bp-@pos.Position">
                         </div>
-                    }
+
+                        @* Quick action buttons *@
+                        <div class="mb-4">
+                            <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 block mb-2">Quick Rating</span>
+                            <div class="flex gap-2">
+                                <button type="button" onclick="setAllSliders(2.5)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 transition-colors">Poor</button>
+                                <button type="button" onclick="setAllSliders(5.0)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors">Average</button>
+                                <button type="button" onclick="setAllSliders(7.5)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">Good</button>
+                                <button type="button" onclick="setAllSliders(10.0)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-green-300 text-green-700 bg-green-50 hover:bg-green-100 transition-colors">Excellent</button>
+                            </div>
+                        </div>
+
+                        @* Skill sliders *@
+                        <div class="space-y-2" id="skillSliders">
+                            @for (int i = 0; i < Model.SkillPositions.Count; i++)
+                            {
+                                var pos = Model.SkillPositions[i];
+                                var currentLevel = Model.CurrentWorkerVector != null && pos.Position < Model.CurrentWorkerVector.Length
+                                    ? Model.CurrentWorkerVector[pos.Position] : 0f;
+                                <div class="flex items-center gap-3 py-1.5">
+                                    <span class="text-sm font-medium w-24 shrink-0 dark:text-gray-200">@pos.SkillName</span>
+                                    <div class="flex-1 relative">
+                                        <input type="range" min="0" max="10" step="0.5" value="5"
+                                               data-position="@pos.Position"
+                                               data-current="@currentLevel.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                               oninput="updateSliderPreview(this)"
+                                               class="w-full h-2 bg-blue-100 rounded-full appearance-none cursor-pointer accent-brand
+                                                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
+                                                      [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-brand [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer" />
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-800 w-10 text-right dark:text-gray-200" id="val-@pos.Position">5.0</span>
+                                    <input type="hidden" name="skillPositions" value="@pos.Position">
+                                    <input type="hidden" name="basePoints" value="0" id="bp-@pos.Position">
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @* RIGHT COLUMN: Recalculation Preview *@
+                    <div class="w-full lg:w-96 shrink-0 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 pt-5 lg:pt-0 lg:pl-6">
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Recalculation Preview</h3>
+                        <p class="text-sm text-gray-400 mb-4 dark:text-gray-500">Current profile versus projected profile after applying performance</p>
+
+                        <table class="w-full text-sm" id="previewTable">
+                            <thead>
+                                <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                                    <th class="text-left pb-1.5 font-medium">Skill</th>
+                                    <th class="text-center pb-1.5 font-medium">Current</th>
+                                    <th class="text-center pb-1.5 w-5"></th>
+                                    <th class="text-center pb-1.5 font-medium">New</th>
+                                    <th class="text-center pb-1.5 font-medium">Difference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.SkillPositions.Count; i++)
+                                {
+                                    var pos = Model.SkillPositions[i];
+                                    var currentLevel = Model.CurrentWorkerVector != null && pos.Position < Model.CurrentWorkerVector.Length
+                                        ? Model.CurrentWorkerVector[pos.Position] : 0f;
+                                    var initialNew = (float)SliderToNewLevel(currentLevel, 5.0, multiplier);
+                                    var initialDiff = initialNew - currentLevel;
+                                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                                        <td class="py-2 pr-2 text-gray-700 dark:text-gray-300">@pos.SkillName</td>
+                                        <td class="py-2 text-center text-gray-600 dark:text-gray-400" id="current-@pos.Position">@currentLevel.ToString("0.00")</td>
+                                        <td class="py-2 text-center text-gray-400">→</td>
+                                        <td class="py-2 text-center font-medium text-gray-800 dark:text-gray-200" id="new-@pos.Position">@initialNew.ToString("0.00")</td>
+                                        <td class="py-2 text-center">
+                                            <span class="inline-block px-1.5 py-0.5 rounded-full text-sm sm:text-xs font-semibold bg-gray-100 text-gray-500" id="diff-@pos.Position">@(initialDiff >= 0 ? "+" : "")@initialDiff.ToString("0.00")</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            @* RIGHT COLUMN: Recalculation Preview *@
-            <div class="w-full lg:w-96 shrink-0 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 pt-5 lg:pt-0 lg:pl-6">
-                <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Recalculation Preview</h3>
-                <p class="text-sm text-gray-400 mb-4 dark:text-gray-500">Current profile versus projected profile after applying performance</p>
-
-                <table class="w-full text-sm" id="previewTable">
-                    <thead>
-                        <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                            <th class="text-left pb-1.5 font-medium">Skill</th>
-                            <th class="text-center pb-1.5 font-medium">Current</th>
-                            <th class="text-center pb-1.5 w-5"></th>
-                            <th class="text-center pb-1.5 font-medium">New</th>
-                            <th class="text-center pb-1.5 font-medium">Difference</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (int i = 0; i < Model.SkillPositions.Count; i++)
-                        {
-                            var pos = Model.SkillPositions[i];
-                            var currentLevel = Model.CurrentWorkerVector != null && pos.Position < Model.CurrentWorkerVector.Length
-                                ? Model.CurrentWorkerVector[pos.Position] : 0f;
-                            var initialNew = (float)SliderToNewLevel(currentLevel, 5.0, multiplier);
-                            var initialDiff = initialNew - currentLevel;
-                            <tr class="border-b border-gray-100 dark:border-gray-800">
-                                <td class="py-2 pr-2 text-gray-700 dark:text-gray-300">@pos.SkillName</td>
-                                <td class="py-2 text-center text-gray-600 dark:text-gray-400" id="current-@pos.Position">@currentLevel.ToString("0.00")</td>
-                                <td class="py-2 text-center text-gray-400">→</td>
-                                <td class="py-2 text-center font-medium text-gray-800 dark:text-gray-200" id="new-@pos.Position">@initialNew.ToString("0.00")</td>
-                                <td class="py-2 text-center">
-                                    <span class="inline-block px-1.5 py-0.5 rounded-full text-sm sm:text-xs font-semibold bg-gray-100 text-gray-500" id="diff-@pos.Position">@(initialDiff >= 0 ? "+" : "")@initialDiff.ToString("0.00")</span>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+            @* Action buttons at bottom of modal *@
+            <div class="flex justify-end gap-2 mt-4 shrink-0">
+                <button type="button" onclick="closeModal()"
+                        class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="px-5 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep font-medium">
+                    Submit Evaluation
+                </button>
             </div>
-        </div>
-
-        @* Action buttons at bottom of modal *@
-        <div class="flex justify-end gap-2 mt-6">
+        </form>
+    }
+    else
+    {
+        <div class="flex flex-col items-center justify-center flex-1">
+            <p class="text-sm text-gray-500 text-center py-8 dark:text-gray-400">All workers have already been evaluated for this task.</p>
             <button type="button" onclick="closeModal()"
-                    class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                Cancel
-            </button>
-            <button type="submit"
-                    class="px-5 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep font-medium">
-                Submit Evaluation
+                    class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                Close
             </button>
         </div>
-    </form>
-}
-else
-{
-    <p class="text-sm text-gray-500 text-center py-8 dark:text-gray-400">All workers have already been evaluated for this task.</p>
-    <div class="flex justify-center mt-2">
-        <button type="button" onclick="closeModal()"
-                class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-            Close
-        </button>
-    </div>
-}
+    }
+</div>
