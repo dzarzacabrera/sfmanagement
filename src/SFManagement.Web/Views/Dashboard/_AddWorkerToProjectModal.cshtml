@@ -1,11 +1,11 @@
 @model AddWorkerToProjectPopupViewModel
 
 <div class="flex flex-col h-full">
-    <div class="shrink-0 pr-12">
+    <div class="shrink-0 px-6 pt-6 pb-4">
         <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Add Workers to Project</h2>
     </div>
 
-    <div class="flex flex-col flex-1 min-h-0">
+    <div class="flex flex-col flex-1 min-h-0 pl-6 pr-6 sm:pr-0 pb-6">
         <form id="addWorkerToProjectForm" class="flex flex-col flex-1 min-h-0">
             <input type="hidden" name="projectIdEncrypted" value="@Model.ProjectIdEncrypted">
 

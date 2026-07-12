@@ -193,7 +193,7 @@ function updateSliderPreview(input) {
     var diffText = (diff >= 0 ? '+' : '') + diff.toFixed(2);
     diffEl.textContent = diffText;
 
-    diffEl.className = 'inline-block px-1.5 py-0.5 rounded-full text-[10px] font-semibold';
+    diffEl.className = 'inline-block px-1.5 py-0.5 rounded-full text-sm sm:text-xs font-semibold';
     if (diff > 0.001) diffEl.classList.add('bg-green-100', 'text-green-700');
     else if (diff < -0.001) diffEl.classList.add('bg-red-100', 'text-red-700');
     else diffEl.classList.add('bg-gray-100', 'text-gray-500');

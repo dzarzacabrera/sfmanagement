@@ -25,30 +25,30 @@
 <div class="flex flex-col h-full">
     @if (Model.AssignedWorkers?.Count > 0)
     {
-        <div class="shrink-0 pr-12">
-            <div class="flex items-center gap-2 mb-4">
-                <span class="text-sm sm:text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0
+        <div class="shrink-0 px-6 pt-6 pb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                <span class="text-sm sm:text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 self-start order-2 sm:order-1
                     @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
                       Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
                       Model.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-200" :
                       "bg-gray-50 text-gray-600 border border-gray-200")">
                     @Model.Criticality
                 </span>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate">@Model.TaskTitle</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate pr-8 sm:pr-0 order-1 sm:order-2">@Model.TaskTitle</h2>
             </div>
         </div>
 
-        <div class="flex flex-col flex-1 min-h-0">
-            @if (!string.IsNullOrEmpty(Model.Description))
-            {
-                <p class="text-base sm:text-sm text-gray-500 mb-4 line-clamp-4 dark:text-gray-400 leading-relaxed">@Model.Description</p>
-            }
+        <div class="flex flex-col flex-1 min-h-0 pl-6 pr-6 sm:pr-0 pb-6">
 
         <form id="evaluationForm" data-crit-multiplier="@multiplier.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)"
               class="flex flex-col flex-1 min-h-0">
             <input type="hidden" name="taskIdEncrypted" value="@Model.TaskIdEncrypted">
 
             <div class="flex-1 overflow-y-auto min-h-0">
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <p class="text-base sm:text-sm text-gray-500 mb-4 line-clamp-4 dark:text-gray-400 leading-relaxed">@Model.Description</p>
+                }
                 <div class="flex flex-col lg:flex-row gap-6">
                     @* LEFT COLUMN *@
                     <div class="flex-1 min-w-0">
@@ -86,7 +86,7 @@
                         </div>
 
                         @* Skill sliders *@
-                        <div class="space-y-2" id="skillSliders">
+                        <div class="space-y-0 sm:space-y-2" id="skillSliders">
                             @for (int i = 0; i < Model.SkillPositions.Count; i++)
                             {
                                 var pos = Model.SkillPositions[i];

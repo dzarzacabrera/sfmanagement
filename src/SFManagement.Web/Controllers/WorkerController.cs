@@ -257,8 +257,6 @@ public class WorkerController : Controller
                 var oldVal = oldVector.ElementAtOrDefault(pos);
                 var newVal = vector.ElementAtOrDefault(pos);
 
-                if (Math.Abs(newVal - oldVal) < 0.001) continue;
-
                 var basePoints = BasePointsFromDelta(oldVal, newVal);
 
                 await using var insEval = new NpgsqlCommand(
