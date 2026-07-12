@@ -11,6 +11,7 @@ function findCard(idOrEnc) {
 }
 
 function openAssignModal(taskIdEnc, projectIdEnc) {
+    closeStatusSheet();
     var col = document.querySelector('.kanban-column[data-status="InProgress"]');
     var skel = col ? showSkeleton(col) : null;
 
@@ -72,6 +73,7 @@ function removeWorker(taskIdEnc, workerIdEnc, btn) {
 }
 
 function openEvaluationModal(taskIdEnc, projectIdEnc) {
+    closeStatusSheet();
     var col = document.querySelector('.kanban-column[data-status="Finish"]');
     var skel = col ? showSkeleton(col) : null;
 
@@ -402,7 +404,7 @@ function openAddWorkerPopup(projectIdEnc) {
                 var btn = this.querySelector('button[type="submit"]');
                 if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Adding...'; }
                 var formData = new FormData(this);
-                fetch('/Dashboard/AddWorkerToProject', { method: 'POST', body: formData })
+                fetch('/Dashboard/AddWorkersToProject', { method: 'POST', body: formData })
                     .then(function (r) {
                         if (r.ok) {
                             closeModal();
@@ -478,8 +480,12 @@ function openStatusSheet(taskIdEnc, currentStatus, btn) {
 
         var rect = btn.getBoundingClientRect();
         sheet.style.position = 'fixed';
-        sheet.style.top = Math.min(rect.bottom + 4, window.innerHeight - 330) + 'px';
-        sheet.style.left = Math.max(8, Math.min(rect.right - 192 + rect.width / 2, window.innerWidth - 200)) + 'px';
+        sheet.style.top = (rect.bottom - 1) + 'px';
+        var dropLeft = rect.left;
+        if (dropLeft + 192 > window.innerWidth - 8) {
+            dropLeft = Math.max(8, rect.right - 192);
+        }
+        sheet.style.left = dropLeft + 'px';
     } else {
         // Mobile: bottom sheet — parent gets the backdrop background
         sheet.className += ' fixed inset-0 items-end justify-center flex';

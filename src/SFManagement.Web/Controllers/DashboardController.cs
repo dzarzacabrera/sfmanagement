@@ -270,15 +270,21 @@ public class DashboardController : Controller
 
     [HttpPost]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> AddWorkerToProject(
+    public async Task<IActionResult> AddWorkersToProject(
         [FromForm] string projectIdEncrypted,
-        [FromForm] string workerIdEncrypted,
-        [FromServices] ICommandHandler<AddWorkerToProjectCommand> handler,
+        [FromForm] string[] workerIdEncrypted,
+        [FromServices] ICommandHandler<AddWorkersToProjectCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
         if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return BadRequest();
-        if (!enc.TryDecrypt(workerIdEncrypted, out var wid)) return BadRequest();
-        await handler.HandleAsync(new AddWorkerToProjectCommand(pid, wid));
+        var ids = new List<long>();
+        foreach (var w in workerIdEncrypted)
+        {
+            if (enc.TryDecrypt(w, out var wid))
+                ids.Add(wid);
+        }
+        if (ids.Count == 0) return BadRequest();
+        await handler.HandleAsync(new AddWorkersToProjectCommand(pid, ids));
         return Ok();
     }
 

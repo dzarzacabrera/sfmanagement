@@ -2,7 +2,7 @@
 
 <div class="flex flex-col h-full">
     <div class="shrink-0 pr-12">
-        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Add Worker to Project</h2>
+        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Add Workers to Project</h2>
     </div>
 
     <div class="flex flex-col flex-1 min-h-0">
@@ -15,17 +15,19 @@
             }
             else
             {
-                <div class="flex-1 overflow-y-auto min-h-0 space-y-2">
+                <div class="flex-1 overflow-y-auto min-h-0">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     @foreach (var worker in Model.Workers)
                     {
                         <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-brand-light/20 has-[:checked]:bg-brand-light/20 has-[:checked]:border-brand-dark/50 dark:border-gray-600 dark:hover:bg-gray-700">
-                            <input type="radio" name="workerIdEncrypted" value="@worker.IdEncrypted" class="accent-brand">
+                            <input type="checkbox" name="workerIdEncrypted" value="@worker.IdEncrypted" class="accent-brand rounded">
                             <div>
                                 <div class="text-sm font-medium text-gray-900 dark:text-gray-200">@worker.Name</div>
                                 <div class="text-sm text-gray-400">@worker.Role</div>
                             </div>
                         </label>
                     }
+                    </div>
                 </div>
             }
 
@@ -36,7 +38,7 @@
                 </button>
                 <button type="submit"
                         class="px-4 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep">
-                    Add Worker
+                    Add Selected
                 </button>
             </div>
         </form>
