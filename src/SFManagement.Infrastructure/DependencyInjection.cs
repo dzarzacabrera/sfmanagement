@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddTransient<ICommandHandler<ToggleSkillActiveCommand>, ToggleSkillActiveCommandHandler>();
         services.AddTransient<ICommandHandler<CreateWorkerCommand>, CreateWorkerCommandHandler>();
         services.AddTransient<ICommandHandler<AddWorkerToProjectCommand>, AddWorkerToProjectCommandHandler>();
+        services.AddTransient<ICommandHandler<AddWorkersToProjectCommand>, AddWorkersToProjectCommandHandler>();
 
         services.AddTransient<IGetDashboardTasksQueryHandler, GetDashboardTasksQueryHandler>();
         services.AddTransient<IGetRecommendedWorkersQueryHandler, GetRecommendedWorkersQueryHandler>();

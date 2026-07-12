@@ -216,22 +216,22 @@ public class WorkerController : Controller
                 "LIMIT 1", conn))
             {
                 var result = await findCmd.ExecuteScalarAsync();
-                if (result is long existingTaskId)
+                if (result is not null)
                 {
-                    taskId = existingTaskId;
+                    taskId = Convert.ToInt64(result);
                 }
                 else
                 {
                     await using var insProj = new NpgsqlCommand(
                         "INSERT INTO projects (name) VALUES ('Manual Adjustment') RETURNING id", conn);
-                    var projectId = (long)(await insProj.ExecuteScalarAsync())!;
+                    var projectId = Convert.ToInt64(await insProj.ExecuteScalarAsync()!);
 
                     await using var insTask = new NpgsqlCommand(
                         "INSERT INTO tasks (project_id, title, criticality, status, required_skills_vector) " +
                         "VALUES ($1, 'User Skill Edit', 'low', 'Finish', " +
                         "array_fill(0.0::float, ARRAY[1024])::vector(1024)) RETURNING id", conn);
                     insTask.Parameters.Add(new() { Value = projectId });
-                    taskId = (long)(await insTask.ExecuteScalarAsync())!;
+                    taskId = Convert.ToInt64(await insTask.ExecuteScalarAsync()!);
                 }
             }
 
@@ -256,6 +256,8 @@ public class WorkerController : Controller
                 if (!evaluatedPositions.Contains(pos)) continue;
                 var oldVal = oldVector.ElementAtOrDefault(pos);
                 var newVal = vector.ElementAtOrDefault(pos);
+
+                if (Math.Abs(newVal - oldVal) < 0.001) continue;
 
                 var basePoints = BasePointsFromDelta(oldVal, newVal);
 
