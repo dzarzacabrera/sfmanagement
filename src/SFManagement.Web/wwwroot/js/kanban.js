@@ -474,18 +474,36 @@ function openStatusSheet(taskIdEnc, currentStatus, btn) {
         handle.classList.add('hidden');
         body.style.borderRadius = '0.75rem';
         body.style.padding = '0.5rem';
-        body.style.width = '12rem';
+        body.style.width = '10rem';
         body.style.maxHeight = '20rem';
         body.className += ' border border-gray-200 dark:border-gray-700';
 
         var rect = btn.getBoundingClientRect();
-        sheet.style.position = 'fixed';
-        sheet.style.top = (rect.bottom - 1) + 'px';
-        var dropLeft = rect.left;
-        if (dropLeft + 192 > window.innerWidth - 8) {
-            dropLeft = Math.max(8, rect.right - 192);
+        var container = btn.closest('.task-card, .task-row');
+        if (container) {
+            container.style.position = 'relative';
+            container.appendChild(sheet);
+            sheet.style.position = 'absolute';
+            sheet.style.top = (btn.offsetTop + btn.offsetHeight) + 'px';
+            var dropLeft = btn.offsetLeft;
+            if (dropLeft + 160 > container.clientWidth) {
+                dropLeft = Math.max(0, btn.offsetLeft + btn.offsetWidth - 160);
+            }
+            sheet.style.left = dropLeft + 'px';
+            // Prevent clicks inside dropdown from bubbling to card
+            sheet._stopProp = sheet._stopProp || function (e) { e.stopPropagation(); };
+            sheet.removeEventListener('click', sheet._stopProp);
+            sheet.addEventListener('click', sheet._stopProp);
+        } else {
+            // Fallback: fixed positioning
+            sheet.style.position = 'fixed';
+            sheet.style.top = rect.bottom + 'px';
+            var dropLeft = rect.left;
+            if (dropLeft + 160 > window.innerWidth - 8) {
+                dropLeft = Math.max(8, rect.right - 160);
+            }
+            sheet.style.left = dropLeft + 'px';
         }
-        sheet.style.left = dropLeft + 'px';
     } else {
         // Mobile: bottom sheet — parent gets the backdrop background
         sheet.className += ' fixed inset-0 items-end justify-center flex';
@@ -514,7 +532,8 @@ function openStatusSheet(taskIdEnc, currentStatus, btn) {
         }
         el.textContent = label;
         if (!isCurrent) {
-            el.onclick = function () {
+            el.onclick = function (e) {
+                e.stopPropagation();
                 closeStatusSheet();
                 changeStatus(taskIdEnc, s);
             };
@@ -527,7 +546,9 @@ function openStatusSheet(taskIdEnc, currentStatus, btn) {
 
 function closeStatusSheet() {
     var sheet = document.getElementById('status-bottom-sheet');
-    if (sheet) sheet.classList.add('hidden');
+    if (!sheet) return;
+    document.body.appendChild(sheet);
+    sheet.classList.add('hidden');
 }
 
 // Close status sheet on click outside (desktop dropdown)
