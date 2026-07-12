@@ -45,12 +45,11 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
             var newLevel = newVector[evaluation.SkillPosition];
             var actualImpact = newLevel - previousLevel;
 
+            await InsertEvaluationAsync(connection, command.TaskId, assignment.WorkerId,
+                evaluation, task.Criticality, basePoints, actualImpact, previousLevel, newLevel);
+
             if (Math.Abs(actualImpact) > 0.001)
-            {
-                await InsertEvaluationAsync(connection, command.TaskId, assignment.WorkerId,
-                    evaluation, task.Criticality, basePoints, actualImpact, previousLevel, newLevel);
                 hasChanges = true;
-            }
 
             currentVector = newVector;
         }
