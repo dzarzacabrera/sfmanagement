@@ -49,9 +49,21 @@
                 {
                     <p class="text-base sm:text-sm text-gray-500 mb-4 line-clamp-4 dark:text-gray-400 leading-relaxed">@Model.Description</p>
                 }
-                <div class="flex flex-col lg:flex-row gap-6">
+
+                @* Quick action buttons *@
+                <div class="mb-4">
+                    <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 block mb-2">Quick Rating</span>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="setAllSliders(2.5)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 transition-colors">Poor</button>
+                        <button type="button" onclick="setAllSliders(5.0)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors">Average</button>
+                        <button type="button" onclick="setAllSliders(7.5)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">Good</button>
+                        <button type="button" onclick="setAllSliders(10.0)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-green-300 text-green-700 bg-green-50 hover:bg-green-100 transition-colors">Excellent</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6">
                     @* LEFT COLUMN *@
-                    <div class="flex-1 min-w-0">
+                    <div class="flex-1 md:w-1/2 min-w-0">
                         @* Worker row *@
                         <div class="flex items-start gap-4 mb-5">
                             <div class="flex-1">
@@ -71,17 +83,6 @@
                                     <p class="text-sm font-medium text-gray-900 dark:text-gray-100">@Model.WorkerName</p>
                                     <input type="hidden" name="workerIdEncrypted" value="@Model.WorkerIdEncrypted">
                                 }
-                            </div>
-                        </div>
-
-                        @* Quick action buttons *@
-                        <div class="mb-4">
-                            <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 block mb-2">Quick Rating</span>
-                            <div class="flex gap-2">
-                                <button type="button" onclick="setAllSliders(2.5)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 transition-colors">Poor</button>
-                                <button type="button" onclick="setAllSliders(5.0)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors">Average</button>
-                                <button type="button" onclick="setAllSliders(7.5)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">Good</button>
-                                <button type="button" onclick="setAllSliders(10.0)" class="flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg border border-green-300 text-green-700 bg-green-50 hover:bg-green-100 transition-colors">Excellent</button>
                             </div>
                         </div>
 
@@ -113,7 +114,7 @@
                     </div>
 
                     @* RIGHT COLUMN: Recalculation Preview *@
-                    <div class="w-full lg:w-96 shrink-0 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 pt-5 lg:pt-0 lg:pl-6">
+                    <div class="w-full md:w-1/2 shrink-0 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700 pt-5 md:pt-0 md:pl-6">
                         <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Recalculation Preview</h3>
                         <p class="text-sm text-gray-400 mb-4 dark:text-gray-500">Current profile versus projected profile after applying performance</p>
 
