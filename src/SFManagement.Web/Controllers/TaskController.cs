@@ -21,11 +21,15 @@ public class TaskController : Controller
     {
         var tasks = await handler.HandleAsync(new GetAllTasksQuery());
         var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
-        ViewBag.Projects = projects.Select(p => p with { IdEncrypted = enc.Encrypt(p.Id) }).ToList();
-        ViewBag.DefaultProjectIdEncrypted = projects.Count > 0 ? enc.Encrypt(projects[0].Id) : enc.Encrypt(1);
+
+        var projectEncryptedMap = projects.ToDictionary(p => p.Id, p => enc.Encrypt(p.Id));
+        ViewBag.Projects = projects.Select(p => p with { IdEncrypted = projectEncryptedMap[p.Id] }).ToList();
+        ViewBag.DefaultProjectIdEncrypted = projects.Count > 0 ? projectEncryptedMap[projects[0].Id] : enc.Encrypt(1);
+        ViewBag.ProjectEncryptedMap = projectEncryptedMap;
+
         ViewBag.PageTitle = "Tasks";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "") };
-        return View(tasks.Select(t => t with { IdEncrypted = enc.Encrypt(t.Id), ProjectIdEncrypted = enc.Encrypt(t.ProjectId) }).ToList());
+        return View(tasks.Select(t => t with { IdEncrypted = enc.Encrypt(t.Id), ProjectIdEncrypted = projectEncryptedMap.GetValueOrDefault(t.ProjectId, enc.Encrypt(t.ProjectId)) }).ToList());
     }
 
     [HttpGet]
