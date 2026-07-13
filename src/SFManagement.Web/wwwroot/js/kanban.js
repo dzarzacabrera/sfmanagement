@@ -161,6 +161,10 @@ function setAllSliders(value) {
     });
 }
 
+function roundToFive(v) {
+    return Math.sign(v) * Math.round(Math.abs(v) / 0.05) * 0.05;
+}
+
 function updateSliderPreview(input) {
     var pos = input.getAttribute('data-position');
     var val = parseFloat(input.value);
@@ -185,7 +189,7 @@ function updateSliderPreview(input) {
 
     var current = parseFloat(input.getAttribute('data-current')) || 0;
     var impact = basePoints * multiplier;
-    var newLevel = Math.max(0, Math.min(10, Math.round((current + impact) / 0.05) * 0.05));
+    var newLevel = Math.max(0, Math.min(10, roundToFive(current + impact)));
 
     newEl.textContent = newLevel.toFixed(2);
 
@@ -324,27 +328,27 @@ if (kanbanGrid) {
     });
 }
 
-function archiveTask(taskIdEnc, btn) {
-    var card = btn.closest('.task-card');
+function archiveTask(taskIdEnc, btn, keepVisible) {
+    var card = btn.closest('.task-card') || btn.closest('.task-row');
     if (!card) return;
-
-    // Capture current height for collapse animation
-    var h = card.scrollHeight;
-    card.style.overflow = 'hidden';
-    card.style.maxHeight = h + 'px';
-    // Force reflow so the maxHeight takes effect before transition
-    void card.offsetWidth;
-    card.style.transition = 'transform 0.3s ease, opacity 0.3s ease, max-height 0.3s ease 0.3s, margin 0.3s ease 0.3s, padding 0.3s ease 0.3s';
-    card.style.transform = 'scale(0.95)';
-    card.style.opacity = '0';
-    card.style.maxHeight = '0';
-    card.style.margin = '0';
-    card.style.padding = '0';
 
     var undoKey = 'archive-undo-' + taskIdEnc;
 
-    showUndoToast('Task archived.', function () {
-        // Undo: restore the card with reverse animation
+    if (!keepVisible) {
+        // Collapse animation for dashboard kanban cards
+        var h = card.scrollHeight;
+        card.style.overflow = 'hidden';
+        card.style.maxHeight = h + 'px';
+        void card.offsetWidth;
+        card.style.transition = 'transform 0.3s ease, opacity 0.3s ease, max-height 0.3s ease 0.3s, margin 0.3s ease 0.3s, padding 0.3s ease 0.3s';
+        card.style.transform = 'scale(0.95)';
+        card.style.opacity = '0';
+        card.style.maxHeight = '0';
+        card.style.margin = '0';
+        card.style.padding = '0';
+    }
+
+    function restoreCard() {
         card.style.transition = 'transform 0.3s ease, opacity 0.3s ease, max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease';
         card.style.transform = '';
         card.style.opacity = '';
@@ -352,40 +356,62 @@ function archiveTask(taskIdEnc, btn) {
         card.style.margin = '';
         card.style.padding = '';
         card.style.overflow = '';
+    }
+
+    showUndoToast('Task archived.', function () {
+        restoreCard();
         clearTimeout(window[undoKey]);
         showToast('Archive cancelled', 'undo');
     });
 
-    // After 2 seconds, actually archive
     window[undoKey] = setTimeout(function () {
         var formData = new FormData();
         formData.append('taskIdEncrypted', taskIdEnc);
         fetch('/Dashboard/ArchiveTask', { method: 'POST', body: formData })
             .then(function (r) {
                 if (r.ok) {
-                    card.remove();
-                    updateColumnCounts();
+                    if (keepVisible) {
+                        var statusBadge = card.querySelector('[data-status-badge]');
+                        if (statusBadge) {
+                            statusBadge.textContent = 'Archived';
+                            statusBadge.className = 'px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium bg-gray-100 text-gray-500';
+                        }
+                        btn.style.display = 'none';
+                        var actionsBar = btn.parentElement;
+                        if (actionsBar) {
+                            var restoreBtn = document.createElement('button');
+                            restoreBtn.className = 'bg-white border border-gray-300 text-gray-600 px-2 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 transition-colors whitespace-nowrap';
+                            restoreBtn.title = 'Restore to Finish';
+                            restoreBtn.textContent = 'Restore';
+                            restoreBtn.dataset.taskId = taskIdEnc;
+                            restoreBtn.addEventListener('click', function (e) {
+                                e.stopPropagation();
+                                var rid = this.dataset.taskId;
+                                var fd = new FormData();
+                                fd.append('taskIdEncrypted', rid);
+                                fd.append('newStatus', 'Finish');
+                                fetch('/Dashboard/ChangeStatus', { method: 'POST', body: fd })
+                                    .then(function (r) {
+                                        if (r.ok) { location.reload(); }
+                                        else { showToast('Restore failed', 'error'); }
+                                    })
+                                    .catch(function () { showToast('Restore error', 'error'); });
+                            });
+                            actionsBar.appendChild(restoreBtn);
+                        }
+                    } else {
+                        card.remove();
+                    }
+                    if (typeof updateColumnCounts === 'function') updateColumnCounts();
                     showToast('Task archived permanently', 'success');
                 } else {
                     showToast('Archive failed: ' + r.status, 'error');
-                    card.style.transition = '';
-                    card.style.transform = '';
-                    card.style.opacity = '';
-                    card.style.maxHeight = '';
-                    card.style.margin = '';
-                    card.style.padding = '';
-                    card.style.overflow = '';
+                    if (!keepVisible) restoreCard();
                 }
             })
             .catch(function (err) {
                 showToast('Archive error: ' + err.message, 'error');
-                card.style.transition = '';
-                card.style.transform = '';
-                card.style.opacity = '';
-                card.style.maxHeight = '';
-                card.style.margin = '';
-                card.style.padding = '';
-                card.style.overflow = '';
+                if (!keepVisible) restoreCard();
             });
     }, 2000);
 }

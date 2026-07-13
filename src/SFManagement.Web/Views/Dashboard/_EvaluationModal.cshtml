@@ -50,6 +50,22 @@
                     <p class="text-base sm:text-sm text-gray-500 mb-4 line-clamp-4 dark:text-gray-400 leading-relaxed">@Model.Description</p>
                 }
 
+                @if (Model.SkillPositions?.Count > 0)
+                {
+                    <div class="flex flex-col gap-1.5 mb-4">
+                        <span class="text-sm sm:text-pill font-bold uppercase tracking-wider text-brand">Required Skills</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach (var skill in Model.SkillPositions)
+                            {
+                                <span class="inline-flex items-stretch text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
+                                    <span class="px-2 py-0.5 bg-brand-light text-brand self-center">@skill.SkillName</span>
+                                    <span class="px-1.5 bg-brand-dark text-white font-bold border-l border-brand-dark flex items-center self-stretch">@skill.RequiredLevel.ToString("0")</span>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+
                 @* Quick action buttons *@
                 <div class="mb-4">
                     <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 block mb-2">Quick Rating</span>

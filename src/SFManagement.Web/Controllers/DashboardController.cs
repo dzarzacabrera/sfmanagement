@@ -187,7 +187,7 @@ public class DashboardController : Controller
         }
 
         var taskSkills = task?.Skills
-            ?.Select(s => new SkillPositionDto(s.SkillPosition, s.SkillName))
+            ?.Select(s => new SkillPositionDto(s.SkillPosition, s.SkillName, s.RequiredLevel))
             .ToList() ?? [];
 
         var encryptedWorkers = remainingWorkers?

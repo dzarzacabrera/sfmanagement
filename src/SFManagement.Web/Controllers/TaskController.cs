@@ -75,7 +75,14 @@ public class TaskController : Controller
 
         ViewBag.PageTitle = task.Title;
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Tasks", "/Task/Index"), new("Detail", "") };
-        return View(task with { IdEncrypted = enc.Encrypt(tid) });
+        return View(task with
+        {
+            IdEncrypted = enc.Encrypt(tid),
+            AssignedWorkers = task.AssignedWorkers?.Select(w => w with
+            {
+                WorkerIdEncrypted = enc.Encrypt(w.WorkerId)
+            }).ToList()
+        });
     }
 
     [HttpGet]

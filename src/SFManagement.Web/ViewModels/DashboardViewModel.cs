@@ -57,7 +57,7 @@ public record EvaluationViewModel(
     public string WorkerIdEncrypted { get; init; } = "";
 }
 
-public record SkillPositionDto(int Position, string SkillName);
+public record SkillPositionDto(int Position, string SkillName, float RequiredLevel);
 
 public record AddWorkerToProjectPopupViewModel(
     long ProjectId,
