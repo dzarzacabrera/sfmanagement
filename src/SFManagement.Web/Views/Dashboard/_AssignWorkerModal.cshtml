@@ -35,16 +35,15 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate pr-8 sm:pr-0 order-1 sm:order-2">@Model.TaskTitle</h2>
         </div>
     </div>
-
     <div class="flex flex-col flex-1 min-h-0 pl-6 pr-6 sm:pr-0 pb-6">
         @if (!string.IsNullOrEmpty(Model.Description))
         {
-            <p class="text-base sm:text-sm text-gray-500 mb-3 line-clamp-4 dark:text-gray-400 leading-relaxed">@Model.Description</p>
+            <p class="text-base sm:text-sm text-gray-500 mb-3 line-clamp-4 dark:text-gray-400 leading-relaxed shrink-0">@Model.Description</p>
         }
 
         @if (Model.Skills?.Count > 0)
         {
-            <div class="flex flex-col gap-1.5 mb-3">
+            <div class="flex flex-col gap-1.5 mb-3 shrink-0">
                 <span class="text-sm sm:text-pill font-bold uppercase tracking-wider text-brand">Required Skills</span>
                 <div class="flex flex-wrap gap-1.5">
                     @foreach (var skill in Model.Skills)
@@ -58,77 +57,88 @@
             </div>
         }
 
-        <div class="border-t border-gray-200 dark:border-gray-700 my-3"></div>
+        <div class="border-t border-gray-200 dark:border-gray-700 my-3 shrink-0"></div>
 
-        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">Cosine Similarity Ranking</h3>
+        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 shrink-0">Cosine Similarity Ranking</h3>
 
-        <form id="assignForm" class="flex-1 overflow-y-auto min-h-0 space-y-3">
-    <input type="hidden" name="taskIdEncrypted" value="@Model.TaskIdEncrypted">
-    @foreach (var worker in Model.Workers)
-    {
-        index++;
-        var pct = worker.CompatibilityScore * 100;
-        var displayPct = Math.Min(pct, 100);
-        var isExpert = pct > 100;
-        var matchColor = MatchColor(pct);
-        var matchBg = MatchBg(pct);
+        <div id="assignWorkerList" class="flex-1 overflow-y-auto min-h-0 space-y-3 pb-4">
+            @foreach (var worker in Model.Workers)
+            {
+                index++;
+                var pct = worker.CompatibilityScore * 100;
+                var displayPct = Math.Min(pct, 100);
+                var isExpert = pct > 100;
+                var matchColor = MatchColor(pct);
+                var matchBg = MatchBg(pct);
 
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
-            <div class="flex items-start justify-between gap-3">
-                <div class="flex items-center gap-3 min-w-0">
-                    <span class="shrink-0 w-7 h-7 rounded-full text-white text-sm font-bold flex items-center justify-center @(index == 1 ? "bg-brand" : "")" @(index > 1 ? "style=background-color:rgba(33,102,143,0.25);color:#21668f" : "")>@index</span>
-                    <div class="min-w-0">
-                        <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">@worker.Name</div>
-                        <div class="text-sm text-gray-400 dark:text-gray-400 truncate">@worker.Role</div>
-                    </div>
-                </div>
-                <div class="shrink-0 text-right">
-                    <div class="text-lg font-bold" style="color:@matchColor">
-                        @if (isExpert)
-                        {
-                            <span style="color:#e6a817;">&#9733;</span>
-                        }
-                        @displayPct.ToString("0")%
-                    </div>
-                    <div class="text-sm text-gray-400 uppercase tracking-wider" style="color:@matchColor">match</div>
-                </div>
-            </div>
-            @if (Model.Skills?.Count > 0)
-                {
-                    <div class="flex items-start gap-2 mt-3">
-                        <div class="flex flex-wrap gap-1.5 flex-1 min-w-0">
-                            @foreach (var skill in Model.Skills)
-                            {
-                                var workerLevel = skill.SkillPosition < worker.SkillsVector.Length ? worker.SkillsVector[skill.SkillPosition] : 0;
-                                var skillPct = skill.RequiredLevel > 0 ? workerLevel / skill.RequiredLevel * 100 : 0;
-                                var textColor = MatchColor(skillPct);
-                                var bgColor = MatchBg(skillPct);
-
-                                <span class="inline-flex items-center text-sm sm:text-xs font-semibold rounded-md border overflow-hidden" style="border-color:@textColor;">
-                                    <span class="px-2 py-0.5" style="background-color:@bgColor; color:@textColor;">
-                                        @skill.SkillName
-                                    </span>
-                                    <span class="px-1.5 py-0.5 text-white font-bold border-l" style="background-color:@textColor; border-color:@textColor;">@workerLevel.ToString("0") / @skill.RequiredLevel.ToString("0")</span>
-                                </span>
-                            }
+                <div class="assign-card worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 cursor-pointer transition-all duration-150 hover:shadow-md dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                     data-worker-id="@worker.IdEncrypted"
+                     onclick="toggleWorkerSelect(this)">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="shrink-0 w-7 h-7 rounded-full text-white text-sm font-bold flex items-center justify-center @(index == 1 ? "bg-brand" : "")" @(index > 1 ? "style=background-color:rgba(33,102,143,0.25);color:#21668f" : "")>@index</span>
+                            <div class="min-w-0">
+                                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">@worker.Name</div>
+                                <div class="text-sm text-gray-400 dark:text-gray-400 truncate">@worker.Role</div>
+                            </div>
                         </div>
-                        <button type="submit" class="w-1/4 shrink-0 text-sm font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors"
-                                onclick="this.form.querySelectorAll('input[name=\'workerIdEncrypted\']').forEach(function(i){i.remove()}); var inp=document.createElement('input'); inp.type='hidden'; inp.name='workerIdEncrypted'; inp.value='@worker.IdEncrypted'; this.form.appendChild(inp);">
-                            Asignar
-                        </button>
+                        <div class="shrink-0 text-right">
+                            <div class="text-lg font-bold" style="color:@matchColor">
+                                @if (isExpert)
+                                {
+                                    <span style="color:#e6a817;">&#9733;</span>
+                                }
+                                @displayPct.ToString("0")%
+                            </div>
+                            <div class="text-sm text-gray-400 uppercase tracking-wider" style="color:@matchColor">match</div>
+                        </div>
                     </div>
-                }
-                else
-                {
-                    <div class="mt-3 flex justify-end">
-                        <button type="submit" class="w-1/4 text-sm font-medium px-3 py-1.5 rounded-lg bg-brand text-white hover:bg-brand-deep transition-colors"
-                                onclick="this.form.querySelectorAll('input[name=\'workerIdEncrypted\']').forEach(function(i){i.remove()}); var inp=document.createElement('input'); inp.type='hidden'; inp.name='workerIdEncrypted'; inp.value='@worker.IdEncrypted'; this.form.appendChild(inp);">
-                            Asignar
-                        </button>
-                    </div>
-                }
+                    @if (Model.Skills?.Count > 0)
+                    {
+                        <div class="flex items-start gap-2 mt-3">
+                            <div class="flex flex-wrap gap-1.5 flex-1 min-w-0">
+                                @foreach (var skill in Model.Skills)
+                                {
+                                    var workerLevel = skill.SkillPosition < worker.SkillsVector.Length ? worker.SkillsVector[skill.SkillPosition] : 0;
+                                    var skillPct = skill.RequiredLevel > 0 ? workerLevel / skill.RequiredLevel * 100 : 0;
+                                    var textColor = MatchColor(skillPct);
+                                    var bgColor = MatchBg(skillPct);
+
+                                    <span class="inline-flex items-center text-sm sm:text-xs font-semibold rounded-md border overflow-hidden" style="border-color:@textColor;">
+                                        <span class="px-2 py-0.5" style="background-color:@bgColor; color:@textColor;">
+                                            @skill.SkillName
+                                        </span>
+                                        <span class="px-1.5 py-0.5 text-white font-bold border-l" style="background-color:@textColor; border-color:@textColor;">@workerLevel.ToString("0") / @skill.RequiredLevel.ToString("0")</span>
+                                    </span>
+                                }
+                            </div>
+                            <div class="shrink-0 w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all duration-150 assign-check">
+                                <svg class="w-3.5 h-3.5 text-white hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mt-3 flex justify-end">
+                            <div class="shrink-0 w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all duration-150 assign-check">
+                                <svg class="w-3.5 h-3.5 text-white hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
         </div>
-    }
-</form>
+
+        <div class="flex justify-end gap-2 mt-4 shrink-0">
+            <button type="button" onclick="closeModal()"
+                    class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                Cancel
+            </button>
+            <button id="assignBtn" type="button" disabled
+                    class="px-5 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                    onclick="submitAssignWorkers('@Model.TaskIdEncrypted')">
+                Assign
+            </button>
+        </div>
     </div>
 </div>
