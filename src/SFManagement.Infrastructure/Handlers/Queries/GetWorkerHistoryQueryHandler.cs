@@ -19,7 +19,7 @@ internal sealed class GetWorkerHistoryQueryHandler(INpgsqlConnectionFactory conn
             "pe.skill_position, pe.rating, pe.criticality, " +
             "pe.base_points, pe.impact, pe.previous_level, pe.new_level, pe.created_at " +
             "FROM performance_evaluations pe " +
-            "INNER JOIN tasks t ON t.id = pe.task_id " +
+            "LEFT JOIN tasks t ON t.id = pe.task_id " +
             "LEFT JOIN skills_catalogue sc ON sc.vector_position = pe.skill_position " +
             "WHERE pe.worker_id = $1 " +
             "ORDER BY pe.created_at DESC", connection);
@@ -30,9 +30,10 @@ internal sealed class GetWorkerHistoryQueryHandler(INpgsqlConnectionFactory conn
         while (await reader.ReadAsync())
         {
             var mapper = new DataReaderMapper(reader);
+            var taskTitle = mapper.GetStringOrNull("task_title") ?? EvaluationHistoryDto.ManualAdjustmentTitle;
             results.Add(new EvaluationHistoryDto(
                 mapper.GetInt32("id"),
-                mapper.GetString("task_title"),
+                taskTitle,
                 mapper.GetString("skill_name"),
                 mapper.GetInt32("skill_position"),
                 mapper.GetDouble("rating"),

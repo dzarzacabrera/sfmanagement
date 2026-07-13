@@ -207,35 +207,7 @@ public class WorkerController : Controller
             var raw = await getCmd.ExecuteScalarAsync() as Vector;
             var oldVector = raw?.ToArray() ?? new float[1024];
 
-            // Get or create the "Manual Adjustment" project and task
-            long taskId;
-            await using (var findCmd = new NpgsqlCommand(
-                "SELECT t.id FROM tasks t " +
-                "INNER JOIN projects p ON p.id = t.project_id " +
-                "WHERE p.name = 'Manual Adjustment' AND t.title = 'User Skill Edit' " +
-                "LIMIT 1", conn))
-            {
-                var result = await findCmd.ExecuteScalarAsync();
-                if (result is not null)
-                {
-                    taskId = Convert.ToInt64(result);
-                }
-                else
-                {
-                    await using var insProj = new NpgsqlCommand(
-                        "INSERT INTO projects (name) VALUES ('Manual Adjustment') RETURNING id", conn);
-                    var projectId = Convert.ToInt64(await insProj.ExecuteScalarAsync()!);
-
-                    await using var insTask = new NpgsqlCommand(
-                        "INSERT INTO tasks (project_id, title, criticality, status, required_skills_vector) " +
-                        "VALUES ($1, 'User Skill Edit', 'low', 'Finish', " +
-                        "array_fill(0.0::float, ARRAY[1024])::vector(1024)) RETURNING id", conn);
-                    insTask.Parameters.Add(new() { Value = projectId });
-                    taskId = Convert.ToInt64(await insTask.ExecuteScalarAsync()!);
-                }
-            }
-
-            // Update worker first
+            // Update worker
             await handler.HandleAsync(new UpdateWorkerCommand(wid, name, role ?? string.Empty, vector));
 
             double BasePointsFromDelta(double oldVal, double newVal)
@@ -269,7 +241,7 @@ public class WorkerController : Controller
                 {
                     Parameters =
                     {
-                        new() { Value = taskId },
+                        new() { Value = DBNull.Value },
                         new() { Value = wid },
                         new() { Value = pos },
                         new() { Value = newVal },

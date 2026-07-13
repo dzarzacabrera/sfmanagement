@@ -5,7 +5,7 @@ namespace SFManagement.Domain.Entities;
 public class PerformanceEvaluation
 {
     public long Id { get; init; }
-    public long TaskId { get; init; }
+    public long? TaskId { get; init; }
     public long WorkerId { get; init; }
     public int SkillPosition { get; init; }
     public double Rating { get; init; }
@@ -16,7 +16,7 @@ public class PerformanceEvaluation
     public double NewLevel { get; init; }
     public DateTime CreatedAt { get; init; }
 
-    public PerformanceEvaluation(long id, long taskId, long workerId, int skillPosition,
+    public PerformanceEvaluation(long id, long? taskId, long workerId, int skillPosition,
         double rating, Criticality criticality, double basePoints,
         double impact, double previousLevel, double newLevel, DateTime createdAt)
     {
