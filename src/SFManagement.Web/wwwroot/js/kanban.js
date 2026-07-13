@@ -12,6 +12,8 @@ function findCard(idOrEnc) {
 
 function openAssignModal(taskIdEnc, projectIdEnc) {
     closeStatusSheet();
+    var modalRoot = document.getElementById('modal-root');
+    if (modalRoot && !modalRoot.classList.contains('hidden')) closeModal();
     var col = document.querySelector('.kanban-column[data-status="InProgress"]');
     var skel = col ? showSkeleton(col) : null;
 
@@ -29,21 +31,18 @@ function openAssignModal(taskIdEnc, projectIdEnc) {
 
 function toggleWorkerSelect(card) {
     card.classList.toggle('selected');
-    var check = card.querySelector('.assign-check');
+    var rankNum = card.querySelector('.rank-num');
+    var rankCheck = card.querySelector('.rank-check');
     if (card.classList.contains('selected')) {
         card.style.borderColor = '#1d4ed8';
         card.style.backgroundColor = 'rgba(29,78,216,0.06)';
-        check.style.borderColor = '#1d4ed8';
-        check.style.backgroundColor = '#1d4ed8';
-        var svg = check.querySelector('svg');
-        if (svg) svg.classList.remove('hidden');
+        if (rankNum) rankNum.classList.add('hidden');
+        if (rankCheck) rankCheck.classList.remove('hidden');
     } else {
         card.style.borderColor = '';
         card.style.backgroundColor = '';
-        check.style.borderColor = '';
-        check.style.backgroundColor = '';
-        var svg2 = check.querySelector('svg');
-        if (svg2) svg2.classList.add('hidden');
+        if (rankNum) rankNum.classList.remove('hidden');
+        if (rankCheck) rankCheck.classList.add('hidden');
     }
     var count = document.querySelectorAll('.assign-card.selected').length;
     var btn = document.getElementById('assignBtn');
@@ -505,13 +504,46 @@ function moveTaskStatus(taskIdEnc, direction) {
 }
 
 function openStatusSheet(taskIdEnc, currentStatus, btn) {
+    if (window.innerWidth >= 640 && btn) {
+        openStatusDropdown(taskIdEnc, currentStatus, btn);
+    } else {
+        openStatusMobileSheet(taskIdEnc, currentStatus);
+    }
+}
+
+function openStatusMobileSheet(taskIdEnc, currentStatus) {
+    var statuses = ['Queued', 'InProgress', 'Finish', 'Blocked'];
+    var html = '<div class="px-6 pt-2 pb-6"><h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Change Status</h3><div class="flex flex-col gap-2">';
+    statuses.forEach(function (s) {
+        var label = STATUS_LABELS[s] || s;
+        var isCurrent = s === currentStatus;
+        var cls = 'w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors ' +
+            (isCurrent ? 'bg-brand text-white cursor-default' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600');
+        html += '<button class="' + cls + '" data-status="' + s + '"' + (isCurrent ? ' disabled' : '') + '>' + label + '</button>';
+    });
+    html += '</div></div>';
+
+    openModal(html);
+
+    var content = document.getElementById('modal-content');
+    content.querySelectorAll('button[data-status]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var s = this.getAttribute('data-status');
+            if (s && s !== currentStatus) {
+                closeModal();
+                changeStatus(taskIdEnc, s);
+            }
+        });
+    });
+}
+
+function openStatusDropdown(taskIdEnc, currentStatus, btn) {
     var sheet = document.getElementById('status-bottom-sheet');
     var body = document.getElementById('sheet-body');
     var handle = document.getElementById('sheet-handle');
     var opts = document.getElementById('status-sheet-options');
     if (!sheet || !opts) return;
 
-    // Reset
     sheet.className = 'z-[70]';
     sheet.style.position = '';
     sheet.style.top = '';
@@ -525,55 +557,36 @@ function openStatusSheet(taskIdEnc, currentStatus, btn) {
     body.style.padding = '';
     body.style.width = '';
     body.style.maxHeight = '';
-    handle.classList.remove('hidden');
+    handle.classList.add('hidden');
+    body.style.borderRadius = '0.75rem';
+    body.style.padding = '0.5rem';
+    body.style.width = '10rem';
+    body.style.maxHeight = '20rem';
+    body.className += ' border border-gray-200 dark:border-gray-700';
 
-    if (window.innerWidth >= 640 && btn) {
-        // Desktop: dropdown near button — no backdrop
-        handle.classList.add('hidden');
-        body.style.borderRadius = '0.75rem';
-        body.style.padding = '0.5rem';
-        body.style.width = '10rem';
-        body.style.maxHeight = '20rem';
-        body.className += ' border border-gray-200 dark:border-gray-700';
-
-        var rect = btn.getBoundingClientRect();
-        var container = btn.closest('.task-card, .task-row');
-        if (container) {
-            container.style.position = 'relative';
-            container.appendChild(sheet);
-            sheet.style.position = 'absolute';
-            sheet.style.top = (btn.offsetTop + btn.offsetHeight) + 'px';
-            var dropLeft = btn.offsetLeft;
-            if (dropLeft + 160 > container.clientWidth) {
-                dropLeft = Math.max(0, btn.offsetLeft + btn.offsetWidth - 160);
-            }
-            sheet.style.left = dropLeft + 'px';
-            // Prevent clicks inside dropdown from bubbling to card
-            sheet._stopProp = sheet._stopProp || function (e) { e.stopPropagation(); };
-            sheet.removeEventListener('click', sheet._stopProp);
-            sheet.addEventListener('click', sheet._stopProp);
-        } else {
-            // Fallback: fixed positioning
-            sheet.style.position = 'fixed';
-            sheet.style.top = rect.bottom + 'px';
-            var dropLeft = rect.left;
-            if (dropLeft + 160 > window.innerWidth - 8) {
-                dropLeft = Math.max(8, rect.right - 160);
-            }
-            sheet.style.left = dropLeft + 'px';
+    var rect = btn.getBoundingClientRect();
+    var container = btn.closest('.task-card, .task-row');
+    if (container) {
+        container.style.position = 'relative';
+        container.appendChild(sheet);
+        sheet.style.position = 'absolute';
+        sheet.style.top = (btn.offsetTop + btn.offsetHeight) + 'px';
+        var dropLeft = btn.offsetLeft;
+        if (dropLeft + 160 > container.clientWidth) {
+            dropLeft = Math.max(0, btn.offsetLeft + btn.offsetWidth - 160);
         }
+        sheet.style.left = dropLeft + 'px';
+        sheet._stopProp = sheet._stopProp || function (e) { e.stopPropagation(); };
+        sheet.removeEventListener('click', sheet._stopProp);
+        sheet.addEventListener('click', sheet._stopProp);
     } else {
-        // Mobile: bottom sheet — parent gets the backdrop background
-        sheet.className += ' fixed inset-0 items-end justify-center flex';
-        sheet.style.backgroundColor = 'rgba(0,0,0,0.3)';
-        body.style.borderRadius = '1rem 1rem 0 0';
-        body.style.padding = '1.5rem 1.5rem 2rem';
-        body.style.width = '100%';
-        body.style.maxHeight = '60vh';
-        // Close when tapping outside the sheet body
-        sheet.onclick = function (e) {
-            if (e.target === sheet) closeStatusSheet();
-        };
+        sheet.style.position = 'fixed';
+        sheet.style.top = rect.bottom + 'px';
+        var dropLeft = rect.left;
+        if (dropLeft + 160 > window.innerWidth - 8) {
+            dropLeft = Math.max(8, rect.right - 160);
+        }
+        sheet.style.left = dropLeft + 'px';
     }
 
     opts.innerHTML = '';
@@ -582,12 +595,8 @@ function openStatusSheet(taskIdEnc, currentStatus, btn) {
         var label = STATUS_LABELS[s] || s;
         var isCurrent = s === currentStatus;
         var el = document.createElement('button');
-        var isDesktop = window.innerWidth >= 640;
         el.className = 'w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors ' +
-            (isCurrent ? 'bg-brand text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600');
-        if (isDesktop && isCurrent) {
-            el.className += ' cursor-default';
-        }
+            (isCurrent ? 'bg-brand text-white cursor-default' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600');
         el.textContent = label;
         if (!isCurrent) {
             el.onclick = function (e) {
