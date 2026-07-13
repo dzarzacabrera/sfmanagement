@@ -15,5 +15,7 @@ public record EvaluationHistoryDto(
     double NewLevel,
     DateTime CreatedAt)
 {
+    public const string ManualAdjustmentTitle = "Edit by User";
+
     public string IdEncrypted { get; init; } = "";
 }

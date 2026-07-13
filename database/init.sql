@@ -86,7 +86,7 @@ END $$;
 -- 2.7 Performance Evaluations (immutable audit trail)
 CREATE TABLE IF NOT EXISTS performance_evaluations (
     id                INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    task_id           INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+    task_id           INT REFERENCES tasks(id) ON DELETE SET NULL,
     worker_id         INT NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
     skill_position    INT NOT NULL,
     rating            DOUBLE PRECISION NOT NULL,
