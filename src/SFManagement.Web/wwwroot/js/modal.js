@@ -2,6 +2,77 @@ var lastFocusedElement = null;
 var isDragging = false;
 var dragStartY = 0;
 var dragStartScrollTop = 0;
+var isMobileModal = false;
+var sheetDragY = 0;
+var sheetDragging = false;
+
+function applyMobileSheet() {
+    var root = document.getElementById('modal-root');
+    var panel = document.getElementById('modal-panel');
+    var content = document.getElementById('modal-content');
+    var dragHeader = document.getElementById('modal-drag-header');
+    var closeDesktop = root.querySelector('button[aria-label="Close"].absolute');
+
+    root.classList.remove('items-center', 'p-4');
+    root.classList.add('items-end');
+    root.style.backgroundColor = 'rgba(0,0,0,0.3)';
+
+    panel.style.borderRadius = '1rem 1rem 0 0';
+    panel.style.maxWidth = '100%';
+    panel.style.maxHeight = '90dvh';
+    panel.style.height = 'auto';
+    panel.style.transform = '';
+    panel.style.transition = '';
+
+    content.style.height = 'auto';
+    content.style.maxHeight = 'calc(90dvh - 48px)';
+
+    var titleDiv = content.querySelector('.shrink-0');
+    if (titleDiv) {
+        titleDiv.style.paddingTop = '0.25rem';
+        titleDiv.style.paddingBottom = '0.75rem';
+    }
+
+    dragHeader.classList.remove('hidden');
+    dragHeader.classList.add('flex');
+    if (closeDesktop) closeDesktop.style.display = 'none';
+
+    setTimeout(function () {
+        content.scrollTop = 0;
+    }, 0);
+}
+
+function removeMobileSheet() {
+    var root = document.getElementById('modal-root');
+    var panel = document.getElementById('modal-panel');
+    var content = document.getElementById('modal-content');
+    var dragHeader = document.getElementById('modal-drag-header');
+    var closeDesktop = root.querySelector('button[aria-label="Close"].absolute');
+
+    root.classList.add('items-center', 'p-4');
+    root.classList.remove('items-end');
+    root.style.backgroundColor = '';
+
+    panel.style.borderRadius = '';
+    panel.style.maxWidth = '';
+    panel.style.maxHeight = '';
+    panel.style.height = '';
+    panel.style.transform = '';
+    panel.style.transition = '';
+
+    content.style.height = '';
+    content.style.maxHeight = '';
+
+    var titleDiv = content.querySelector('.shrink-0');
+    if (titleDiv) {
+        titleDiv.style.paddingTop = '';
+        titleDiv.style.paddingBottom = '';
+    }
+
+    dragHeader.classList.add('hidden');
+    dragHeader.classList.remove('flex');
+    if (closeDesktop) closeDesktop.style.display = '';
+}
 
 function openModal(html) {
     var root = document.getElementById('modal-root');
@@ -13,17 +84,24 @@ function openModal(html) {
     });
 
     content.innerHTML = html;
-    // Add right padding to form content when scrollable to avoid scrollbar overlap
+
+    isMobileModal = window.innerWidth < 640;
+    if (isMobileModal) {
+        applyMobileSheet();
+    } else {
+        removeMobileSheet();
+    }
+
     requestAnimationFrame(function () {
         if (content.scrollHeight > content.clientHeight) {
             var forms = content.querySelectorAll('form');
             forms.forEach(function (f) { f.style.paddingRight = '8px'; });
         }
     });
-    root.classList.remove('hidden', 'modal-exit-active');
-    root.classList.add('flex', 'modal-enter');
+    root.classList.remove('hidden', 'modal-exit-active', 'modal-sheet-exit-active');
+    var enterClass = isMobileModal ? 'modal-sheet-enter' : 'modal-enter';
+    root.classList.add('flex', enterClass);
 
-    // Lock background: prevent scroll on body with position fixed
     var scrollY = window.scrollY;
     document.body.style.position = 'fixed';
     document.body.style.top = '-' + scrollY + 'px';
@@ -32,8 +110,9 @@ function openModal(html) {
     document.body.dataset.scrollY = scrollY;
 
     requestAnimationFrame(function () {
-        root.classList.remove('modal-enter');
-        root.classList.add('modal-enter-active');
+        root.classList.remove(enterClass);
+        var activeClass = isMobileModal ? 'modal-sheet-enter-active' : 'modal-enter-active';
+        root.classList.add(activeClass);
     });
 
     setTimeout(function () {
@@ -44,14 +123,17 @@ function openModal(html) {
 
 function closeModal() {
     var root = document.getElementById('modal-root');
-    root.classList.remove('modal-enter-active');
-    root.classList.add('modal-exit', 'modal-exit-active');
+    var panel = document.getElementById('modal-panel');
+    var exitClass = isMobileModal ? 'modal-sheet-exit' : 'modal-exit';
+    var exitActiveClass = isMobileModal ? 'modal-sheet-exit-active' : 'modal-exit-active';
+    root.classList.remove('modal-enter-active', 'modal-sheet-enter-active');
+    root.classList.add(exitClass, exitActiveClass);
 
     setTimeout(function () {
         root.classList.add('hidden');
-        root.classList.remove('flex', 'modal-exit', 'modal-exit-active');
+        root.classList.remove('flex', exitClass, exitActiveClass);
+        removeMobileSheet();
 
-        // Restore background scroll position
         var scrollY = parseInt(document.body.dataset.scrollY || '0');
         document.body.style.position = '';
         document.body.style.top = '';
@@ -67,11 +149,96 @@ function closeModal() {
     }, 150);
 }
 
+// --- Drag-to-dismiss on handle header (mobile + desktop) ---
+(function () {
+    var header = document.getElementById('modal-drag-header');
+    if (!header) return;
+    var isSheetOpen = false;
+
+    function getSheetBg() {
+        return window.innerWidth < 640 ? 0.3 : 0.4;
+    }
+
+    header.addEventListener('touchstart', function (e) {
+        if (e.target.closest('button')) return;
+        isSheetOpen = document.getElementById('modal-root').classList.contains('modal-sheet-enter-active') ||
+                       document.getElementById('modal-root').classList.contains('modal-enter-active');
+        if (!isSheetOpen) return;
+        sheetDragY = e.touches[0].clientY;
+        sheetDragging = true;
+        var panel = document.getElementById('modal-panel');
+        panel.style.transition = 'none';
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function (e) {
+        if (!sheetDragging) return;
+        var delta = e.touches[0].clientY - sheetDragY;
+        if (delta < 0) delta = 0;
+        var panel = document.getElementById('modal-panel');
+        var root = document.getElementById('modal-root');
+        panel.style.transform = 'translateY(' + delta + 'px)';
+        var opacity = Math.max(0, 1 - delta / 300);
+        root.style.backgroundColor = 'rgba(0,0,0,' + (getSheetBg() * opacity) + ')';
+    }, { passive: true });
+
+    document.addEventListener('touchend', function () {
+        if (!sheetDragging) return;
+        sheetDragging = false;
+        var panel = document.getElementById('modal-panel');
+        var lastDelta = parseFloat(panel.style.transform.replace(/[^0-9.-]/g, '')) || 0;
+        panel.style.transition = 'transform 0.2s ease-out';
+        if (lastDelta > 80) {
+            closeModal();
+        } else {
+            panel.style.transform = 'translateY(0)';
+            var root = document.getElementById('modal-root');
+            root.style.backgroundColor = 'rgba(0,0,0,' + getSheetBg() + ')';
+        }
+    });
+
+    header.addEventListener('mousedown', function (e) {
+        if (e.target.closest('button')) return;
+        isSheetOpen = document.getElementById('modal-root').classList.contains('modal-sheet-enter-active') ||
+                       document.getElementById('modal-root').classList.contains('modal-enter-active');
+        if (!isSheetOpen) return;
+        sheetDragY = e.clientY;
+        sheetDragging = true;
+        var panel = document.getElementById('modal-panel');
+        panel.style.transition = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!sheetDragging) return;
+        var delta = e.clientY - sheetDragY;
+        if (delta < 0) delta = 0;
+        var panel = document.getElementById('modal-panel');
+        var root = document.getElementById('modal-root');
+        panel.style.transform = 'translateY(' + delta + 'px)';
+        var opacity = Math.max(0, 1 - delta / 300);
+        root.style.backgroundColor = 'rgba(0,0,0,' + (getSheetBg() * opacity) + ')';
+    });
+
+    document.addEventListener('mouseup', function () {
+        if (!sheetDragging) return;
+        sheetDragging = false;
+        var panel = document.getElementById('modal-panel');
+        var lastDelta = parseFloat(panel.style.transform.replace(/[^0-9.-]/g, '')) || 0;
+        panel.style.transition = 'transform 0.2s ease-out';
+        if (lastDelta > 80) {
+            closeModal();
+        } else {
+            panel.style.transform = 'translateY(0)';
+            var root = document.getElementById('modal-root');
+            root.style.backgroundColor = 'rgba(0,0,0,' + getSheetBg() + ')';
+        }
+    });
+})();
+
 // --- Drag to scroll on modal content (desktop) ---
 document.addEventListener('mousedown', function (e) {
     var content = document.getElementById('modal-content');
     if (!content || !content.contains(e.target)) return;
-    // Ignore clicks on interactive elements
     if (e.target.closest('input, select, textarea, button, a, [role="button"], .skill-remove, .skill-pill')) return;
 
     isDragging = true;

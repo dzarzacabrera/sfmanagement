@@ -27,18 +27,18 @@
     {
         <div class="shrink-0 px-6 pt-6 pb-4">
             <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                <span class="text-sm sm:text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 self-start order-2 sm:order-1
+                <span class="inline-block font-bold px-2.5 py-0.5 rounded-full shrink-0 self-start order-2 sm:order-1
                     @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
                       Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
                       Model.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-200" :
-                      "bg-gray-50 text-gray-600 border border-gray-200")">
+                      "bg-gray-50 text-gray-600 border border-gray-200")" style="font-size:13px;">
                     @Model.Criticality
                 </span>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate pr-8 sm:pr-0 order-1 sm:order-2">@Model.TaskTitle</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate order-1 sm:order-2">@Model.TaskTitle</h2>
             </div>
         </div>
 
-        <div class="flex flex-col flex-1 min-h-0 pl-6 pr-6 sm:pr-0 pb-6">
+        <div class="flex flex-col flex-1 min-h-0 px-6 pb-6">
 
         <form id="evaluationForm" data-crit-multiplier="@multiplier.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)"
               class="flex flex-col flex-1 min-h-0">
