@@ -114,6 +114,26 @@ public class DashboardController : Controller
 
     [HttpPost]
     [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> AssignWorkers(
+        [FromForm] string taskIdEncrypted,
+        [FromForm] string[] workerIdsEncrypted,
+        [FromServices] ICommandHandler<AssignWorkersCommand> handler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return BadRequest();
+        var workerIds = new List<long>();
+        foreach (var wEnc in workerIdsEncrypted)
+        {
+            if (enc.TryDecrypt(wEnc, out var wid))
+                workerIds.Add(wid);
+        }
+        if (workerIds.Count == 0) return BadRequest();
+        await handler.HandleAsync(new AssignWorkersCommand(tid, workerIds));
+        return Ok();
+    }
+
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> RemoveWorker(
         [FromForm] string taskIdEncrypted,
         [FromForm] string workerIdEncrypted,

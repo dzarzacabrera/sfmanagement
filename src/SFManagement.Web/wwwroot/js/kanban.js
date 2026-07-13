@@ -20,31 +20,63 @@ function openAssignModal(taskIdEnc, projectIdEnc) {
         .then(function (html) {
             if (skel) skel.remove();
             openModal(html);
-            document.getElementById('assignForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                var btn = e.submitter || this.querySelector('button[type="submit"]');
-                if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Assigning...'; }
-                var formData = new FormData(this);
-                fetch('/Dashboard/AssignWorker', { method: 'POST', body: formData })
-                    .then(function (r) {
-                        if (r.ok) {
-                            closeModal();
-                            refreshTaskCard(taskIdEnc);
-                            showToast('Worker assigned successfully', 'success');
-                        } else {
-                            showToast('Assign failed: ' + r.status, 'error');
-                            if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
-                        }
-                    })
-                    .catch(function (err) {
-                        showToast('Assign error: ' + err.message, 'error');
-                        if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
-                    });
-            });
         })
         .catch(function (err) {
             if (skel) skel.remove();
             showToast('Failed to load assign popup: ' + err.message, 'error');
+        });
+}
+
+function toggleWorkerSelect(card) {
+    card.classList.toggle('selected');
+    var check = card.querySelector('.assign-check');
+    if (card.classList.contains('selected')) {
+        card.style.borderColor = '#1d4ed8';
+        card.style.backgroundColor = 'rgba(29,78,216,0.06)';
+        check.style.borderColor = '#1d4ed8';
+        check.style.backgroundColor = '#1d4ed8';
+        var svg = check.querySelector('svg');
+        if (svg) svg.classList.remove('hidden');
+    } else {
+        card.style.borderColor = '';
+        card.style.backgroundColor = '';
+        check.style.borderColor = '';
+        check.style.backgroundColor = '';
+        var svg2 = check.querySelector('svg');
+        if (svg2) svg2.classList.add('hidden');
+    }
+    var count = document.querySelectorAll('.assign-card.selected').length;
+    var btn = document.getElementById('assignBtn');
+    if (btn) {
+        btn.disabled = count === 0;
+        btn.textContent = count > 0 ? 'Assign (' + count + ')' : 'Assign';
+    }
+}
+
+function submitAssignWorkers(taskIdEnc) {
+    var cards = document.querySelectorAll('.assign-card.selected');
+    if (cards.length === 0) return;
+    var btn = document.getElementById('assignBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Assigning...'; }
+    var formData = new FormData();
+    formData.append('taskIdEncrypted', taskIdEnc);
+    cards.forEach(function (card) {
+        formData.append('workerIdsEncrypted', card.dataset.workerId);
+    });
+    fetch('/Dashboard/AssignWorkers', { method: 'POST', body: formData })
+        .then(function (r) {
+            if (r.ok) {
+                closeModal();
+                refreshTaskCard(taskIdEnc);
+                showToast('Workers assigned successfully', 'success');
+            } else {
+                showToast('Assign failed: ' + r.status, 'error');
+                if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
+            }
+        })
+        .catch(function (err) {
+            showToast('Assign error: ' + err.message, 'error');
+            if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
         });
 }
 
