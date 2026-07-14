@@ -14,6 +14,9 @@ function openAssignModal(taskIdEnc, projectIdEnc) {
     closeStatusSheet();
     var modalRoot = document.getElementById('modal-root');
     if (modalRoot && !modalRoot.classList.contains('hidden')) closeModal();
+    // Store the card's encrypted task ID (used by refreshTaskCard to find the correct card)
+    // The modal's TaskIdEncrypted has a different AES-GCM nonce, so we can't rely on it for DOM lookups
+    if (modalRoot) modalRoot.dataset.cardTaskId = taskIdEnc;
     var col = document.querySelector('.kanban-column[data-status="InProgress"]');
     var skel = col ? showSkeleton(col) : null;
 
@@ -22,11 +25,30 @@ function openAssignModal(taskIdEnc, projectIdEnc) {
         .then(function (html) {
             if (skel) skel.remove();
             openModal(html);
+            // Update button count for pre-selected (already assigned) workers
+            updateAssignButton();
+            // Store the set of initially selected worker IDs so submitAssignWorkers can detect changes
+            if (modalRoot) {
+                var initial = [];
+                document.querySelectorAll('.assign-card.selected').forEach(function (c) {
+                    initial.push(c.dataset.workerId);
+                });
+                modalRoot.dataset.initialWorkerIds = initial.join(',');
+            }
         })
         .catch(function (err) {
             if (skel) skel.remove();
             showToast('Failed to load assign popup: ' + err.message, 'error');
         });
+}
+
+function updateAssignButton() {
+    var count = document.querySelectorAll('.assign-card.selected').length;
+    var assignBtns = document.querySelectorAll('#assignBtn, #assignProjectBtn');
+    assignBtns.forEach(function (btn) {
+        btn.disabled = count === 0;
+        btn.textContent = count > 0 ? 'Assign (' + count + ')' : 'Assign';
+    });
 }
 
 function toggleWorkerSelect(card) {
@@ -44,30 +66,43 @@ function toggleWorkerSelect(card) {
         if (rankNum) rankNum.classList.remove('hidden');
         if (rankCheck) rankCheck.classList.add('hidden');
     }
-    var count = document.querySelectorAll('.assign-card.selected').length;
-    var assignBtns = document.querySelectorAll('#assignBtn, #assignProjectBtn');
-    assignBtns.forEach(function (btn) {
-        btn.disabled = count === 0;
-        btn.textContent = count > 0 ? 'Assign (' + count + ')' : 'Assign';
-    });
+    updateAssignButton();
 }
 
 function submitAssignWorkers(taskIdEnc) {
     var cards = document.querySelectorAll('.assign-card.selected');
-    if (cards.length === 0) return;
+    var root = document.getElementById('modal-root');
+    // Skip if no changes were made to the selection
+    var initialIds = root ? root.dataset.initialWorkerIds || '' : '';
+    var currentIds = [];
+    cards.forEach(function (c) { currentIds.push(c.dataset.workerId); });
+    if (currentIds.sort().join(',') === initialIds.split(',').sort().join(',')) {
+        closeModal();
+        return;
+    }
+
     var btn = document.getElementById('assignBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Assigning...'; }
     var formData = new FormData();
     formData.append('taskIdEncrypted', taskIdEnc);
+    var workerNames = [];
     cards.forEach(function (card) {
         formData.append('workerIdsEncrypted', card.dataset.workerId);
+        var n = card.querySelector('.min-w-0 .text-sm.font-semibold');
+        if (n) workerNames.push(n.textContent.trim());
     });
+    // The modal's taskIdEnc has a different AES-GCM nonce than the card's data-task-id-encrypted.
+    // Use the stored card task ID to find and update the correct DOM card.
+    var cardTaskId = root ? root.dataset.cardTaskId : null;
     fetch('/Dashboard/AssignWorkers', { method: 'POST', body: formData })
         .then(function (r) {
             if (r.ok) {
                 closeModal();
-                refreshTaskCard(taskIdEnc);
                 showToast('Workers assigned successfully', 'success');
+                var refreshId = cardTaskId || taskIdEnc;
+                // Update Task/Index card workers directly (also uses card's encrypted ID, not modal's)
+                updateTaskIndexWorkers(refreshId, workerNames);
+                refreshTaskCard(refreshId);
             } else {
                 showToast('Assign failed: ' + r.status, 'error');
                 if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
@@ -77,6 +112,27 @@ function submitAssignWorkers(taskIdEnc) {
             showToast('Assign error: ' + err.message, 'error');
             if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
         });
+}
+
+function updateTaskIndexWorkers(taskIdEnc, workerNames) {
+    var joined = workerNames.join(', ');
+    // Card view in Task/Index — replace the full list (workerNames already includes pre-assigned)
+    document.querySelectorAll('.task-card[data-task-id="' + taskIdEnc + '"]').forEach(function (card) {
+        var existing = card.querySelector('.mt-3.text-sm.text-gray-500');
+        if (existing) {
+            existing.innerHTML = '<span class="font-medium text-gray-700 dark:text-gray-300">Team:</span> ' + (joined || '—');
+        } else {
+            card.insertAdjacentHTML('beforeend', '<div class="mt-3 text-sm text-gray-500 dark:text-gray-400"><span class="font-medium text-gray-700 dark:text-gray-300">Team:</span> ' + (joined || '—') + '</div>');
+        }
+    });
+    // List view row in Task/Index — replace the full list
+    document.querySelectorAll('.task-row[data-task-id="' + taskIdEnc + '"]').forEach(function (row) {
+        var cells = row.querySelectorAll('.col-span-2');
+        if (cells.length >= 2) {
+            var assignedCell = cells[1];
+            assignedCell.textContent = joined || '—';
+        }
+    });
 }
 
 function submitAddWorkersToProject(projectIdEnc) {
@@ -114,14 +170,17 @@ function removeWorker(taskIdEnc, workerIdEnc, btn) {
     var card = btn.closest('.task-card');
     if (card) card.style.opacity = '0.5';
 
+    // Remove any lingering tooltip before card is refreshed
+    if (btn._tooltipEl) { btn._tooltipEl.remove(); btn._tooltipEl = null; }
+
     fetch('/Dashboard/RemoveWorker', { method: 'POST', body: formData })
         .then(function (r) {
+            if (card) card.style.opacity = '';
             if (r.ok) {
                 refreshTaskCard(taskIdEnc);
                 showToast('Worker removed', 'success');
             } else {
                 showToast('Remove failed: ' + r.status, 'error');
-                if (card) card.style.opacity = '';
             }
         })
         .catch(function (err) {
@@ -262,43 +321,62 @@ function updateSliderPreview(input) {
 }
 
 function refreshTaskCard(taskIdEnc, newStatus) {
-    var card = findCard(taskIdEnc);
-    if (!card) return;
-
-    // Clean up orphaned tooltips before removing old card
-    card.querySelectorAll('[data-tooltip]').forEach(function (el) {
-        if (el._tooltipEl) {
-            el._tooltipEl.remove();
-            el._tooltipEl = null;
-        }
-    });
-
-    var projectIdEnc = window.__dashboardProjectIdEncrypted || '';
+    var projectIdEnc = window.__dashboardProjectIdEncrypted;
+    if (!projectIdEnc) return;
 
     fetch('/Dashboard/GetTaskCardHtml?taskId=' + taskIdEnc + '&projectId=' + projectIdEnc)
-        .then(function (r) { if (!r.ok) return null; return r.text(); })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
         .then(function (html) {
-            if (!html) return;
-            var temp = document.createElement('div');
-            temp.innerHTML = html;
-            var newCard = temp.querySelector('.task-card');
-            if (!newCard) return;
+            if (!html) throw new Error('Empty response');
+            var newCard = htmlToCard(html);
+            if (!newCard) throw new Error('No .task-card in response');
 
+            var card = findCard(taskIdEnc);
+            if (!card) {
+                // Card not in DOM — insert fresh into newStatus column (or fetch the attribute from the response)
+                var status = newStatus || newCard.getAttribute('data-status') || 'Queued';
+                var col = document.querySelector('.kanban-column[data-status="' + status + '"]');
+                if (col) {
+                    var container = col.querySelector('.space-y-4') || col;
+                    var placeholder = col.querySelector('.empty-placeholder');
+                    if (placeholder) placeholder.remove();
+                    container.insertBefore(newCard, container.firstChild);
+                }
+                updateColumnCounts();
+                return;
+            }
+
+            // Copy all attributes from newCard to the existing card element
+            // This preserves the DOM node position but updates class, draggable, data-status, etc.
+            var attrs = newCard.attributes;
+            for (var i = 0; i < attrs.length; i++) {
+                card.setAttribute(attrs[i].name, attrs[i].value);
+            }
+            // Replace inner content to reflect updated state (workers, controls, etc.)
+            card.innerHTML = newCard.innerHTML;
+
+            // If status changed, move the card element to the target column
             if (newStatus) {
                 var targetCol = document.querySelector('.kanban-column[data-status="' + newStatus + '"]');
                 if (targetCol) {
-                    var targetContainer = targetCol.querySelector('.space-y-4') || targetCol;
+                    var container = targetCol.querySelector('.space-y-4') || targetCol;
                     var placeholder = targetCol.querySelector('.empty-placeholder');
                     if (placeholder) placeholder.remove();
-                    targetContainer.insertBefore(newCard, targetContainer.firstChild);
-                    card.remove();
+                    container.insertBefore(card, container.firstChild);
                 }
-            } else {
-                card.parentNode.replaceChild(newCard, card);
             }
+
             updateColumnCounts();
         })
-        .catch(function () { /* silently fail */ });
+        .catch(function (err) {
+            showToast('Card refresh failed: ' + err.message, 'error');
+        });
+}
+
+function htmlToCard(html) {
+    var temp = document.createElement('div');
+    temp.innerHTML = html;
+    return temp.querySelector('.task-card');
 }
 
 function updateTaskCard(taskIdEnc, newStatus) {

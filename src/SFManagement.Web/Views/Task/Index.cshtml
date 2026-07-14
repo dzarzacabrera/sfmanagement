@@ -220,6 +220,7 @@ else
                 var isArchived = task.Status == ProjectTaskStatus.Archived;
 
                 <div class="task-row grid grid-cols-12 items-center gap-4 border-b border-gray-100 last:border-b-0 py-3 px-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors @rowColors[Math.Abs(task.ProjectId) % 10]"
+                     data-task-id="@task.IdEncrypted"
                      data-title="@task.Title.ToLower()"
                      data-project="@task.ProjectIdEncrypted">
                     <div class="col-span-3 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
