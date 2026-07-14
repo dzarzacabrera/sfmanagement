@@ -28,12 +28,13 @@ internal sealed class GetRecommendedWorkersQueryHandler(INpgsqlConnectionFactory
         await using var cmd = new NpgsqlCommand(
             "SELECT w.id, w.name, w.role, " +
             "(w.skills_vector <#> $1) * -1 AS raw_score, " +
-            "w.skills_vector " +
+            "w.skills_vector, " +
+            "CASE WHEN ta.worker_id IS NOT NULL THEN true ELSE false END AS is_assigned " +
             "FROM workers w " +
             "INNER JOIN project_workers pw ON pw.worker_id = w.id " +
+            "LEFT JOIN task_assignments ta ON ta.worker_id = w.id AND ta.task_id = $3 " +
             "WHERE pw.project_id = $2 " +
-            "AND w.id NOT IN (SELECT worker_id FROM task_assignments WHERE task_id = $3) " +
-            "ORDER BY raw_score DESC", connection);
+            "ORDER BY is_assigned DESC, raw_score DESC", connection);
         cmd.Parameters.Add(new() { Value = new Pgvector.Vector(taskVector) });
         cmd.Parameters.Add(new() { Value = query.ProjectId });
         cmd.Parameters.Add(new() { Value = query.TaskId });
@@ -44,13 +45,15 @@ internal sealed class GetRecommendedWorkersQueryHandler(INpgsqlConnectionFactory
         {
             var mapper = new DataReaderMapper(reader);
             var rawScore = reader.GetDouble(reader.GetOrdinal("raw_score"));
+            var isAssigned = reader.GetBoolean(reader.GetOrdinal("is_assigned"));
             var normalizedScore = rawScore / taskSelfDot;
             results.Add(new WorkerScoreDto(
                 mapper.GetInt32("id"),
                 mapper.GetString("name"),
                 mapper.GetString("role"),
                 normalizedScore,
-                mapper.GetVector("skills_vector")));
+                mapper.GetVector("skills_vector"),
+                isAssigned));
         }
 
         return results;

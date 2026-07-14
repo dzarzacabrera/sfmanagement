@@ -116,18 +116,20 @@ public class DashboardController : Controller
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AssignWorkers(
         [FromForm] string taskIdEncrypted,
-        [FromForm] string[] workerIdsEncrypted,
+        [FromForm] string[]? workerIdsEncrypted,
         [FromServices] ICommandHandler<AssignWorkersCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
         if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return BadRequest();
         var workerIds = new List<long>();
-        foreach (var wEnc in workerIdsEncrypted)
+        if (workerIdsEncrypted != null)
         {
-            if (enc.TryDecrypt(wEnc, out var wid))
-                workerIds.Add(wid);
+            foreach (var wEnc in workerIdsEncrypted)
+            {
+                if (enc.TryDecrypt(wEnc, out var wid))
+                    workerIds.Add(wid);
+            }
         }
-        if (workerIds.Count == 0) return BadRequest();
         await handler.HandleAsync(new AssignWorkersCommand(tid, workerIds));
         return Ok();
     }

@@ -5,7 +5,8 @@ public record WorkerScoreDto(
     string Name,
     string Role,
     double CompatibilityScore,
-    float[] SkillsVector)
+    float[] SkillsVector,
+    bool IsAssigned = false)
 {
     public string IdEncrypted { get; init; } = "";
 }
