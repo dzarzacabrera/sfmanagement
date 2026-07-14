@@ -61,7 +61,8 @@ public record SkillPositionDto(int Position, string SkillName, float RequiredLev
 
 public record AddWorkerToProjectPopupViewModel(
     long ProjectId,
-    IReadOnlyList<WorkerDto> Workers)
+    IReadOnlyList<WorkerDto> Workers,
+    IReadOnlyList<SkillDto> AllSkills)
 {
     public string ProjectIdEncrypted { get; init; } = "";
 }

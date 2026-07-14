@@ -37,7 +37,7 @@
                 {
                     <span class="inline-flex items-stretch text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
                         <span class="px-2 py-0.5 bg-brand-light text-brand dark:bg-brand-light/20 dark:text-blue-100 self-center">@skill.SkillName</span>
-                        <span class="px-1.5 bg-brand-dark text-white font-bold border-l border-brand-dark flex items-center self-stretch">@skill.RequiredLevel.ToString("0")</span>
+                        <span class="px-1.5 bg-brand-dark text-white font-bold border-l border-brand-dark flex items-center self-stretch">@skill.RequiredLevel.ToString("0.##")</span>
                     </span>
                 }
             </div>
@@ -50,7 +50,10 @@
             <div class="flex flex-wrap gap-1.5 items-center">
                 @if (Model.AssignedWorkers?.Count > 0)
                 {
-                    foreach (var worker in Model.AssignedWorkers)
+                    var maxVisibleWorkers = 6;
+                    var visibleWorkers = Model.AssignedWorkers.Take(maxVisibleWorkers).ToList();
+                    var extraWorkers = Model.AssignedWorkers.Count - visibleWorkers.Count;
+                    foreach (var worker in visibleWorkers)
                     {
                         <span class="inline-flex items-center gap-1 text-sm sm:text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50">
                             @worker.WorkerName
@@ -63,6 +66,10 @@
                                 </button>
                             }
                         </span>
+                    }
+                    if (extraWorkers > 0)
+                    {
+                        <span class="inline-flex items-center text-sm sm:text-xs px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 font-medium border border-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600">+@extraWorkers</span>
                     }
                 }
                 else

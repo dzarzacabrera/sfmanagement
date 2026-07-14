@@ -45,11 +45,11 @@ function toggleWorkerSelect(card) {
         if (rankCheck) rankCheck.classList.add('hidden');
     }
     var count = document.querySelectorAll('.assign-card.selected').length;
-    var btn = document.getElementById('assignBtn');
-    if (btn) {
+    var assignBtns = document.querySelectorAll('#assignBtn, #assignProjectBtn');
+    assignBtns.forEach(function (btn) {
         btn.disabled = count === 0;
         btn.textContent = count > 0 ? 'Assign (' + count + ')' : 'Assign';
-    }
+    });
 }
 
 function submitAssignWorkers(taskIdEnc) {
@@ -75,6 +75,33 @@ function submitAssignWorkers(taskIdEnc) {
         })
         .catch(function (err) {
             showToast('Assign error: ' + err.message, 'error');
+            if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
+        });
+}
+
+function submitAddWorkersToProject(projectIdEnc) {
+    var cards = document.querySelectorAll('.assign-card.selected');
+    if (cards.length === 0) return;
+    var btn = document.getElementById('assignProjectBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Assigning...'; }
+    var formData = new FormData();
+    formData.append('projectIdEncrypted', projectIdEnc);
+    cards.forEach(function (card) {
+        formData.append('workerIdEncrypted', card.dataset.workerId);
+    });
+    fetch('/Dashboard/AddWorkersToProject', { method: 'POST', body: formData })
+        .then(function (r) {
+            if (r.ok) {
+                closeModal();
+                showToast('Workers added to project', 'success');
+                location.reload();
+            } else {
+                showToast('Failed: ' + r.status, 'error');
+                if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
+            }
+        })
+        .catch(function (err) {
+            showToast('Error: ' + err.message, 'error');
             if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
         });
 }
@@ -456,27 +483,6 @@ function openAddWorkerPopup(projectIdEnc) {
         .then(function (html) {
             if (skel) skel.remove();
             openModal(html);
-            document.getElementById('addWorkerToProjectForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                var btn = this.querySelector('button[type="submit"]');
-                if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner mr-1"></span> Adding...'; }
-                var formData = new FormData(this);
-                fetch('/Dashboard/AddWorkersToProject', { method: 'POST', body: formData })
-                    .then(function (r) {
-                        if (r.ok) {
-                            closeModal();
-                            showToast('Worker added to project', 'success');
-                            location.reload();
-                        } else {
-                            showToast('Failed: ' + r.status, 'error');
-                            if (btn) { btn.disabled = false; btn.textContent = 'Add Worker'; }
-                        }
-                    })
-                    .catch(function (err) {
-                        showToast('Error: ' + err.message, 'error');
-                        if (btn) { btn.disabled = false; btn.textContent = 'Add Worker'; }
-                    });
-            });
         })
         .catch(function (err) {
             if (skel) skel.remove();
