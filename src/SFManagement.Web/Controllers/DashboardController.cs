@@ -276,12 +276,15 @@ public class DashboardController : Controller
     public async Task<IActionResult> AddWorkerPopup(
         [FromQuery] string projectId,
         [FromServices] IGetWorkersNotInProjectQueryHandler handler,
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler,
         [FromServices] IIdEncryptionService enc)
     {
         if (!enc.TryDecrypt(projectId, out var pid)) return NotFound();
         var workers = await handler.HandleAsync(new GetWorkersNotInProjectQuery(pid));
+        var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
         var vm = new AddWorkerToProjectPopupViewModel(pid,
-            workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList())
+            workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList(),
+            skills)
         {
             ProjectIdEncrypted = enc.Encrypt(pid)
         };

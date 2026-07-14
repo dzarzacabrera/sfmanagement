@@ -1,46 +1,74 @@
 @model AddWorkerToProjectPopupViewModel
+@using SFManagement.Application.DTOs
+@{
+    var activeSkills = Model.AllSkills.Where(s => s.IsActive).ToList();
+}
 
 <div class="flex flex-col h-full">
     <div class="shrink-0 px-6 pt-6 pb-4">
-        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Add Workers to Project</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Add Workers to Project</h2>
     </div>
 
-    <div class="flex flex-col flex-1 min-h-0 px-6 pb-6">
-        <form id="addWorkerToProjectForm" class="flex flex-col flex-1 min-h-0">
-            <input type="hidden" name="projectIdEncrypted" value="@Model.ProjectIdEncrypted">
-
-            @if (Model.Workers.Count == 0)
-            {
-                <p class="text-sm text-gray-400 italic text-center py-4">All workers are already assigned to this project.</p>
-            }
-            else
-            {
-                <div class="flex-1 overflow-y-auto min-h-0">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    @foreach (var worker in Model.Workers)
-                    {
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-brand-light/20 has-[:checked]:bg-brand-light/20 has-[:checked]:border-brand-dark/50 dark:border-gray-600 dark:hover:bg-gray-700">
-                            <input type="checkbox" name="workerIdEncrypted" value="@worker.IdEncrypted" class="accent-brand rounded">
-                            <div>
-                                <div class="text-sm font-medium text-gray-900 dark:text-gray-200">@worker.Name</div>
-                                <div class="text-sm text-gray-400">@worker.Role</div>
+    @if (Model.Workers.Count == 0)
+    {
+        <div class="flex-1 flex items-center justify-center px-6 pb-6">
+            <p class="text-sm text-gray-400 italic text-center">All workers are already assigned to this project.</p>
+        </div>
+    }
+    else
+    {
+        <div class="flex flex-col flex-1 min-h-0 px-6 pb-6">
+            <div id="addWorkerList" class="flex-1 overflow-y-auto min-h-0 space-y-3 pb-4">
+                @foreach (var worker in Model.Workers)
+                {
+                    <div class="assign-card worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 cursor-pointer transition-all duration-150 hover:shadow-md dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                         data-worker-id="@worker.IdEncrypted"
+                         onclick="toggleWorkerSelect(this)">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="rank-num shrink-0 w-7 h-7 rounded-full bg-brand/25 text-brand text-sm font-bold flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                </span>
+                                <span class="rank-check shrink-0 w-7 h-7 rounded-full bg-brand text-white flex items-center justify-center hidden">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">@worker.Name</div>
+                                    <div class="text-sm text-gray-400 dark:text-gray-400 truncate">@worker.Role</div>
+                                </div>
                             </div>
-                        </label>
-                    }
+                        </div>
+                        @if (activeSkills.Count > 0)
+                        {
+                            <div class="flex items-start gap-2 mt-3">
+                                <div class="flex flex-wrap gap-1.5 flex-1 min-w-0">
+                                    @foreach (var skill in activeSkills)
+                                    {
+                                        var workerLevel = skill.VectorPosition < worker.SkillsVector.Length ? worker.SkillsVector[skill.VectorPosition] : 0;
+                                        if (workerLevel <= 0.001) continue;
+                                        <span class="inline-flex items-center text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
+                                            <span class="px-2 py-0.5 bg-brand-light text-brand self-center">@skill.Name</span>
+                                            <span class="px-1.5 bg-brand-dark text-white font-bold border-l border-brand-dark flex items-center self-stretch">@workerLevel.ToString("0.##")</span>
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
                     </div>
-                </div>
-            }
+                }
+            </div>
 
             <div class="flex justify-end gap-2 mt-4 shrink-0">
                 <button type="button" onclick="closeModal()"
-                        class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                        class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                     Cancel
                 </button>
-                <button type="submit"
-                        class="px-4 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep">
-                    Add Selected
+                <button id="assignProjectBtn" type="button" disabled
+                        class="px-5 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                        onclick="submitAddWorkersToProject('@Model.ProjectIdEncrypted')">
+                    Assign
                 </button>
             </div>
-        </form>
-    </div>
+        </div>
+    }
 </div>

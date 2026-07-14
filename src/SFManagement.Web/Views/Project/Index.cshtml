@@ -75,6 +75,22 @@ else
                         var desc = project.DescriptionMd.Length > 120 ? project.DescriptionMd[..120] : project.DescriptionMd;
                         <p class="text-base sm:text-sm text-gray-400 mt-1 sm:mt-1.5 line-clamp-3 dark:text-gray-400">@Html.Raw(desc.Replace("\n", "<br>").Replace("\\n", "<br>"))</p>
                     }
+                    @if (project.WorkerNames?.Count > 0)
+                    {
+                        var maxVisible = 6;
+                        var visibleWorkers = project.WorkerNames.Take(maxVisible).ToList();
+                        var extra = project.WorkerNames.Count - visibleWorkers.Count;
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            @foreach (var wName in visibleWorkers)
+                            {
+                                <span class="inline-flex items-center text-sm sm:text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">@wName</span>
+                            }
+                            @if (extra > 0)
+                            {
+                                <span class="inline-flex items-center text-sm sm:text-xs px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 font-medium border border-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600">+@extra</span>
+                            }
+                        </div>
+                    }
                 </div>
                 <div class="flex flex-wrap gap-2 pt-3">
                     <a href="/Dashboard/Index?projectId=@project.IdEncrypted"
@@ -122,6 +138,22 @@ else
                     </div>
                     <div class="col-span-6 text-sm text-gray-500 dark:text-gray-400 truncate">
                         @listDesc
+                        @if (project.WorkerNames?.Count > 0)
+                        {
+                            var maxVisible = 6;
+                            var visibleW = project.WorkerNames.Take(maxVisible).ToList();
+                            var extra = project.WorkerNames.Count - visibleW.Count;
+                            <span class="inline-flex flex-wrap gap-1 ml-0.5 align-middle">
+                                @foreach (var wName in visibleW)
+                                {
+                                    <span class="inline-flex items-center text-xs px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">@wName</span>
+                                }
+                                @if (extra > 0)
+                                {
+                                    <span class="inline-flex items-center text-xs px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-500 font-medium border border-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600">+@extra</span>
+                                }
+                            </span>
+                        }
                     </div>
                     <div class="col-span-3 flex items-center justify-end">
                         <div class="flex items-center gap-1 pr-2 border-r border-gray-200 dark:border-gray-600">
