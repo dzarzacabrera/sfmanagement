@@ -104,12 +104,12 @@ function submitAssignWorkers(taskIdEnc) {
                 updateTaskIndexWorkers(refreshId, workerNames);
                 refreshTaskCard(refreshId);
             } else {
-                showToast('Assign failed: ' + r.status, 'error');
+                showToast('Assign failed: ' + r.status, 'error', btn);
                 if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
             }
         })
         .catch(function (err) {
-            showToast('Assign error: ' + err.message, 'error');
+            showToast('Assign error: ' + err.message, 'error', btn);
             if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
         });
 }
@@ -152,12 +152,12 @@ function submitAddWorkersToProject(projectIdEnc) {
                 showToast('Workers added to project', 'success');
                 location.reload();
             } else {
-                showToast('Failed: ' + r.status, 'error');
+                showToast('Failed: ' + r.status, 'error', btn);
                 if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
             }
         })
         .catch(function (err) {
-            showToast('Error: ' + err.message, 'error');
+            showToast('Error: ' + err.message, 'error', btn);
             if (btn) { btn.disabled = false; btn.textContent = 'Assign'; }
         });
 }
@@ -178,13 +178,13 @@ function removeWorker(taskIdEnc, workerIdEnc, btn) {
             if (card) card.style.opacity = '';
             if (r.ok) {
                 refreshTaskCard(taskIdEnc);
-                showToast('Worker removed', 'success');
+                showToast('Worker removed', 'success', btn);
             } else {
-                showToast('Remove failed: ' + r.status, 'error');
+                showToast('Remove failed: ' + r.status, 'error', btn);
             }
         })
         .catch(function (err) {
-            showToast('Remove error: ' + err.message, 'error');
+            showToast('Remove error: ' + err.message, 'error', btn);
             if (card) card.style.opacity = '';
         });
 }
@@ -243,7 +243,7 @@ document.getElementById('modal-root').addEventListener('submit', function (e) {
         .then(function (r) { return r.json(); })
         .then(function (data) {
             if (data.hasMore) {
-                showToast('Evaluation submitted. Select next worker.', 'success');
+                showToast('Evaluation submitted. Select next worker.', 'success', btn);
                 openEvaluationModal(taskIdEnc, window.__dashboardProjectIdEncrypted || '');
             } else {
                 closeModal();
@@ -252,7 +252,7 @@ document.getElementById('modal-root').addEventListener('submit', function (e) {
             }
         })
         .catch(function (err) {
-            showToast('Evaluation error: ' + err.message, 'error');
+            showToast('Evaluation error: ' + err.message, 'error', btn);
             if (btn) { btn.disabled = false; btn.textContent = 'Submit Evaluation'; }
         });
 });
@@ -455,7 +455,7 @@ if (kanbanGrid) {
             .then(function (r) {
                 if (r.ok) {
                     refreshTaskCard(taskIdEnc, newStatus);
-                    showToast('Task moved to ' + newStatus, 'success');
+                    showToast('Task moved to ' + newStatus, 'success', null, col);
                 } else {
                     showToast('Status change failed: ' + r.status, 'error');
                 }
@@ -550,6 +550,33 @@ function archiveTask(taskIdEnc, btn, keepVisible) {
                 if (!keepVisible) restoreCard();
             });
     }, 2000);
+}
+
+function finalizeProject(projectIdEnc, btn) {
+    var formData = new FormData();
+    formData.append('projectIdEncrypted', projectIdEnc);
+
+    // Determine which endpoint: DashboardController or ProjectController
+    var url = btn && btn.closest('.project-card, .project-row') ? '/Project/FinalizeProject' : '/Dashboard/FinalizeProject';
+
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
+    fetch(url, { method: 'POST', body: formData })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                showToast('Project closed successfully', 'success', btn);
+                // Reload the page to reflect changes (tasks hidden, banner shown)
+                setTimeout(function () { location.reload(); }, 500);
+            } else {
+                showToast(data.message || 'Failed to close project', 'error', btn);
+                if (btn) { btn.disabled = false; btn.textContent = 'Close'; }
+            }
+        })
+        .catch(function (err) {
+            showToast('Close error: ' + err.message, 'error', btn);
+            if (btn) { btn.disabled = false; btn.textContent = 'Close'; }
+        });
 }
 
 function openAddWorkerPopup(projectIdEnc) {

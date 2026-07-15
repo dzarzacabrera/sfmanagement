@@ -58,7 +58,8 @@ public class DashboardController : Controller
             tasks.Where(t => t.Status == ProjectTaskStatus.Blocked).Select(t => MapToCard(t, enc)).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.Finish).Select(t => MapToCard(t, enc)).ToList(),
             hasProjectWorkers,
-            hasWorkersToAssignToProject)
+            hasWorkersToAssignToProject,
+            project?.IsFinalized ?? false)
         {
             ProjectIdEncrypted = enc.Encrypt(pid)
         };
@@ -272,6 +273,25 @@ public class DashboardController : Controller
         }
 
         return Json(new { hasMore = evaluatedCount < assignedCount });
+    }
+
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> FinalizeProject(
+        [FromForm] string projectIdEncrypted,
+        [FromServices] ICommandHandler<FinalizeProjectCommand> handler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return BadRequest();
+        try
+        {
+            await handler.HandleAsync(new FinalizeProjectCommand(pid));
+            return Json(new { success = true });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
     }
 
     [HttpGet]

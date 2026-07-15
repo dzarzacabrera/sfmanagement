@@ -12,6 +12,13 @@ internal sealed class AssignWorkersCommandHandler(INpgsqlConnectionFactory conne
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
 
+        await using var checkCmd = new NpgsqlCommand(
+            "SELECT p.is_finalized FROM tasks t JOIN projects p ON p.id = t.project_id WHERE t.id = $1", connection);
+        checkCmd.Parameters.Add(new() { Value = command.TaskId });
+        var isFinalized = await checkCmd.ExecuteScalarAsync();
+        if (isFinalized is true)
+            throw new InvalidOperationException("Cannot assign workers to a task in a closed project.");
+
         await using var tx = await connection.BeginTransactionAsync();
         try
         {

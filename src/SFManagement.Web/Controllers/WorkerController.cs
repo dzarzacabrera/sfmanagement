@@ -17,6 +17,7 @@ public class WorkerController : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Create(
+        [FromQuery] string? projectId,
         [FromServices] IGetAllSkillsQueryHandler skillsHandler,
         [FromServices] IIdEncryptionService enc)
     {
@@ -24,6 +25,7 @@ public class WorkerController : Controller
         ViewBag.AllSkills = skills;
         ViewBag.PageTitle = "Add Worker";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Workers", "/Worker/Index"), new("Add Worker", "") };
+        ViewBag.ReturnProjectId = projectId;
         return View();
     }
 
@@ -42,7 +44,10 @@ public class WorkerController : Controller
         [FromForm] string? role,
         [FromForm] int[]? skillPositions,
         [FromForm] string[]? skillLevels,
-        [FromServices] ICommandHandler<CreateWorkerCommand> handler)
+        [FromForm] string? projectId,
+        [FromServices] ICommandHandler<CreateWorkerCommand> createHandler,
+        [FromServices] ICommandHandler<AddWorkerToProjectCommand> assignHandler,
+        [FromServices] IIdEncryptionService enc)
     {
         var parsed = ParseFloatArray(skillLevels);
         var vector = new float[1024];
@@ -58,7 +63,14 @@ public class WorkerController : Controller
         }
 
         var command = new CreateWorkerCommand(name, role ?? string.Empty, vector);
-        await handler.HandleAsync(command);
+        await createHandler.HandleAsync(command);
+
+        if (!string.IsNullOrEmpty(projectId) && enc.TryDecrypt(projectId, out var pid))
+        {
+            await assignHandler.HandleAsync(new AddWorkerToProjectCommand(pid, command.CreatedId));
+            return RedirectToAction("Detail", "Project", new { projectId });
+        }
+
         return RedirectToAction("Index");
     }
 

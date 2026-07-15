@@ -13,7 +13,8 @@ public record EvaluationHistoryDto(
     double Impact,
     double PreviousLevel,
     double NewLevel,
-    DateTime CreatedAt)
+    DateTime CreatedAt,
+    string? ProjectName = null)
 {
     public const string ManualAdjustmentTitle = "Edit by User";
 

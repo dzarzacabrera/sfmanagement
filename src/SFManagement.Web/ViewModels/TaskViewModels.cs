@@ -10,9 +10,12 @@ public record ProjectDetailViewModel(
     string Name,
     string? DescriptionMd,
     IReadOnlyList<WorkerDto>? Workers = null,
-    bool HasWorkersToAssignToProject = true)
+    IReadOnlyList<TaskDto>? Tasks = null,
+    bool HasWorkersToAssignToProject = true,
+    bool IsFinalized = false)
 {
     public string IdEncrypted { get; init; } = "";
+    public string Status => IsFinalized ? "Closed" : "In Progress";
 }
 
 public record CreateTaskViewModel(

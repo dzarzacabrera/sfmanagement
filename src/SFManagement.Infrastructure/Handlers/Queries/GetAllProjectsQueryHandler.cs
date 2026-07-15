@@ -12,7 +12,7 @@ internal sealed class GetAllProjectsQueryHandler(INpgsqlConnectionFactory connec
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
         await using var cmd = new NpgsqlCommand(
-            "SELECT p.id, p.name, p.description_md, " +
+            "SELECT p.id, p.name, p.description_md, p.is_finalized, " +
             "COALESCE((SELECT array_agg(w.name ORDER BY w.id) FROM workers w " +
             "INNER JOIN project_workers pw ON pw.worker_id = w.id WHERE pw.project_id = p.id), " +
             "ARRAY[]::text[]) " +
@@ -26,7 +26,8 @@ internal sealed class GetAllProjectsQueryHandler(INpgsqlConnectionFactory connec
                 reader.GetInt32(0),
                 reader.GetString(1),
                 reader.IsDBNull(2) ? null : reader.GetString(2),
-                reader.GetFieldValue<string[]>(3)));
+                reader.GetFieldValue<string[]>(4),
+                reader.GetBoolean(3)));
         }
 
         return results;

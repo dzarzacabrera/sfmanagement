@@ -14,6 +14,14 @@ internal sealed class CreateTaskCommandHandler(INpgsqlConnectionFactory connecti
             throw new InvalidOperationException("At least one required skill must be specified.");
 
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
+
+        await using var checkCmd = new NpgsqlCommand(
+            "SELECT is_finalized FROM projects WHERE id = $1", connection);
+        checkCmd.Parameters.Add(new() { Value = command.ProjectId });
+        var isFinalized = await checkCmd.ExecuteScalarAsync();
+        if (isFinalized is true)
+            throw new InvalidOperationException("Cannot create tasks in a closed project.");
+
         await using var cmd = new NpgsqlCommand(
             "INSERT INTO tasks (project_id, title, description, criticality, required_skills_vector) " +
             "VALUES ($1, $2, $3, $4::criticality, $5) RETURNING id", connection)
@@ -29,6 +37,6 @@ internal sealed class CreateTaskCommandHandler(INpgsqlConnectionFactory connecti
         };
 
         var result = await cmd.ExecuteScalarAsync();
-        command.CreatedId = Convert.ToInt32(result);
+        command.CreatedId = Convert.ToInt64(result);
     }
 }

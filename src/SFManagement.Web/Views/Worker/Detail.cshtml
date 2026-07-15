@@ -67,6 +67,7 @@ else
             <thead>
                 <tr class="bg-gray-100 text-left dark:bg-gray-800">
                     <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Date</th>
+                    <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Project</th>
                     <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Task</th>
                     <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Skill</th>
                     <th class="px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Rating</th>
@@ -82,6 +83,7 @@ else
                 {
                     <tr class="border-t border-gray-200 hover:bg-gray-50 dark:border-gray-700">
                         <td class="px-4 py-2 text-gray-500 dark:text-gray-300">@eval.CreatedAt.ToString("g")</td>
+                        <td class="px-4 py-2 dark:text-gray-300">@(eval.ProjectName ?? "—")</td>
                         <td class="px-4 py-2 dark:text-gray-300">@eval.TaskTitle</td>
                         <td class="px-4 py-2 dark:text-gray-300">@eval.SkillName</td>
                         <td class="px-4 py-2 font-mono dark:text-gray-300">@eval.Rating.ToString("0.00")</td>

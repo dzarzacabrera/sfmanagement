@@ -109,7 +109,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <div class="text-sm text-gray-500 dark:text-gray-400">
+                <div class="text-sm text-gray-500 dark:text-gray-400 hidden lg:block">
                     @ViewBag.PageTitle
                 </div>
             </div>
@@ -150,8 +150,6 @@
         </div>
     </div>
 
-    <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none"></div>
-
     <div id="status-bottom-sheet" class="hidden z-[70]">
         <div id="sheet-body" class="bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto">
             <div id="sheet-handle" class="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4"></div>
@@ -162,9 +160,9 @@
 
     <script src="~/js/theme.js"></script>
     <script src="~/js/modal.js?v=20260713150000"></script>
-    <script src="~/js/toast.js"></script>
+    <script src="~/js/toast.js?v=20260715140000"></script>
     <script src="~/js/tooltips.js"></script>
-    <script src="~/js/kanban.js?v=20260715000000"></script>
+    <script src="~/js/kanban.js?v=20260715140000"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

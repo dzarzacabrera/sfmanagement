@@ -36,4 +36,11 @@
         target._tooltipEl.remove();
         target._tooltipEl = null;
     });
+
+    document.addEventListener('click', function (e) {
+        var target = e.target.closest('[data-tooltip]');
+        if (!target || !target._tooltipEl) return;
+        target._tooltipEl.remove();
+        target._tooltipEl = null;
+    });
 })();
