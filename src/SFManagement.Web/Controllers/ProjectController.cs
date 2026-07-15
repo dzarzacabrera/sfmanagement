@@ -79,6 +79,12 @@ public class ProjectController : Controller
         var project = projects.FirstOrDefault(p => p.Id == pid);
         if (project is null) return NotFound();
 
+        if (project.IsFinalized)
+        {
+            TempData["ToastError"] = "Cannot edit a closed project.";
+            return RedirectToAction("Index");
+        }
+
         ViewBag.PageTitle = "Edit Project";
         ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new("Edit", "") };
         return View(project with { IdEncrypted = enc.Encrypt(pid) });
@@ -90,9 +96,18 @@ public class ProjectController : Controller
         [FromForm] string name,
         [FromForm] string? descriptionMd,
         [FromServices] ICommandHandler<UpdateProjectCommand> handler,
+        [FromServices] IGetAllProjectsQueryHandler projectsHandler,
         [FromServices] IIdEncryptionService enc)
     {
         if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return NotFound();
+
+        var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
+        if (projects.FirstOrDefault(p => p.Id == pid) is { IsFinalized: true })
+        {
+            TempData["ToastError"] = "Cannot edit a closed project.";
+            return RedirectToAction("Index");
+        }
+
         var command = new UpdateProjectCommand(pid, name, descriptionMd);
         await handler.HandleAsync(command);
         return RedirectToAction("Detail", new { projectId = projectIdEncrypted });
@@ -103,6 +118,7 @@ public class ProjectController : Controller
         [FromQuery] string projectId,
         [FromServices] IGetAllProjectsQueryHandler projectHandler,
         [FromServices] IGetWorkersByProjectQueryHandler workersHandler,
+        [FromServices] IGetDashboardTasksQueryHandler tasksHandler,
         [FromServices] IIdEncryptionService enc,
         [FromServices] INpgsqlConnectionFactory connFactory)
     {
@@ -110,7 +126,8 @@ public class ProjectController : Controller
         var projects = await projectHandler.HandleAsync(new GetAllProjectsQuery());
         var project = projects.FirstOrDefault(p => p.Id == pid);
 
-        var workers = await workersHandler.HandleAsync(new GetWorkersByProjectQuery(pid));
+        var workersTask = workersHandler.HandleAsync(new GetWorkersByProjectQuery(pid));
+        var tasksTask = tasksHandler.HandleAsync(new GetDashboardTasksQuery(pid));
 
         var hasWorkersToAssignToProject = true;
         await using (var conn = await connFactory.GetOpenConnectionAsync())
@@ -122,15 +139,21 @@ public class ProjectController : Controller
             hasWorkersToAssignToProject = available > 0;
         }
 
-        ViewBag.PageTitle = $"Project #{pid}";
-        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new($"Project #{pid}", "") };
+        var workers = await workersTask;
+        var tasks = await tasksTask;
+
+        var projectName = project?.Name ?? $"Project #{pid}";
+        ViewBag.PageTitle = projectName;
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new(projectName, "") };
 
         var vm = new ProjectDetailViewModel(
             pid,
             project?.Name ?? $"Project #{pid}",
             project?.DescriptionMd,
             workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList(),
-            hasWorkersToAssignToProject)
+            tasks.Select(t => t with { IdEncrypted = enc.Encrypt(t.Id), ProjectIdEncrypted = enc.Encrypt(t.ProjectId) }).ToList(),
+            hasWorkersToAssignToProject,
+            project?.IsFinalized ?? false)
         {
             IdEncrypted = projectId
         };
@@ -175,5 +198,24 @@ public class ProjectController : Controller
         if (ids.Count == 0) return BadRequest();
         await handler.HandleAsync(new AddWorkersToProjectCommand(pid, ids));
         return Ok();
+    }
+
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> FinalizeProject(
+        [FromForm] string projectIdEncrypted,
+        [FromServices] ICommandHandler<FinalizeProjectCommand> handler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return BadRequest();
+        try
+        {
+            await handler.HandleAsync(new FinalizeProjectCommand(pid));
+            return Json(new { success = true });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Json(new { success = false, message = ex.Message });
+        }
     }
 }

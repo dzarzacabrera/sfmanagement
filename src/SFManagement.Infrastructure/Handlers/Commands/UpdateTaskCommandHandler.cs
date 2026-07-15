@@ -16,6 +16,13 @@ internal sealed class UpdateTaskCommandHandler(INpgsqlConnectionFactory connecti
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
 
+        await using var guardCmd = new NpgsqlCommand(
+            "SELECT p.is_finalized FROM tasks t JOIN projects p ON p.id = t.project_id WHERE t.id = $1", connection);
+        guardCmd.Parameters.Add(new() { Value = command.TaskId });
+        var isFinalized = await guardCmd.ExecuteScalarAsync();
+        if (isFinalized is true)
+            throw new InvalidOperationException("Cannot edit a task in a closed project.");
+
         ProjectTask task;
         await using (var loadCmd = new NpgsqlCommand(
             "SELECT id, project_id, title, description, criticality, status, required_skills_vector " +

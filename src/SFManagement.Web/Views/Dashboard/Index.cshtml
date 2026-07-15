@@ -14,21 +14,43 @@
 </style>
 
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6 dark:bg-gray-800">
-    <h1 class="text-2xl font-bold text-brand dark:text-white">@Model.ProjectName</h1>
-    <div class="flex gap-2">
-        <a href="/Task/Create?projectId=@Model.ProjectIdEncrypted"
-           class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep">
-            + New Task
-        </a>
-        @if (Model.HasWorkersToAssignToProject)
+    <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold text-brand dark:text-white">@Model.ProjectName</h1>
+        @if (Model.IsFinalized)
         {
-            <button id="btn-add-worker" onclick="openAddWorkerPopup('@Model.ProjectIdEncrypted')"
-                    class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 @(!Model.HasProjectWorkers ? "pulse-add-worker" : "")">
-                Add Worker
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-600 border border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
+                Closed
+            </span>
+        }
+    </div>
+    <div class="flex gap-2">
+        @if (!Model.IsFinalized)
+        {
+            <a href="/Task/Create?projectId=@Model.ProjectIdEncrypted"
+               class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep">
+                + New Task
+            </a>
+            if (Model.HasWorkersToAssignToProject)
+            {
+                <button id="btn-add-worker" onclick="openAddWorkerPopup('@Model.ProjectIdEncrypted')"
+                        class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 @(!Model.HasProjectWorkers ? "pulse-add-worker" : "")">
+                    Add Worker
+                </button>
+            }
+            <button id="btn-finalize" onclick="finalizeProject('@Model.ProjectIdEncrypted')"
+                    class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors cursor-pointer whitespace-nowrap">
+                Close Project
             </button>
         }
     </div>
 </div>
+
+@if (Model.IsFinalized)
+{
+    <div class="mb-6 p-4 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400">
+        This project is closed. Tasks are no longer displayed.
+    </div>
+}
 
 <script>
     window.__dashboardProjectIdEncrypted = '@Model.ProjectIdEncrypted';

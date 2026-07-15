@@ -219,10 +219,11 @@ else
                 var isFinishedAndEvaluated = task.Status == ProjectTaskStatus.Finish && task.AllWorkersEvaluated;
                 var isArchived = task.Status == ProjectTaskStatus.Archived;
 
-                <div class="task-row grid grid-cols-12 items-center gap-4 border-b border-gray-100 last:border-b-0 py-3 px-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors @rowColors[Math.Abs(task.ProjectId) % 10]"
+                <div class="task-row grid grid-cols-12 items-center gap-4 border-b border-gray-100 last:border-b-0 py-3 px-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors cursor-pointer @rowColors[Math.Abs(task.ProjectId) % 10]"
                      data-task-id="@task.IdEncrypted"
                      data-title="@task.Title.ToLower()"
-                     data-project="@task.ProjectIdEncrypted">
+                     data-project="@task.ProjectIdEncrypted"
+                     onclick="location.href='/Task/Detail?taskId=@task.IdEncrypted'">
                     <div class="col-span-3 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
                         @task.Title
                     </div>
@@ -258,7 +259,7 @@ else
                             <text>&mdash;</text>
                         }
                     </div>
-                    <div class="col-span-3 flex items-center justify-end">
+                    <div class="col-span-3 flex items-center justify-end" onclick="event.stopPropagation()">
                         <div class="flex items-center gap-1">
                             <a href="/Task/Detail?taskId=@task.IdEncrypted"
                                class="p-2 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"

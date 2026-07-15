@@ -41,7 +41,8 @@ CREATE TABLE IF NOT EXISTS skills_catalogue (
 CREATE TABLE IF NOT EXISTS projects (
     id             INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name           VARCHAR(200) NOT NULL,
-    description_md TEXT
+    description_md TEXT,
+    is_finalized   BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- 2.3 Workers
@@ -128,8 +129,8 @@ INSERT INTO skills_catalogue (id, name, vector_position) OVERRIDING SYSTEM VALUE
 
 -- 3.2 Projects
 INSERT INTO projects (id, name, description_md) OVERRIDING SYSTEM VALUE VALUES
-(1, 'SFManagement Core Platform', '# Project Specification\nDevelopment of the main corporate resource scheduling application.'),
-(2, 'E-Commerce Platform Refactor', '# E-Commerce Architecture\nMigration of the legacy checkout system to a modern web API with optimization audits.');
+(1, 'SFManagement Core Platform', E'# Project Specification\n\nDevelopment of the main corporate resource scheduling application.'),
+(2, 'E-Commerce Platform Refactor', E'# E-Commerce Architecture\n\nMigration of the legacy checkout system to a modern web API with optimization audits.');
 
 -- 3.3 Workers (4 profiles with 1024-dimensional vectors, padded with zeros)
 -- Worker 1: Pure Frontend Specialist

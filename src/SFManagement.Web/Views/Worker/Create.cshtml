@@ -1,6 +1,10 @@
 <h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Add Worker</h1>
 
 <form method="post" class="max-w-2xl space-y-4">
+    @if (!string.IsNullOrEmpty(ViewBag.ReturnProjectId as string))
+    {
+        <input type="hidden" name="projectId" value="@ViewBag.ReturnProjectId" />
+    }
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Worker Name</label>
@@ -25,7 +29,12 @@
                 class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep border border-transparent">
             Create Worker
         </button>
-        <a href="@Url.Action("Index", "Worker")"
+        @{
+            var cancelUrl = !string.IsNullOrEmpty(ViewBag.ReturnProjectId as string)
+                ? Url.Action("Detail", "Project", new { projectId = ViewBag.ReturnProjectId })
+                : Url.Action("Index", "Worker");
+        }
+        <a href="@cancelUrl"
            class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
             Cancel
         </a>

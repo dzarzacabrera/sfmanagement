@@ -16,7 +16,7 @@ internal sealed class GetWorkerTasksQueryHandler(INpgsqlConnectionFactory connec
             "FROM task_assignments ta " +
             "INNER JOIN tasks t ON t.id = ta.task_id " +
             "INNER JOIN projects p ON p.id = t.project_id " +
-            "WHERE ta.worker_id = $1 AND t.status NOT IN ('Finish', 'Archived') " +
+            "WHERE ta.worker_id = $1 AND t.status NOT IN ('Finish', 'Archived') AND p.is_finalized = FALSE " +
             "ORDER BY t.id", connection);
         cmd.Parameters.Add(new() { Value = query.WorkerId });
 

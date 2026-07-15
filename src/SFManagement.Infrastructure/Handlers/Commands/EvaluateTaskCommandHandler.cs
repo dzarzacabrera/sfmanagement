@@ -16,6 +16,13 @@ internal sealed class EvaluateTaskCommandHandler(INpgsqlConnectionFactory connec
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
 
+        await using var guardCmd = new NpgsqlCommand(
+            "SELECT p.is_finalized FROM tasks t JOIN projects p ON p.id = t.project_id WHERE t.id = $1", connection);
+        guardCmd.Parameters.Add(new() { Value = command.TaskId });
+        var isFinalized = await guardCmd.ExecuteScalarAsync();
+        if (isFinalized is true)
+            throw new InvalidOperationException("Cannot evaluate workers in a closed project.");
+
         var (task, assignment) = await LoadTaskAndAssignmentAsync(command.TaskId, command.WorkerId, connection);
         if (task.Status != ProjectTaskStatus.Finish)
             throw new InvalidOperationException("Cannot evaluate a task that is not in Finish status.");

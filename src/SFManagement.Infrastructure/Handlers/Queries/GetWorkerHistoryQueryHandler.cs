@@ -17,9 +17,11 @@ internal sealed class GetWorkerHistoryQueryHandler(INpgsqlConnectionFactory conn
             "SELECT pe.id, t.title AS task_title, " +
             "COALESCE(sc.name, 'Skill #' || pe.skill_position) AS skill_name, " +
             "pe.skill_position, pe.rating, pe.criticality, " +
-            "pe.base_points, pe.impact, pe.previous_level, pe.new_level, pe.created_at " +
+            "pe.base_points, pe.impact, pe.previous_level, pe.new_level, pe.created_at, " +
+            "p.name AS project_name " +
             "FROM performance_evaluations pe " +
             "LEFT JOIN tasks t ON t.id = pe.task_id " +
+            "LEFT JOIN projects p ON p.id = t.project_id " +
             "LEFT JOIN skills_catalogue sc ON sc.vector_position = pe.skill_position " +
             "WHERE pe.worker_id = $1 " +
             "ORDER BY pe.created_at DESC", connection);
@@ -42,7 +44,8 @@ internal sealed class GetWorkerHistoryQueryHandler(INpgsqlConnectionFactory conn
                 mapper.GetDouble("impact"),
                 mapper.GetDouble("previous_level"),
                 mapper.GetDouble("new_level"),
-                mapper.GetDateTime("created_at")));
+                mapper.GetDateTime("created_at"),
+                mapper.GetStringOrNull("project_name")));
         }
 
         return results;

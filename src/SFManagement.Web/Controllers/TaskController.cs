@@ -39,7 +39,12 @@ public class TaskController : Controller
         [FromServices] IGetAllSkillsQueryHandler skillsHandler,
         [FromServices] IIdEncryptionService enc)
     {
-        var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
+        var projects = (await projectsHandler.HandleAsync(new GetAllProjectsQuery())).Where(p => !p.IsFinalized).ToList();
+        if (projects.Count == 0)
+        {
+            TempData["ToastError"] = "No active projects available. Close a project before creating tasks.";
+            return RedirectToAction("Index", "Project");
+        }
         var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
         var criticalities = new List<CriticalityOption>
         {
@@ -197,9 +202,19 @@ public class TaskController : Controller
         [FromForm] int[] skillPositions,
         [FromForm] string[] skillLevels,
         [FromServices] ICommandHandler<CreateTaskCommand> handler,
+        [FromServices] IGetAllProjectsQueryHandler projectsHandler,
         [FromServices] IIdEncryptionService enc)
     {
         if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return NotFound();
+
+        // Reject if project is closed
+        var projects = await projectsHandler.HandleAsync(new GetAllProjectsQuery());
+        var project = projects.FirstOrDefault(p => p.Id == pid);
+        if (project is { IsFinalized: true })
+        {
+            TempData["ToastError"] = "Cannot create tasks in a closed project.";
+            return RedirectToAction("Index", "Project");
+        }
         skillPositions = skillPositions ?? [];
         var parsed = new float[skillLevels?.Length ?? 0];
         for (int i = 0; i < (skillLevels?.Length ?? 0); i++)

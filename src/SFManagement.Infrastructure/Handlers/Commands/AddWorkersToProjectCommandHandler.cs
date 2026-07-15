@@ -11,6 +11,14 @@ internal sealed class AddWorkersToProjectCommandHandler(INpgsqlConnectionFactory
     public async Task HandleAsync(AddWorkersToProjectCommand command)
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
+
+        await using var checkCmd = new NpgsqlCommand(
+            "SELECT is_finalized FROM projects WHERE id = $1", connection);
+        checkCmd.Parameters.Add(new() { Value = command.ProjectId });
+        var isFinalized = await checkCmd.ExecuteScalarAsync();
+        if (isFinalized is true)
+            throw new InvalidOperationException("Cannot add workers to a closed project.");
+
         foreach (var wid in command.WorkerIds)
         {
             await using var cmd = new NpgsqlCommand(
