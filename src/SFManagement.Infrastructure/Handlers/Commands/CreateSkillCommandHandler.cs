@@ -12,9 +12,13 @@ internal sealed class CreateSkillCommandHandler(INpgsqlConnectionFactory connect
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
         await using var cmd = new NpgsqlCommand(
-            "CALL sp_add_skill($1, null)", connection)
+            "CALL sp_add_skill($1, $2, null)", connection)
         {
-            Parameters = { new() { Value = command.Name } }
+            Parameters =
+            {
+                new() { Value = command.Name },
+                new() { Value = command.Description }
+            }
         };
         await cmd.ExecuteNonQueryAsync();
     }

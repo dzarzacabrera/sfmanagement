@@ -1,3 +1,3 @@
 namespace SFManagement.Application.Commands;
 
-public record CreateSkillCommand(string Name);
+public record CreateSkillCommand(string Name, string Description);

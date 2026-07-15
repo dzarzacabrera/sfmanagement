@@ -1,14 +1,24 @@
 @model TaskDto
 
-<div class="mb-6">
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-brand dark:text-white">@Model.Title</h1>
+<h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">@Model.Title</h1>
+
+@section ActionButtons {
+    <div class="flex items-center gap-2">
         <a href="/Dashboard/Index?projectId=@Model.ProjectIdEncrypted"
            class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep whitespace-nowrap">
-            View on Board
+            Dashboard
+        </a>
+        <a href="/Task/Edit?taskId=@Model.IdEncrypted"
+           class="inline-flex items-center gap-1.5 border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            Edit
+        </a>
+        <a href="/Task/Index"
+           class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap">
+            Back Tasks
         </a>
     </div>
-</div>
+}
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 space-y-4">
@@ -55,11 +65,12 @@
         {
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 dark:bg-gray-800 dark:border-gray-700">
                 <h2 class="text-lg font-semibold mb-3 dark:text-white">Required Skills</h2>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-1.5">
                     @foreach (var skill in Model.Skills)
                     {
-                        <span class="px-2.5 py-1 rounded-full text-sm sm:text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                            @skill.SkillName (@skill.RequiredLevel.ToString("0.00"))
+                        <span class="inline-flex items-stretch text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
+                            <span class="px-2 py-0.5 bg-brand-light text-brand self-center">@skill.SkillName</span>
+                            <span class="px-1.5 bg-brand-dark text-white font-bold border-l border-brand-dark flex items-center self-stretch">@skill.RequiredLevel.ToString("0.##")</span>
                         </span>
                     }
                 </div>
@@ -88,6 +99,3 @@
     </div>
 </div>
 
-<a href="/Task/Index" class="inline-block mt-6 text-sm text-brand hover:text-brand-deep dark:text-brand dark:hover:text-brand">
-    &larr; Back to Tasks
-</a>

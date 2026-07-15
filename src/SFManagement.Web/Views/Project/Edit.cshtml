@@ -2,6 +2,13 @@
 
 <h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Edit Project</h1>
 
+@section ActionButtons {
+    <a href="/Project/Index"
+       class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+        Back to Projects
+    </a>
+}
+
 <form method="post" class="max-w-lg space-y-4">
     <input type="hidden" name="projectIdEncrypted" value="@Model.IdEncrypted">
 

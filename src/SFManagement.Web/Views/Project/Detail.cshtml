@@ -17,6 +17,10 @@
     }
 </div>
 
+@section ActionButtons {
+    <a href="/Project/Index" class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Back to Projects</a>
+}
+
 <div class="prose prose-sm max-w-none mb-6">
     @if (!string.IsNullOrEmpty(Model.DescriptionMd))
     {
@@ -47,14 +51,15 @@
             <a href="/Task/Create?projectId=@Model.IdEncrypted" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">Add Task</a>
         }
     </div>
-    <div id="project-tasks" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 mb-6">
+    <div id="project-tasks" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 mb-4">
         @for (int i = 0; i < totalTasks; i++)
         {
             var hiddenClass = i >= md ? "hidden" : i >= mm ? "hidden sm:block" : "";
             var task = Model.Tasks[i];
-            <div class="task-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 @hiddenClass"
-                 data-index="@i">
-                <a href="/Task/Detail?taskId=@task.IdEncrypted" class="text-sm font-semibold text-gray-900 hover:text-brand dark:text-gray-100">@task.Title</a>
+            <div class="task-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer @hiddenClass"
+                 data-index="@i"
+                 onclick="window.location='/Task/Detail?taskId=@task.IdEncrypted'">
+                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">@task.Title</div>
                 <div class="flex items-center gap-2 mt-1">
                     <span class="px-1.5 py-0.5 rounded-full text-xs font-medium
                         @(task.Criticality == SFManagement.Domain.Enums.Criticality.Critical ? "bg-red-100 text-red-700" :
@@ -89,20 +94,19 @@
             <a href="/Worker/Create?projectId=@Model.IdEncrypted" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">Add Worker</a>
         }
     </div>
-    <div id="project-workers" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 mb-6">
+    <div id="project-workers" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 mb-4">
         @for (int i = 0; i < totalWorkers; i++)
         {
             var hiddenClass = i >= md ? "hidden" : i >= mm ? "hidden sm:block" : "";
             var worker = Model.Workers[i];
-            <div class="worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 @hiddenClass"
-                 data-index="@i">
+            <div class="worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer @hiddenClass"
+                 data-index="@i"
+                 onclick="window.location='/Worker/Detail?workerId=@worker.IdEncrypted'">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">@worker.Name</h3>
                         <p class="text-sm text-gray-400 dark:text-gray-400">@worker.Role</p>
                     </div>
-                    <a href="/Worker/Detail?workerId=@worker.IdEncrypted"
-                       class="text-sm font-medium text-brand hover:text-brand-deep">View</a>
                 </div>
                 <div class="flex gap-3 mt-3 text-sm text-gray-500 dark:text-gray-400">
                     <span>@worker.ActiveTaskCount active tasks</span>

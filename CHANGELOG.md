@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-07-15
+
+### Added
+
+- **Skill description field:**
+  - Added `description VARCHAR(150) NOT NULL DEFAULT ''` column to `skills_catalogue`.
+  - Updated seed data in `init.sql` with descriptions for all 20 skills (Spanish UI text).
+  - Updated `sp_add_skill` to accept `p_description VARCHAR(150)`.
+  - Added `Description` property to `SkillDto` record.
+  - `CreateSkillCommand` and `UpdateSkillCatalogueCommand` now accept a `Description` field.
+  - Create/Edit handlers pass description to SQL/procedure.
+  - `SkillController.Create` and `SkillController.Edit` POST actions accept `description` form field.
+  - All skill-loading SQL queries now select the `description` column.
+- **Views for Skill description:**
+  - `Skill/Create.cshtml`: added description textarea (maxlength 150).
+  - `Skill/Edit.cshtml`: added description textarea (maxlength 150), pre-filled with current value.
+  - `Skill/Detail.cshtml`: added description row (first in the grid, `sm:col-span-2`).
+  - `Skill/Index.cshtml` cards: added description line under status with `line-clamp-3 sm:line-clamp-4`.
+  - `Skill/Index.cshtml` list view: added Description column (truncated, between Name and Status), adjusted column spans.
+
 ## [0.7.0] - 2026-07-11
 
 ### Added

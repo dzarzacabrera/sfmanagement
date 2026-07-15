@@ -33,6 +33,7 @@ END $$;
 CREATE TABLE IF NOT EXISTS skills_catalogue (
     id              INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name            VARCHAR(100) NOT NULL,
+    description     VARCHAR(150) NOT NULL DEFAULT '',
     vector_position INT NOT NULL UNIQUE,
     is_active       BOOLEAN NOT NULL DEFAULT TRUE
 );
@@ -112,20 +113,20 @@ $$;
 -- =========================================================================
 
 -- 3.1 Skills Catalogue (12 fixed positions)
-INSERT INTO skills_catalogue (id, name, vector_position) OVERRIDING SYSTEM VALUE VALUES
-(1,  'JavaScript', 0),
-(2,  'jQuery', 1),
-(3,  'HTML5', 2),
-(4,  'CSS3', 3),
-(5,  'Tailwind CSS', 4),
-(6,  'React', 5),
-(7,  'PageSpeed Insights', 6),
-(8,  'Lighthouse CI', 7),
-(9,  'C# OOP', 8),
-(10, 'ASP.NET Core MVC', 9),
-(11, 'MySQL', 10),
-(12, 'Web API Desarrollo', 11),
-(13, 'DevOps', 12);
+INSERT INTO skills_catalogue (id, name, description, vector_position) OVERRIDING SYSTEM VALUE VALUES
+(1,  'JavaScript', 'Client-side scripting language for web applications', 0),
+(2,  'jQuery', 'Legacy JavaScript library for DOM manipulation', 1),
+(3,  'HTML5', 'Markup language for structuring web content', 2),
+(4,  'CSS3', 'Stylesheet language for web presentation', 3),
+(5,  'Tailwind CSS', 'Utility-first CSS framework for rapid UI development', 4),
+(6,  'React', 'Component-based JavaScript library for building user interfaces', 5),
+(7,  'PageSpeed Insights', 'Tool for analyzing web page performance metrics', 6),
+(8,  'Lighthouse CI', 'Automated auditing tool for performance and accessibility', 7),
+(9,  'C# OOP', 'Object-oriented programming with C# language', 8),
+(10, 'ASP.NET Core MVC', 'Model-View-Controller framework for web applications', 9),
+(11, 'MySQL', 'Relational database management system', 10),
+(12, 'Web API Desarrollo', 'Building and designing RESTful web APIs', 11),
+(13, 'DevOps', 'CI/CD pipelines and infrastructure automation', 12);
 
 -- 3.2 Projects
 INSERT INTO projects (id, name, description_md) OVERRIDING SYSTEM VALUE VALUES
@@ -225,7 +226,7 @@ ALTER TABLE tasks ALTER COLUMN id RESTART WITH 11;
 -- Adds a new skill to the catalogue at the next available vector position.
 -- Existing worker/task vectors are already pre-allocated to 1024 dimensions
 -- with zeros in all unused positions, so no ALTER TABLE is needed.
-CREATE OR REPLACE PROCEDURE sp_add_skill(p_name VARCHAR(100), OUT new_id INT)
+CREATE OR REPLACE PROCEDURE sp_add_skill(p_name VARCHAR(100), p_description VARCHAR(150), OUT new_id INT)
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -237,8 +238,8 @@ BEGIN
         RAISE EXCEPTION 'Vector dimension limit reached (1024). Cannot add more skills.';
     END IF;
 
-    INSERT INTO skills_catalogue (name, vector_position)
-    VALUES (p_name, v_next_pos)
+    INSERT INTO skills_catalogue (name, description, vector_position)
+    VALUES (p_name, p_description, v_next_pos)
     RETURNING id INTO new_id;
 END;
 $$;

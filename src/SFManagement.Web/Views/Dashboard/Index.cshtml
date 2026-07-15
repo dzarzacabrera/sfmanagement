@@ -23,14 +23,17 @@
             </span>
         }
     </div>
-    <div class="flex gap-2">
-        @if (!Model.IsFinalized)
-        {
+</div>
+
+@section ActionButtons {
+    @if (!Model.IsFinalized)
+    {
+        <div class="flex items-center gap-2">
             <a href="/Task/Create?projectId=@Model.ProjectIdEncrypted"
                class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep">
                 + New Task
             </a>
-            if (Model.HasWorkersToAssignToProject)
+            @if (Model.HasWorkersToAssignToProject)
             {
                 <button id="btn-add-worker" onclick="openAddWorkerPopup('@Model.ProjectIdEncrypted')"
                         class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 @(!Model.HasProjectWorkers ? "pulse-add-worker" : "")">
@@ -41,9 +44,9 @@
                     class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors cursor-pointer whitespace-nowrap">
                 Close Project
             </button>
-        }
-    </div>
-</div>
+        </div>
+    }
+}
 
 @if (Model.IsFinalized)
 {
