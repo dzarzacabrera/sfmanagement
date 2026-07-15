@@ -2,12 +2,19 @@
 
 <h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">@Model.Name</h1>
 
+@{
+    var isUsed = ViewBag.IsSkillUsed as bool? ?? false;
+}
+
 @section ActionButtons {
     <div class="flex items-center gap-2">
-        <a href="/Skill/Edit?skillId=@Model.IdEncrypted"
-           class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">
-            Edit
-        </a>
+        @if (!isUsed)
+        {
+            <a href="/Skill/Edit?skillId=@Model.IdEncrypted"
+               class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">
+                Edit
+            </a>
+        }
         <a href="/Skill/Index"
            class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
             Back to Skills

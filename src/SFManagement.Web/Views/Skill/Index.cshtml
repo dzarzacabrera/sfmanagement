@@ -1,4 +1,9 @@
 @model List<SkillDto>
+@using System.Collections.Generic
+
+@{
+    var usedPositions = ViewBag.UsedPositions as HashSet<int> ?? new HashSet<int>();
+}
 
 <h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Skills Catalogue</h1>
 
@@ -61,13 +66,16 @@ else
             <div class="skill-card bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative flex flex-col justify-between cursor-pointer"
                  data-name="@skill.Name.ToLower()"
                  onclick="location.href='/Skill/Detail?skillId=@skill.IdEncrypted'">
-                <a href="/Skill/Edit?skillId=@skill.IdEncrypted"
-                   class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
-                   aria-label="Edit @skill.Name">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                    </svg>
-                </a>
+                @if (!usedPositions.Contains(skill.VectorPosition))
+                {
+                    <a href="/Skill/Edit?skillId=@skill.IdEncrypted"
+                       class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-brand hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
+                       aria-label="Edit @skill.Name">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                    </a>
+                }
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 pr-12">@skill.Name</h2>
                     <div class="mt-2">
@@ -136,13 +144,16 @@ else
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             </svg>
                         </a>
-                        <a href="/Skill/Edit?skillId=@skill.IdEncrypted"
-                           class="p-2 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
-                           title="Edit">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                            </svg>
-                        </a>
+                        @if (!usedPositions.Contains(skill.VectorPosition))
+                        {
+                            <a href="/Skill/Edit?skillId=@skill.IdEncrypted"
+                               class="p-2 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
+                               title="Edit">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                </svg>
+                            </a>
+                        }
                         <form method="post" action="/Skill/ToggleActive" class="inline">
                             <input type="hidden" name="skillIdEncrypted" value="@skill.IdEncrypted">
                             <button type="submit"
