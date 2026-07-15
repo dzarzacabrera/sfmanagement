@@ -144,7 +144,7 @@ public class ProjectController : Controller
 
         var projectName = project?.Name ?? $"Project #{pid}";
         ViewBag.PageTitle = projectName;
-        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new(projectName, "") };
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new("Detail", "") };
 
         var vm = new ProjectDetailViewModel(
             pid,

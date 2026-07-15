@@ -1,5 +1,6 @@
 using Npgsql;
 using SFManagement.Application.Queries;
+using SFManagement.Domain.Enums;
 using SFManagement.Infrastructure.Data;
 using SFManagement.Infrastructure.Mappers;
 
@@ -12,7 +13,8 @@ internal sealed class GetWorkerTasksQueryHandler(INpgsqlConnectionFactory connec
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
         await using var cmd = new NpgsqlCommand(
-            "SELECT t.id AS task_id, t.title AS task_title, p.name AS project_name, p.id AS project_id " +
+            "SELECT t.id AS task_id, t.title AS task_title, p.name AS project_name, p.id AS project_id, " +
+            "t.status, t.criticality " +
             "FROM task_assignments ta " +
             "INNER JOIN tasks t ON t.id = ta.task_id " +
             "INNER JOIN projects p ON p.id = t.project_id " +
@@ -29,7 +31,9 @@ internal sealed class GetWorkerTasksQueryHandler(INpgsqlConnectionFactory connec
                 m.GetInt32("task_id"),
                 m.GetString("task_title"),
                 m.GetString("project_name"),
-                m.GetInt32("project_id")));
+                m.GetInt32("project_id"),
+                m.GetEnum<ProjectTaskStatus>("status"),
+                m.GetEnum<Criticality>("criticality")));
         }
 
         return results;

@@ -1,12 +1,13 @@
 @model IReadOnlyList<ProjectDto>
 
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-brand dark:text-white">Projects</h1>
+<h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Projects</h1>
+
+@section ActionButtons {
     <a href="/Project/Create"
        class="bg-brand dark:bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:hover:bg-brand-deep">
         + New Project
     </a>
-</div>
+}
 
 <div class="flex mb-6">
     <div class="flex items-stretch flex-1">
@@ -89,18 +90,9 @@ else
                     </div>
                     @if (project.WorkerNames?.Count > 0)
                     {
-                        var maxVisible = 6;
-                        var visibleWorkers = project.WorkerNames.Take(maxVisible).ToList();
-                        var extra = project.WorkerNames.Count - visibleWorkers.Count;
-                        <div class="flex flex-wrap gap-1 mt-3">
-                            @foreach (var wName in visibleWorkers)
-                            {
-                                <span class="inline-flex items-center text-sm sm:text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">@wName</span>
-                            }
-                            @if (extra > 0)
-                            {
-                                <span class="inline-flex items-center text-sm sm:text-xs px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 font-medium border border-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600">+@extra</span>
-                            }
+                        <div class="mt-3 text-sm text-gray-500 dark:text-gray-400 line-clamp-3">
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">Team:</span>
+                            @string.Join(", ", project.WorkerNames)
                         </div>
                     }
                 </div>
@@ -169,7 +161,7 @@ else
                     <div class="sm:col-span-3 text-sm text-gray-500 dark:text-gray-300 truncate">
                         @if (project.WorkerNames?.Count > 0)
                         {
-                            @string.Join(", ", project.WorkerNames)
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">Team:</span> @string.Join(", ", project.WorkerNames)
                         }
                         else
                         {

@@ -32,9 +32,10 @@ public class SkillController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(
         [FromForm] string name,
+        [FromForm] string? description,
         [FromServices] ICommandHandler<CreateSkillCommand> handler)
     {
-        await handler.HandleAsync(new CreateSkillCommand(name));
+        await handler.HandleAsync(new CreateSkillCommand(name, description ?? ""));
         return RedirectToAction("Index");
     }
 
@@ -57,11 +58,12 @@ public class SkillController : Controller
     public async Task<IActionResult> Edit(
         [FromForm] string skillIdEncrypted,
         [FromForm] string name,
+        [FromForm] string? description,
         [FromServices] ICommandHandler<UpdateSkillCatalogueCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
         if (!enc.TryDecrypt(skillIdEncrypted, out var sid)) return NotFound();
-        await handler.HandleAsync(new UpdateSkillCatalogueCommand(sid, name));
+        await handler.HandleAsync(new UpdateSkillCatalogueCommand(sid, name, description ?? ""));
         return RedirectToAction("Index");
     }
 

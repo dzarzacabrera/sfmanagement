@@ -94,7 +94,7 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
     private static async Task<List<SkillDto>> LoadSkillsAsync(NpgsqlConnection connection)
     {
         await using var cmd = new NpgsqlCommand(
-            "SELECT id, name, vector_position, is_active FROM skills_catalogue ORDER BY vector_position", connection);
+            "SELECT id, name, description, vector_position, is_active FROM skills_catalogue ORDER BY vector_position", connection);
         var skills = new List<SkillDto>();
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -104,6 +104,7 @@ internal sealed class GetDashboardTasksQueryHandler(INpgsqlConnectionFactory con
             skills.Add(new SkillDto(
                 m.GetInt32("id"),
                 m.GetString("name"),
+                m.GetString("description"),
                 m.GetInt32("vector_position"),
                 isActive));
         }
