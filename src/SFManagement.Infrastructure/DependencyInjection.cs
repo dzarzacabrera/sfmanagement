@@ -49,6 +49,7 @@ public static class DependencyInjection
         services.AddTransient<IGetAllTasksQueryHandler, GetAllTasksQueryHandler>();
         services.AddTransient<IGetWorkerTasksQueryHandler, GetWorkerTasksQueryHandler>();
         services.AddTransient<IGetTaskByIdQueryHandler, GetTaskByIdQueryHandler>();
+        services.AddTransient<IIsSkillUsedQueryHandler, IsSkillUsedQueryHandler>();
 
         return services;
     }
