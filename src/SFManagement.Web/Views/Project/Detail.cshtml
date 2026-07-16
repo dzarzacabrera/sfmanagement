@@ -2,7 +2,7 @@
 @model ProjectDetailViewModel
 
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
-    <h1 class="text-2xl font-bold text-brand dark:text-white">@Model.Name</h1>
+    <h1 class="text-2xl font-bold pt-2 text-brand dark:text-white">@Model.Name</h1>
     @if (Model.IsFinalized)
     {
         <span class="inline-flex items-center self-start sm:self-auto mt-3 sm:mt-0 px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-600 border border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
@@ -18,6 +18,7 @@
 </div>
 
 @section ActionButtons {
+    <a href="/Dashboard/Index?projectId=@Model.IdEncrypted" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">Dashboard</a>
     <a href="/Project/Index" class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Back to Projects</a>
 }
 
@@ -39,23 +40,26 @@
     </div>
 }
 
-@if (Model.Tasks?.Count > 0)
-{
-    var totalTasks = Model.Tasks.Count;
-    var md = 6; var mm = 4;
+@{
+    var totalTasks = Model.Tasks?.Count ?? 0;
+    var totalWorkers = Model.Workers?.Count ?? 0;
+    var md6 = 6; var mm4 = 4;
+}
 
-    <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-semibold dark:text-white">Tasks</h2>
-        @if (!Model.IsFinalized)
-        {
-            <a href="/Task/Create?projectId=@Model.IdEncrypted" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">Add Task</a>
-        }
-    </div>
+<div class="flex items-center justify-between mb-3">
+    <h2 class="text-lg font-semibold dark:text-white">Tasks</h2>
+    @if (!Model.IsFinalized)
+    {
+        <a href="/Task/Create?projectId=@Model.IdEncrypted" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">Add Task</a>
+    }
+</div>
+@if (totalTasks > 0)
+{
     <div id="project-tasks" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 mb-4">
         @for (int i = 0; i < totalTasks; i++)
         {
-            var hiddenClass = i >= md ? "hidden" : i >= mm ? "hidden sm:block" : "";
-            var task = Model.Tasks[i];
+            var hiddenClass = i >= md6 ? "hidden" : i >= mm4 ? "hidden sm:block" : "";
+            var task = Model.Tasks![i];
             <div class="task-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer @hiddenClass"
                  data-index="@i"
                  onclick="window.location='/Task/Detail?taskId=@task.IdEncrypted'">
@@ -78,29 +82,30 @@
             </div>
         }
     </div>
-    if (totalTasks > md)
+    if (totalTasks > md6)
     {
         <button onclick="toggleSection('project-tasks', 6, 4, this)" class="toggle-btn text-sm font-medium text-brand hover:text-brand-deep mb-6" data-total="@totalTasks" data-label="tasks">+ tasks</button>
     }
 }
-
-@if (Model.Workers?.Count > 0)
+else
 {
-    var totalWorkers = Model.Workers.Count;
-    var md = 6; var mm = 4;
+    <p class="text-gray-400 italic dark:text-gray-400 mb-6">No tasks.</p>
+}
 
-    <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-semibold dark:text-white">Team</h2>
-        @if (!Model.IsFinalized)
-        {
-            <a href="/Worker/Create?projectId=@Model.IdEncrypted" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">Add Worker</a>
-        }
-    </div>
+<div class="flex items-center justify-between mb-3">
+    <h2 class="text-lg font-semibold dark:text-white">Team</h2>
+    @if (!Model.IsFinalized)
+    {
+        <a href="/Worker/Create?projectId=@Model.IdEncrypted" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">Add Worker</a>
+    }
+</div>
+@if (totalWorkers > 0)
+{
     <div id="project-workers" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 mb-4">
         @for (int i = 0; i < totalWorkers; i++)
         {
-            var hiddenClass = i >= md ? "hidden" : i >= mm ? "hidden sm:block" : "";
-            var worker = Model.Workers[i];
+            var hiddenClass = i >= md6 ? "hidden" : i >= mm4 ? "hidden sm:block" : "";
+            var worker = Model.Workers![i];
             <div class="worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer @hiddenClass"
                  data-index="@i"
                  onclick="window.location='/Worker/Detail?workerId=@worker.IdEncrypted'">
@@ -117,16 +122,14 @@
             </div>
         }
     </div>
-    if (totalWorkers > md)
+    if (totalWorkers > md6)
     {
         <button onclick="toggleSection('project-workers', 6, 4, this)" class="toggle-btn text-sm font-medium text-brand hover:text-brand-deep mb-6" data-total="@totalWorkers" data-label="workers">+ workers</button>
     }
 }
 else
 {
-    <div class="text-center py-8">
-        <p class="text-gray-400 dark:text-gray-500">No workers assigned to this project yet.</p>
-    </div>
+    <p class="text-gray-400 italic dark:text-gray-400 mb-6">No workers assigned.</p>
 }
 
 <script>
