@@ -29,7 +29,7 @@ Git hooks automatizados para calidad de código:
 ### Base de Datos
 - **Motor:** PostgreSQL 16 + pgvector
 - **Idioma:** Strict English (skills_catalogue, workers, projects, tasks, performance_evaluations)
-- **Enums:** task_status (Queued, InProgress, Blocked, Finish), criticality (low, medium, high, critical), performance_rating (Poor, Average, Good, Excellent)
+- **Enums:** task_status (Queued, InProgress, Test, Finish), criticality (low, medium, high, critical), performance_rating (Poor, Average, Good, Excellent)
 - **Vector:** 12 dimensiones fijas mapeadas al catálogo de skills
 - **Seeding:** 12 skills, 4 workers, 2 projects, 4 tasks
 

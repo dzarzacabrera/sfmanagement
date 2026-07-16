@@ -46,7 +46,7 @@ public sealed class TaskStatusTransitionTests(SfManagementFixture fixture)
     }
 
     [Fact]
-    public async Task BlockedToQueued_ShouldSucceed()
+    public async Task TestToQueued_ShouldSucceed()
     {
         using var scope = fixture.Factory.Services.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<ChangeTaskStatusCommand>>();

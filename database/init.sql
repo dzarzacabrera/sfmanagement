@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 -- 1. ENUMS
 -- =========================================================================
 DO $$ BEGIN
-    CREATE TYPE task_status AS ENUM ('Queued', 'InProgress', 'Blocked', 'Finish', 'Archived');
+    CREATE TYPE task_status AS ENUM ('Queued', 'InProgress', 'Test', 'Finish', 'Archived');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 DO $$ BEGIN
@@ -172,7 +172,7 @@ INSERT INTO tasks (id, project_id, title, description, criticality, status, requ
 
 -- Task 3 (Project 2): Performance Optimization. Requires PageSpeed(8) and Lighthouse(8).
 INSERT INTO tasks (id, project_id, title, description, criticality, status, required_skills_vector) OVERRIDING SYSTEM VALUE VALUES
-(3, 2, 'Optimize Checkout Core Web Vitals', 'The current mobile LCP metrics during checkout are above 3.5 seconds. Implement speculative preloading scripts to drop loading times and secure the conversion funnel. The main bottleneck is the checkout summary endpoint which makes four sequential database queries without batching, causing the server response time to spike to 800ms on mobile connections. Preload hints for the critical CSS and the payment form bundle must be injected into the page head using the Link HTTP header. The PostgreSQL query in the GetCheckoutSummaryQueryHandler must be refactored to use a single CTE that joins orders, line_items, shipping_address and payment_methods in one round trip instead of four separate async queries.', 'medium', 'Blocked', util_pad_vector(ARRAY[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8.0, 8.0, 0.0, 0.0, 0.0, 0.0]));
+(3, 2, 'Optimize Checkout Core Web Vitals', 'The current mobile LCP metrics during checkout are above 3.5 seconds. Implement speculative preloading scripts to drop loading times and secure the conversion funnel. The main bottleneck is the checkout summary endpoint which makes four sequential database queries without batching, causing the server response time to spike to 800ms on mobile connections. Preload hints for the critical CSS and the payment form bundle must be injected into the page head using the Link HTTP header. The PostgreSQL query in the GetCheckoutSummaryQueryHandler must be refactored to use a single CTE that joins orders, line_items, shipping_address and payment_methods in one round trip instead of four separate async queries.', 'medium', 'Test', util_pad_vector(ARRAY[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8.0, 8.0, 0.0, 0.0, 0.0, 0.0]));
 
 -- Task 4 (Project 2): UI Refactor. Requires CSS3(4) and Tailwind(4).
 INSERT INTO tasks (id, project_id, title, description, criticality, status, required_skills_vector) OVERRIDING SYSTEM VALUE VALUES

@@ -38,9 +38,9 @@ public class ProjectTask
 
     public void ChangeStatus(ProjectTaskStatus newStatus)
     {
-        // Full freedom between Queued, InProgress, Blocked, Finish
-        var isActive = Status is ProjectTaskStatus.Queued or ProjectTaskStatus.InProgress or ProjectTaskStatus.Blocked or ProjectTaskStatus.Finish;
-        var isActiveTarget = newStatus is ProjectTaskStatus.Queued or ProjectTaskStatus.InProgress or ProjectTaskStatus.Blocked or ProjectTaskStatus.Finish;
+        // Full freedom between Queued, InProgress, Test, Finish
+        var isActive = Status is ProjectTaskStatus.Queued or ProjectTaskStatus.InProgress or ProjectTaskStatus.Test or ProjectTaskStatus.Finish;
+        var isActiveTarget = newStatus is ProjectTaskStatus.Queued or ProjectTaskStatus.InProgress or ProjectTaskStatus.Test or ProjectTaskStatus.Finish;
         var validTransitions = (isActive && isActiveTarget)
             || (Status == ProjectTaskStatus.Finish && newStatus == ProjectTaskStatus.Archived)
             || (Status == ProjectTaskStatus.Archived && newStatus == ProjectTaskStatus.Finish);

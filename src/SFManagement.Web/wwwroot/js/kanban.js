@@ -610,16 +610,17 @@ function openAddWorkerPopup(projectIdEnc) {
         });
 }
 
-// Status flow: Queued (0) -> InProgress (1) -> Finish (2); Blocked is separate
-var STATUS_FLOW = ['Queued', 'InProgress', 'Finish'];
-var STATUS_LABELS = { Queued: 'Queued', InProgress: 'In Progress', Finish: 'Finished', Blocked: 'Blocked' };
+// Status flow: Queued (0) -> InProgress (1) -> Test (2) -> Finish (3)
+var STATUS_FLOW = ['Queued', 'InProgress', 'Test', 'Finish'];
+var STATUS_LABELS = { Queued: 'Queued', InProgress: 'In Progress', Test: 'Test', Finish: 'Finished' };
 
 function moveTaskStatus(taskIdEnc, direction) {
     var card = findCard(taskIdEnc);
     if (!card) return;
     var current = card.getAttribute('data-status');
-    if (current === 'Blocked') {
+    if (current === 'Test') {
         if (direction === -1) changeStatus(taskIdEnc, 'InProgress');
+        if (direction === 1) changeStatus(taskIdEnc, 'Finish');
         return;
     }
     var idx = STATUS_FLOW.indexOf(current);
@@ -638,7 +639,7 @@ function openStatusSheet(taskIdEnc, currentStatus, btn) {
 }
 
 function openStatusMobileSheet(taskIdEnc, currentStatus) {
-    var statuses = ['Queued', 'InProgress', 'Finish', 'Blocked'];
+    var statuses = ['Queued', 'InProgress', 'Test', 'Finish'];
     var html = '<div class="px-6 pt-2 pb-6"><h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Change Status</h3><div class="flex flex-col gap-2">';
     statuses.forEach(function (s) {
         var label = STATUS_LABELS[s] || s;
@@ -716,7 +717,7 @@ function openStatusDropdown(taskIdEnc, currentStatus, btn) {
     }
 
     opts.innerHTML = '';
-    var statuses = ['Queued', 'InProgress', 'Finish', 'Blocked'];
+    var statuses = ['Queued', 'InProgress', 'Test', 'Finish'];
     statuses.forEach(function (s) {
         var label = STATUS_LABELS[s] || s;
         var isCurrent = s === currentStatus;

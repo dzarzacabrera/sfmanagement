@@ -28,8 +28,8 @@ El núcleo del motor de SFManagement requiere un sistema de evaluación de habil
 ### ProjectTask.ChangeStatus()
 Solo se permiten las siguientes transiciones:
 - `Queued → InProgress`
-- `InProgress → Blocked`, `InProgress → Finish`
-- `Blocked → Queued`, `Blocked → InProgress`
+- `InProgress → Test`, `InProgress → Finish`
+- `Test → Queued`, `Test → InProgress`, `Test → Finish`
 - Cualquier transición hacia/desde `Finish` está prohibida (estado terminal).
 - `Queued → Finish` directo está prohibido.
 
