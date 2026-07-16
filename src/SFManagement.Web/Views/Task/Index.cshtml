@@ -29,7 +29,7 @@
     };
 }
 
-<h1 class="text-2xl font-bold mb-6 text-brand dark:text-white">Tasks</h1>
+<h1 class="text-2xl font-bold pt-2 mb-6 text-brand dark:text-white">Tasks</h1>
 
 @section ActionButtons {
     <div class="flex gap-2">
@@ -121,9 +121,9 @@ else
                             </svg>
                         </a>
                     }
-                    <p class="text-base sm:text-sm text-gray-400 dark:text-gray-400 truncate pr-12 mt-2" title="@task.ProjectName">
-                        <span class="project-dot inline-block align-middle mr-1.5" style="background:@(projectDotColors[Math.Abs(task.ProjectId) % 10]);width:10px;height:10px;border-radius:50%;"></span>
-                        @projectNameShort
+                    <p class="text-base sm:text-sm text-gray-400 dark:text-gray-400 truncate pr-12 mt-2 flex items-center gap-1.5" title="@task.ProjectName">
+                        <span class="project-dot shrink-0" style="background:@(projectDotColors[Math.Abs(task.ProjectId) % 10]);width:10px;height:10px;border-radius:50%;"></span>
+                        <span class="truncate">@projectNameShort</span>
                     </p>
                     <div class="flex items-center gap-2 flex-wrap mt-3">
                         <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Status:</span>

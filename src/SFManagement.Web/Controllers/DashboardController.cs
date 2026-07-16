@@ -65,7 +65,7 @@ public class DashboardController : Controller
         };
 
         ViewBag.PageTitle = "Dashboard";
-        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new(projectName, ""), new("Dashboard", "") };
+        ViewBag.Breadcrumbs = new List<KeyValuePair<string, string>> { new("Projects", "/Project/Index"), new(projectName, "") };
 
         return View(vm);
     }
