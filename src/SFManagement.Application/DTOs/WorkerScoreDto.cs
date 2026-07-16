@@ -9,4 +9,5 @@ public record WorkerScoreDto(
     bool IsAssigned = false)
 {
     public string IdEncrypted { get; init; } = "";
+    public bool Exceeds { get; init; }
 }

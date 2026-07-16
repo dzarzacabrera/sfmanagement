@@ -25,13 +25,16 @@
 <div class="flex flex-col h-full">
     <div class="shrink-0 px-6 pt-6 pb-4">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate mb-1.5">@Model.TaskTitle</h2>
-        <span class="inline-block font-bold px-2.5 py-0.5 rounded-full
-            @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
-              Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
-              Model.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-200" :
-              "bg-gray-50 text-gray-600 border border-gray-200")" style="font-size:13px;">
-            @Model.Criticality
-        </span>
+        <div class="flex items-center gap-2 text-sm">
+            <span class="font-medium text-gray-500 dark:text-gray-400">Priority:</span>
+            <span class="inline-block font-bold px-2.5 py-0.5 rounded-full
+                @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
+                  Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
+                  Model.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-200" :
+                  "bg-gray-50 text-gray-600 border border-gray-200")" style="font-size:13px;">
+                @Model.Criticality
+            </span>
+        </div>
     </div>
     <div class="flex flex-col flex-1 min-h-0 px-6 pb-6">
         @if (!string.IsNullOrEmpty(Model.Description))
@@ -64,10 +67,9 @@
             {
                 index++;
                 var pct = worker.CompatibilityScore * 100;
-                var displayPct = Math.Min(pct, 100);
-                var isExpert = pct > 100;
-                var matchColor = MatchColor(pct);
-                var matchBg = MatchBg(pct);
+                var isExpert = worker.Exceeds;
+                var matchColor = isExpert ? "#7C3AED" : MatchColor(pct);
+                var matchBg = isExpert ? "#F3E8FF" : MatchBg(pct);
 
                 var isAssigned = worker.IsAssigned;
                 var selectedClass = isAssigned ? "selected" : "";
@@ -97,7 +99,7 @@
                                     <span style="color:#e6a817;">&#9733;</span>
                                     <span class="text-xs font-medium normal-case" style="color:#7C3AED;">EXCEEDS</span>
                                 }
-                                @displayPct.ToString("0")%
+                                @pct.ToString("0")%
                             </div>
                             <div class="text-sm text-gray-400 uppercase tracking-wider" style="color:@matchColor">match</div>
                         </div>

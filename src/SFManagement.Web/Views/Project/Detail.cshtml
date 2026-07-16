@@ -61,11 +61,13 @@
                  onclick="window.location='/Task/Detail?taskId=@task.IdEncrypted'">
                 <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">@task.Title</div>
                 <div class="flex items-center gap-2 mt-1">
+                    <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Priority:</span>
                     <span class="px-1.5 py-0.5 rounded-full text-xs font-medium
                         @(task.Criticality == SFManagement.Domain.Enums.Criticality.Critical ? "bg-red-100 text-red-700" :
                           task.Criticality == SFManagement.Domain.Enums.Criticality.High ? "bg-orange-100 text-orange-700" :
                           task.Criticality == SFManagement.Domain.Enums.Criticality.Medium ? "bg-blue-100 text-blue-700" :
                           "bg-gray-100 text-gray-600")">@task.Criticality</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Status:</span>
                     <span class="px-1.5 py-0.5 rounded-full text-xs font-medium
                         @(task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InProgress ? "bg-amber-100 text-amber-700" :
                           task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Blocked ? "bg-red-100 text-red-700" :
