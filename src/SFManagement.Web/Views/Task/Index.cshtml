@@ -129,7 +129,7 @@ else
                         <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Status:</span>
                         <span data-status-badge class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
                             @(task.Status == ProjectTaskStatus.InProgress ? "bg-amber-100 text-amber-700" :
-                              task.Status == ProjectTaskStatus.Blocked ? "bg-red-100 text-red-700" :
+                              task.Status == ProjectTaskStatus.Test ? "bg-purple-100 text-purple-700" :
                               task.Status == ProjectTaskStatus.Finish ? "bg-green-100 text-green-700" :
                               task.Status == ProjectTaskStatus.Archived ? "bg-gray-100 text-gray-500" :
                               "bg-blue-100 text-blue-700")">
@@ -236,7 +236,7 @@ else
                     <div class="col-span-1">
                         <span data-status-badge class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
                             @(task.Status == ProjectTaskStatus.InProgress ? "bg-amber-100 text-amber-700" :
-                              task.Status == ProjectTaskStatus.Blocked ? "bg-red-100 text-red-700" :
+                              task.Status == ProjectTaskStatus.Test ? "bg-purple-100 text-purple-700" :
                               task.Status == ProjectTaskStatus.Finish ? "bg-green-100 text-green-700" :
                               task.Status == ProjectTaskStatus.Archived ? "bg-gray-100 text-gray-500" :
                               "bg-blue-100 text-blue-700")">

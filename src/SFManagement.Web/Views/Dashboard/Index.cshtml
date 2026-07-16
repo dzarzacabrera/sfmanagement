@@ -71,8 +71,8 @@
     @foreach (var (status, label, tasks) in new[] {
         ("Queued", "Queued", Model.QueuedTasks),
         ("InProgress", "In Progress", Model.InProgressTasks),
-        ("Finish", "Finished", Model.FinishedTasks),
-        ("Blocked", "Blocked", Model.BlockedTasks) })
+        ("Test", "Test", Model.BlockedTasks),
+        ("Finish", "Finished", Model.FinishedTasks) })
     {
         <div class="bg-gray-100 rounded-xl p-3 kanban-column dark:bg-gray-800 dark:text-gray-100" data-status="@status">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-brand mb-3 px-1 dark:text-brand">
