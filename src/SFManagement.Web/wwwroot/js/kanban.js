@@ -55,13 +55,28 @@ function toggleWorkerSelect(card) {
     card.classList.toggle('selected');
     var rankNum = card.querySelector('.rank-num');
     var rankCheck = card.querySelector('.rank-check');
+
+    var hasCustomLeft = card.style.borderLeftColor && card.style.borderLeftColor !== '';
+    if (hasCustomLeft && !card.dataset.origBorderLeft) {
+        card.dataset.origBorderLeft = card.style.borderLeftColor;
+    }
+
     if (card.classList.contains('selected')) {
         card.style.borderColor = '#1d4ed8';
+        if (card.dataset.origBorderLeft) {
+            card.style.borderLeftColor = card.dataset.origBorderLeft;
+        }
         card.style.backgroundColor = 'rgba(29,78,216,0.06)';
         if (rankNum) rankNum.classList.add('hidden');
         if (rankCheck) rankCheck.classList.remove('hidden');
     } else {
         card.style.borderColor = '';
+        card.style.borderTopColor = '';
+        card.style.borderRightColor = '';
+        card.style.borderBottomColor = '';
+        if (card.dataset.origBorderLeft) {
+            card.style.borderLeftColor = card.dataset.origBorderLeft;
+        }
         card.style.backgroundColor = '';
         if (rankNum) rankNum.classList.remove('hidden');
         if (rankCheck) rankCheck.classList.add('hidden');

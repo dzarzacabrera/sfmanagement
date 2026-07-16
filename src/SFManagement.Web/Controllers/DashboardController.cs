@@ -85,18 +85,78 @@ public class DashboardController : Controller
         var tasks = await taskHandler.HandleAsync(new GetDashboardTasksQuery(pid));
         var task = tasks.FirstOrDefault(t => t.Id == tid);
 
+        var workersList = workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList();
+        var remaining = new List<WorkerScoreDto>(workersList);
+
+        WorkerScoreDto? mostEfficient = null;
+        WorkerScoreDto? growUp = null;
+        WorkerScoreDto? fastestToFinish = null;
+
+        var taskSkills = task?.Skills ?? new List<TaskSkillDto>();
+
+        // 1. Most Efficient: 95-100%, not exceeds, pick lowest in range (closest to 95%)
+        var efficientCandidates = remaining
+            .Where(w => w.CompatibilityScore >= 0.95 && w.CompatibilityScore <= 1.00 && !w.Exceeds)
+            .OrderBy(w => w.CompatibilityScore)
+            .ToList();
+        if (efficientCandidates.Count != 0)
+        {
+            mostEfficient = efficientCandidates[0];
+            remaining.Remove(mostEfficient);
+        }
+
+        // 2. Grow Up: 75-95%, closest to 87%
+        var growUpCandidates = remaining
+            .Where(w => w.CompatibilityScore >= 0.75 && w.CompatibilityScore <= 0.95)
+            .OrderBy(w => Math.Abs(w.CompatibilityScore - 0.87))
+            .ToList();
+        if (growUpCandidates.Count != 0)
+        {
+            growUp = growUpCandidates[0];
+            remaining.Remove(growUp);
+        }
+
+        // 3. Fastest to Finish: 100%, exceeds, smallest total excess
+        var fastestCandidates = remaining
+            .Where(w => w.CompatibilityScore >= 1.00 && w.Exceeds)
+            .ToList();
+        if (fastestCandidates.Count != 0)
+        {
+            fastestToFinish = fastestCandidates
+                .OrderBy(w => ComputeTotalExcess(w, taskSkills))
+                .First();
+            remaining.Remove(fastestToFinish);
+        }
+
         var vm = new AssignWorkerViewModel(
             tid,
             task?.Title ?? $"Task #{tid}",
             task?.Description,
             task?.Criticality ?? Criticality.Medium,
-            task?.Skills ?? new List<TaskSkillDto>(),
-            workers.Select(w => w with { IdEncrypted = enc.Encrypt(w.Id) }).ToList())
+            taskSkills,
+            remaining)
         {
-            TaskIdEncrypted = enc.Encrypt(tid)
+            TaskIdEncrypted = enc.Encrypt(tid),
+            MostEfficient = mostEfficient,
+            GrowUp = growUp,
+            FastestToFinish = fastestToFinish
         };
 
         return PartialView("_AssignWorkerModal", vm);
+    }
+
+    private static double ComputeTotalExcess(WorkerScoreDto worker, IReadOnlyList<TaskSkillDto> taskSkills)
+    {
+        double total = 0;
+        foreach (var skill in taskSkills)
+        {
+            if (skill.SkillPosition < worker.SkillsVector.Length)
+            {
+                var excess = Math.Max(0, worker.SkillsVector[skill.SkillPosition] - skill.RequiredLevel);
+                total += excess;
+            }
+        }
+        return total;
     }
 
     [HttpPost]

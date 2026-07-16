@@ -41,6 +41,9 @@ public record AssignWorkerViewModel(
     IReadOnlyList<WorkerScoreDto> Workers)
 {
     public string TaskIdEncrypted { get; init; } = "";
+    public WorkerScoreDto? MostEfficient { get; init; }
+    public WorkerScoreDto? GrowUp { get; init; }
+    public WorkerScoreDto? FastestToFinish { get; init; }
 }
 
 public record EvaluationViewModel(
