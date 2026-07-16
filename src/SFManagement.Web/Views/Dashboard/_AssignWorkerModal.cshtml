@@ -60,9 +60,97 @@
 
         <div class="border-t border-gray-200 dark:border-gray-700 my-3 shrink-0"></div>
 
-        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 shrink-0">Cosine Similarity Ranking</h3>
+        @{
+            void RenderRecCard(WorkerScoreDto worker, string label, string labelBg, string borderColor)
+            {
+                var pct = worker.CompatibilityScore * 100;
+                var isExpert = worker.Exceeds;
+                var matchColor = isExpert ? "#7C3AED" : MatchColor(pct);
+                var matchBg = isExpert ? "#F3E8FF" : MatchBg(pct);
+                var isAssigned = worker.IsAssigned;
+                var selectedClass = isAssigned ? "selected" : "";
+                var selectedStyle = isAssigned ? "border-color:#1d4ed8;background-color:rgba(29,78,216,0.06)" : "";
+                var rankCheckHidden = isAssigned ? "" : "hidden";
+
+                <div class="assign-card worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 cursor-pointer transition-all duration-150 hover:shadow-md dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative overflow-visible @selectedClass"
+                     style="border-left-color:@borderColor;border-left-width:4px;@selectedStyle"
+                     data-worker-id="@worker.IdEncrypted"
+                     onclick="toggleWorkerSelect(this)">
+                    <span class="absolute text-xs font-bold px-2 py-0.5 rounded" style="background-color:@labelBg;color:white;top:-8px;right:10px;border-radius:6px;z-index:1;">@label</span>
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="rank-num shrink-0 w-7 h-7 rounded-full bg-brand/25 text-brand text-sm font-bold flex items-center justify-center @(isAssigned ? "hidden" : "")">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                            </span>
+                            <span class="rank-check shrink-0 w-7 h-7 rounded-full bg-brand text-white flex items-center justify-center @rankCheckHidden">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                            <div class="min-w-0">
+                                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">@worker.Name</div>
+                                <div class="text-sm text-gray-400 dark:text-gray-400 truncate">@worker.Role</div>
+                            </div>
+                        </div>
+                        <div class="shrink-0 text-right">
+                            <div class="text-lg font-bold flex items-center justify-end gap-1" style="color:@matchColor">
+                                @if (isExpert)
+                                {
+                                    <span style="color:#e6a817;">&#9733;</span>
+                                    <span class="text-xs font-medium normal-case" style="color:#7C3AED;">EXCEEDS</span>
+                                }
+                                @pct.ToString("0")%
+                            </div>
+                            <div class="text-sm text-gray-400 uppercase tracking-wider" style="color:@matchColor">match</div>
+                        </div>
+                    </div>
+                    @if (Model.Skills?.Count > 0)
+                    {
+                        <div class="flex items-start gap-2 mt-3">
+                            <div class="flex flex-wrap gap-1.5 flex-1 min-w-0">
+                                @foreach (var skill in Model.Skills)
+                                {
+                                    var workerLevel = skill.SkillPosition < worker.SkillsVector.Length ? worker.SkillsVector[skill.SkillPosition] : 0;
+                                    var skillPct = skill.RequiredLevel > 0 ? workerLevel / skill.RequiredLevel * 100 : 0;
+                                    var isExceeding = workerLevel > skill.RequiredLevel;
+                                    var textColor = isExceeding ? "#7C3AED" : MatchColor(skillPct);
+                                    var bgColor = isExceeding ? "#F3E8FF" : MatchBg(skillPct);
+
+                                    <span class="inline-flex items-center text-sm sm:text-xs font-semibold rounded-md border overflow-hidden" style="border-color:@textColor;">
+                                        <span class="px-2 py-0.5" style="background-color:@bgColor; color:@textColor;">
+                                            @skill.SkillName
+                                        </span>
+                                        <span class="px-1.5 py-0.5 text-white font-bold border-l" style="background-color:@textColor; border-color:@textColor;">@workerLevel.ToString("0.##") / @skill.RequiredLevel.ToString("0.##")</span>
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
 
         <div id="assignWorkerList" class="flex-1 overflow-y-auto min-h-0 space-y-3 pb-4">
+
+            @if (Model.MostEfficient != null || Model.GrowUp != null || Model.FastestToFinish != null)
+            {
+                <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">Recommended</h3>
+
+                @if (Model.MostEfficient != null)
+                {
+                    RenderRecCard(Model.MostEfficient, "Most Efficient", "#059669", "#059669");
+                }
+                @if (Model.GrowUp != null)
+                {
+                    RenderRecCard(Model.GrowUp, "Grow Up", "#D97706", "#D97706");
+                }
+                @if (Model.FastestToFinish != null)
+                {
+                    RenderRecCard(Model.FastestToFinish, "Fastest to Finish", "#2563EB", "#2563EB");
+                }
+
+                <div class="border-t border-gray-200 dark:border-gray-700 my-3"></div>
+            }
+
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">Cosine Similarity Ranking</h3>
             @foreach (var worker in Model.Workers)
             {
                 index++;
