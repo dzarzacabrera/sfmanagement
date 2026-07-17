@@ -421,11 +421,24 @@ function updateTaskCard(taskIdEnc, newStatus) {
 }
 
 function updateColumnCounts() {
-    document.querySelectorAll('.kanban-column').forEach(function (col) {
+    var cols = document.querySelectorAll('.kanban-column');
+    cols.forEach(function (col) {
         var count = col.querySelectorAll('.task-card').length;
         var counter = col.querySelector('.task-count');
         if (counter) counter.textContent = count;
     });
+
+    // On desktop: shrink empty columns to half width
+    var grid = document.getElementById('kanban-grid');
+    if (!grid) return;
+    if (window.innerWidth < 1024) {
+        grid.style.gridTemplateColumns = '';
+        return;
+    }
+    var template = Array.from(cols).map(function (col) {
+        return col.querySelectorAll('.task-card').length === 0 ? '0.5fr' : '1fr';
+    }).join(' ');
+    grid.style.gridTemplateColumns = template;
 }
 
 // Event delegation for drag events (works with dynamically refreshed cards)
@@ -891,13 +904,22 @@ function closeStatusSheet() {
 }
 
 // Close status sheet on click outside (desktop dropdown)
-document.addEventListener('click', function (e) {
-    var sheet = document.getElementById('status-bottom-sheet');
-    if (!sheet || sheet.classList.contains('hidden')) return;
-    if (window.innerWidth < 640) return;
-    if (e.target.closest('#status-bottom-sheet') || e.target.closest('[onclick*="openStatusSheet"]')) return;
-    closeStatusSheet();
-});
+    document.addEventListener('click', function (e) {
+        var sheet = document.getElementById('status-bottom-sheet');
+        if (!sheet || sheet.classList.contains('hidden')) return;
+        if (window.innerWidth < 640) return;
+        if (e.target.closest('#status-bottom-sheet') || e.target.closest('[onclick*="openStatusSheet"]')) return;
+        closeStatusSheet();
+    });
+
+    // Apply empty-column width on load and on resize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateColumnCounts);
+    } else {
+        updateColumnCounts();
+    }
+    window.addEventListener('resize', updateColumnCounts);
+
 
 function changeStatus(taskIdEnc, newStatus) {
     var formData = new FormData();
