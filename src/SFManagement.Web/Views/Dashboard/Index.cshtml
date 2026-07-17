@@ -67,23 +67,39 @@
     })();
 </script>
 
-<div id="kanban-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    @foreach (var (status, label, tasks) in new[] {
-        ("Queued", "Queued", Model.QueuedTasks),
-        ("InProgress", "In Progress", Model.InProgressTasks),
-        ("Test", "Test", Model.BlockedTasks),
-        ("Finish", "Finished", Model.FinishedTasks) })
-    {
-        <div class="bg-gray-100 rounded-xl p-3 kanban-column dark:bg-gray-800 dark:text-gray-100" data-status="@status">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-brand mb-3 px-1 dark:text-brand">
-                @label <span class="ml-1 text-sm sm:text-pill bg-gray-200 px-1.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300 task-count">@tasks.Count</span>
-            </h2>
-            <div class="space-y-4">
-                @foreach (var task in tasks)
-                {
-                    <partial name="_TaskCard" model="task" />
-                }
+@if ((bool)(ViewBag.NoProjects ?? false) || (bool)(ViewBag.NoActiveProjects ?? false))
+{
+    <div class="flex flex-col items-center justify-center text-center py-20">
+        <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p class="text-lg font-medium text-gray-600 dark:text-gray-300 mb-1">Please create a project to get started</p>
+        <a href="/Project/Create"
+           class="mt-4 inline-flex items-center bg-brand text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-deep transition-colors">
+            + New Project
+        </a>
+    </div>
+}
+else
+{
+    <div id="kanban-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        @foreach (var (status, label, tasks) in new[] {
+            ("Queued", "Queued", Model.QueuedTasks),
+            ("InProgress", "In Progress", Model.InProgressTasks),
+            ("Test", "Test", Model.BlockedTasks),
+            ("Finish", "Finished", Model.FinishedTasks) })
+        {
+            <div class="bg-gray-100 rounded-xl p-3 kanban-column dark:bg-gray-800 dark:text-gray-100" data-status="@status">
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-brand mb-3 px-1 dark:text-brand">
+                    @label <span class="ml-1 text-sm sm:text-pill bg-gray-200 px-1.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300 task-count">@tasks.Count</span>
+                </h2>
+                <div class="space-y-4">
+                    @foreach (var task in tasks)
+                    {
+                        <partial name="_TaskCard" model="task" />
+                    }
+                </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
+}

@@ -35,6 +35,11 @@
         .dark .sidebar-link.active { background: rgba(33,102,143,0.2); }
         .dark .modal-backdrop { background: rgba(0,0,0,0.6); }
         #modal-content { cursor: grab; scrollbar-gutter: stable; }
+        #modal-panel.modal-sm { max-width: 28rem; }
+        #modal-panel.modal-sm #modal-content { height: auto; max-height: 80vh; padding: 1.5rem; cursor: default; }
+        @@media (max-width: 640px) {
+            #modal-panel.modal-sm #modal-content { padding: 1.25rem; max-height: 85vh; }
+        }
         @@media (max-width: 1023px) {
             #sidebar { transition: transform 0.3s ease-in-out; }
             body.sidebar-open #sidebar { transform: translateX(0); }
@@ -84,9 +89,10 @@
             <a href="/Project/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Projects</a>
             <a href="/Task/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Tasks</a>
             <a href="/Worker/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Workers</a>
+            <a href="/Skill/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Skills Catalogue</a>
 
             <span class="px-4 py-1.5 mt-2 text-sm font-semibold text-gray-400 uppercase tracking-wider dark:text-gray-500">Administration</span>
-            <a href="/Skill/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Skills Catalogue</a>
+            <a href="/Setup/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Setup</a>
         </nav>
 
         <div class="sticky bottom-0 px-4 py-3 border-t border-gray-100 text-sm text-gray-400 flex items-center justify-between bg-white dark:bg-gray-900 dark:border-gray-800 dark:text-gray-500">
@@ -106,7 +112,7 @@
     <!-- Main content -->
     <div class="flex-1 flex flex-col min-w-0">
         <!-- Top bar -->
-        <header class="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm px-4 sm:px-6 py-3 flex items-center justify-between dark:bg-gray-900 dark:border-gray-800">
+        <header class="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm px-4 sm:px-6 py-3 min-h-[60px] flex items-center justify-between dark:bg-gray-900 dark:border-gray-800">
             <div class="flex items-center gap-2">
                 <button id="sidebar-toggle" onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden" aria-label="Menu">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

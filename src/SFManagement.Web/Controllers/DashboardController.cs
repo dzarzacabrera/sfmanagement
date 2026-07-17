@@ -31,6 +31,11 @@ public class DashboardController : Controller
         var project = projects.FirstOrDefault(p => p.Id == pid);
         var projectName = project?.Name ?? $"Project #{pid}";
 
+        var noProjects = projects.Count == 0;
+        var noActiveProjects = projects.Count(p => !p.IsFinalized) == 0;
+        ViewBag.NoProjects = noProjects;
+        ViewBag.NoActiveProjects = noActiveProjects;
+
         var hasProjectWorkers = true;
         var hasWorkersToAssignToProject = true;
         await using (var conn = await connFactory.GetOpenConnectionAsync())
