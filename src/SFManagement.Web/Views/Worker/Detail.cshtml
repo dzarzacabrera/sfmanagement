@@ -62,13 +62,13 @@
     </div>
 }
 
-@if (Model.AssignedTasks?.Count > 0)
+@if (Model.ActiveTasks?.Count > 0)
 {
-    <h2 class="text-lg font-semibold mb-3 dark:text-white">Assigned Tasks</h2>
+    <h2 class="text-lg font-semibold mb-3 dark:text-white">Active Tasks</h2>
     <div id="worker-tasks" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-        @for (int i = 0; i < Model.AssignedTasks.Count; i++)
+        @for (int i = 0; i < Model.ActiveTasks.Count; i++)
         {
-            var t = Model.AssignedTasks[i];
+            var t = Model.ActiveTasks[i];
              <a href="/Dashboard/Index?projectId=@t.ProjectIdEncrypted"
                 class="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700"
                 data-pg-item>
@@ -95,7 +95,7 @@
             </a>
         }
     </div>
-    @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.AssignedTasks.Count, "tasks", PageSize: 10), new ViewDataDictionary(ViewData) { { "PaginationGrid", "worker-tasks" } })
+    @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.ActiveTasks.Count, "tasks", PageSize: 10), new ViewDataDictionary(ViewData) { { "PaginationGrid", "worker-tasks" } })
 }
 
 <h2 class="text-lg font-semibold mb-3 dark:text-white">Evaluation History</h2>

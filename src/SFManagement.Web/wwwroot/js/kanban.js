@@ -63,9 +63,6 @@ function toggleWorkerSelect(card) {
 
     if (card.classList.contains('selected')) {
         card.style.borderColor = '#21668f';
-        if (card.dataset.origBorderLeft) {
-            card.style.borderLeftColor = card.dataset.origBorderLeft;
-        }
         card.style.backgroundColor = 'rgba(33,102,143,0.06)';
         if (rankNum) rankNum.classList.add('hidden');
         if (rankCheck) rankCheck.classList.remove('hidden');
