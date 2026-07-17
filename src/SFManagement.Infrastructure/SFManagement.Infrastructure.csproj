@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <Target Name="CopySeedScript" BeforeTargets="BeforeBuild;BeforeRebuild">
-    <Copy SourceFiles="..\..\database\init.sql" DestinationFiles="Seed\init.sql" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="..\..\database\init.sql" DestinationFiles="Seed\init.sql" SkipUnchangedFiles="true" Condition="Exists('..\..\database\init.sql')" />
   </Target>
 
 </Project>
