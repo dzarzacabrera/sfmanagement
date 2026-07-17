@@ -527,7 +527,7 @@ function archiveTask(taskIdEnc, btn, keepVisible) {
         restoreCard();
         clearTimeout(window[undoKey]);
         showToast('Archive cancelled', 'undo');
-    });
+    }, btn);
 
     window[undoKey] = setTimeout(function () {
         var formData = new FormData();

@@ -93,7 +93,7 @@ else
                     </div>
                     @if (project.WorkerNames?.Count > 0)
                     {
-                        <div class="mt-3 text-sm text-gray-500 dark:text-gray-400 line-clamp-3">
+                        <div class="mt-3 text-sm text-gray-500 dark:text-gray-400 line-clamp-3" data-tooltip="@string.Join(", ", project.WorkerNames)">
                             <span class="font-semibold text-gray-700 dark:text-gray-300">Team:</span>
                             @string.Join(", ", project.WorkerNames)
                         </div>
@@ -139,7 +139,7 @@ else
                      data-pg-item
                      data-name="@project.Name.ToLower()"
                      onclick="location.href='/Project/Detail?projectId=@project.IdEncrypted'">
-                    <div class="sm:col-span-4 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
+                    <div class="sm:col-span-4 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate" data-tooltip="@project.Name">
                         @project.Name
                     </div>
                     <div class="sm:col-span-2">
@@ -156,7 +156,7 @@ else
                             </span>
                         }
                     </div>
-                    <div class="sm:col-span-3 text-sm text-gray-500 dark:text-gray-300 truncate">
+                    <div class="sm:col-span-3 text-sm text-gray-500 dark:text-gray-300 truncate" data-tooltip="@(project.WorkerNames?.Count > 0 ? "Team: " + string.Join(", ", project.WorkerNames) : "")">
                         @if (project.WorkerNames?.Count > 0)
                         {
                             <span class="font-semibold text-gray-700 dark:text-gray-300">Team:</span> @string.Join(", ", project.WorkerNames)

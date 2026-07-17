@@ -90,7 +90,7 @@ else
                     </div>
                     @if (!string.IsNullOrEmpty(skill.Description))
                     {
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-3 sm:line-clamp-4">@skill.Description</p>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-3 sm:line-clamp-4" data-tooltip="@skill.Description">@skill.Description</p>
                     }
                 </div>
                 <div class="flex flex-wrap gap-2 pt-3 justify-end">
@@ -119,10 +119,10 @@ else
                 <div class="skill-row grid grid-cols-12 items-center gap-4 border-b border-gray-100 last:border-b-0 py-3 px-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                      data-name="@skill.Name.ToLower()"
                      onclick="location.href='/Skill/Detail?skillId=@skill.IdEncrypted'">
-                    <div class="col-span-4 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
+                    <div class="col-span-4 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate" data-tooltip="@skill.Name">
                         @skill.Name
                     </div>
-                    <div class="col-span-3 text-sm text-gray-500 dark:text-gray-400 truncate">
+                    <div class="col-span-3 text-sm text-gray-500 dark:text-gray-400 truncate" data-tooltip="@skill.Description">
                         @skill.Description
                     </div>
                     <div class="col-span-2 text-sm">
