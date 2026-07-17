@@ -75,7 +75,7 @@ public record WorkerHistoryViewModel(
     long WorkerId,
     string WorkerName,
     IReadOnlyList<EvaluationHistoryDto> Evaluations,
-    IReadOnlyList<WorkerTaskDto>? AssignedTasks = null)
+    IReadOnlyList<WorkerTaskDto>? ActiveTasks = null)
 {
     public string WorkerIdEncrypted { get; init; } = "";
 }
