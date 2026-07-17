@@ -51,18 +51,10 @@ public class ProjectController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(
         [FromForm] string name,
-        [FromForm] IFormFile? descriptionFile,
+        [FromForm] string? descriptionMd,
         [FromServices] ICommandHandler<CreateProjectCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
-        string? descriptionMd = null;
-
-        if (descriptionFile is not null && descriptionFile.Length > 0)
-        {
-            using var reader = new StreamReader(descriptionFile.OpenReadStream());
-            descriptionMd = await reader.ReadToEndAsync();
-        }
-
         var command = new CreateProjectCommand(name, descriptionMd);
         await handler.HandleAsync(command);
         return RedirectToAction("Index", "Dashboard", new { projectId = enc.Encrypt(command.CreatedId) });

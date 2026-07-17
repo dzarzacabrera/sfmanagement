@@ -22,11 +22,10 @@
     <a href="/Project/Index" class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Back to Projects</a>
 }
 
-<div class="prose prose-sm max-w-none mb-6">
+<div class="mb-6">
     @if (!string.IsNullOrEmpty(Model.DescriptionMd))
     {
-        var html = Markdig.Markdown.ToHtml(Model.DescriptionMd);
-        <div class="bg-gray-50 pt-3 pb-4 pr-4 rounded-lg dark:bg-gray-800 dark:text-gray-300">@Html.Raw(html)</div>
+        <div class="bg-gray-50 pt-3 pb-4 pr-4 rounded-lg dark:bg-gray-800 dark:text-gray-300 text-sm whitespace-pre-wrap">@Model.DescriptionMd</div>
     }
     else
     {

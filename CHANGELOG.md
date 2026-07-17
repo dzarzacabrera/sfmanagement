@@ -200,7 +200,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `ToggleActive` POST: soft-delete/reactivar skill
   - **`WorkerController.Edit`**: nueva página para editar nombre + skills del worker usando Skill Pills Selector pre-cargado con el vector actual
   - **`ProjectController.Detail`**: nueva página de detalle del proyecto
-  - **`Project/Create`**: reemplazado textarea por `<input type="file" accept=".md">` con procesamiento server-side
   - **`kanban.js` sin recarga**: todas las operaciones (AssignWorker, ChangeStatus, SubmitEvaluation) manipulan el DOM in-place en vez de `location.reload()`
   - **`modal.js` con focus trap + animaciones**:
     - Focus trap: Tab cíclico dentro del modal, Shift+Tab al revés
