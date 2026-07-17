@@ -26,7 +26,7 @@
     </div>
     @if (!string.IsNullOrEmpty(Model.Description))
     {
-        <p class="text-base sm:text-sm text-gray-500 mt-2 line-clamp-2 dark:text-gray-400 leading-relaxed">@Model.Description</p>
+        <p class="text-base sm:text-sm text-gray-500 mt-2 line-clamp-2 dark:text-gray-400 leading-relaxed" data-tooltip="@Model.Description">@Model.Description</p>
     }
     @if (Model.Skills?.Count > 0)
     {

@@ -123,7 +123,7 @@ else
                             </svg>
                         </a>
                     }
-                    <p class="text-base sm:text-sm text-gray-400 dark:text-gray-400 truncate pr-12 mt-2 flex items-center gap-1.5" title="@task.ProjectName">
+                    <p class="text-base sm:text-sm text-gray-400 dark:text-gray-400 truncate pr-12 mt-2 flex items-center gap-1.5" data-tooltip="@task.ProjectName">
                         <span class="project-dot shrink-0" style="background:@(projectDotColors[Math.Abs(task.ProjectId) % 10]);width:10px;height:10px;border-radius:50%;"></span>
                         <span class="truncate">@projectNameShort</span>
                     </p>
@@ -230,10 +230,10 @@ else
                      data-title="@task.Title.ToLower()"
                      data-project="@task.ProjectIdEncrypted"
                      onclick="location.href='/Task/Detail?taskId=@task.IdEncrypted'">
-                    <div class="col-span-3 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
+                    <div class="col-span-3 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate" data-tooltip="@task.Title">
                         @task.Title
                     </div>
-                    <div class="col-span-2 text-sm text-gray-500 dark:text-gray-400 truncate" title="@task.ProjectName">
+                    <div class="col-span-2 text-sm text-gray-500 dark:text-gray-400 truncate" data-tooltip="@task.ProjectName">
                         @projectNameShort
                     </div>
                     <div class="col-span-1">
@@ -255,7 +255,7 @@ else
                             @task.Criticality
                         </span>
                     </div>
-                    <div class="col-span-2 text-sm text-gray-500 dark:text-gray-300 truncate">
+                    <div class="col-span-2 text-sm text-gray-500 dark:text-gray-300 truncate" data-tooltip="@(task.AssignedWorkers?.Count > 0 ? string.Join(", ", task.AssignedWorkers.Select(w => w.WorkerName)) : "")">
                         @if (task.AssignedWorkers?.Count > 0)
                         {
                             @string.Join(", ", task.AssignedWorkers.Select(w => w.WorkerName))

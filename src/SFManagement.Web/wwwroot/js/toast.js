@@ -64,10 +64,30 @@
         }, 3000);
     };
 
-    window.showUndoToast = function (message, onUndo) {
+    window.showUndoToast = function (message, onUndo, refEl) {
         var msg = document.createElement('div');
-        msg.style.cssText = 'position:fixed;z-index:9999;top:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);font-size:14px;font-weight:500;background:#fff;color:#111827;border:1px solid #e5e7eb;opacity:0;transition:opacity .2s ease';
+        var isMobile = window.innerWidth < 640;
+        msg.style.cssText = 'position:fixed;z-index:9999;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);font-size:14px;font-weight:500;background:#fff;color:#111827;border:1px solid #e5e7eb;opacity:0;transition:opacity .2s ease';
         msg.innerHTML = '<svg class="w-4 h-4 shrink-0 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>' + message + '</span><button class="ml-2 px-2 py-1 rounded text-sm font-semibold text-white" style="background:#21668f;border:none;cursor:pointer">Undo</button>';
+
+        if (isMobile) {
+            msg.style.top = '50%';
+            msg.style.left = '50%';
+            msg.style.transform = 'translate(-50%, -50%)';
+        } else if (refEl) {
+            var rect = refEl.getBoundingClientRect();
+            msg.style.top = (rect.bottom + 8) + 'px';
+            var msgW = Math.min(280, window.innerWidth - 16);
+            var left = rect.right + 8;
+            if (left + msgW > window.innerWidth - 8) left = rect.left - msgW - 8;
+            if (left < 8) left = 8;
+            msg.style.left = left + 'px';
+        } else {
+            msg.style.top = '16px';
+            msg.style.left = '50%';
+            msg.style.transform = 'translateX(-50%)';
+        }
+
         document.body.appendChild(msg);
         requestAnimationFrame(function () { msg.style.opacity = '1'; });
 

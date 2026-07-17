@@ -1,9 +1,14 @@
 (function () {
+    function isTruncated(el) {
+        return el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+    }
+
     document.addEventListener('mouseover', function (e) {
         var target = e.target.closest('[data-tooltip]');
         if (!target) return;
         var text = target.dataset.tooltip;
         if (!text) return;
+        if (!isTruncated(target)) return;
 
         // Don't show tooltips when a modal is open
         var root = document.getElementById('modal-root');
@@ -13,7 +18,8 @@
         tip.className = 'fixed z-50 px-2 py-1 rounded text-xs font-medium shadow-lg pointer-events-none';
         tip.style.background = '#1f2937';
         tip.style.color = '#f9fafb';
-        tip.style.whiteSpace = 'nowrap';
+        tip.style.whiteSpace = 'normal';
+        tip.style.maxWidth = '640px';
         tip.textContent = text;
 
         document.body.appendChild(tip);
