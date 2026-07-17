@@ -335,7 +335,7 @@ function updateSliderPreview(input) {
     else diffEl.classList.add('bg-gray-100', 'text-gray-500');
 }
 
-function refreshTaskCard(taskIdEnc, newStatus) {
+function refreshTaskCard(taskIdEnc, newStatus, insertBefore) {
     var projectIdEnc = window.__dashboardProjectIdEncrypted;
     if (!projectIdEnc) return;
 
@@ -348,36 +348,39 @@ function refreshTaskCard(taskIdEnc, newStatus) {
 
             var card = findCard(taskIdEnc);
             if (!card) {
-                // Card not in DOM — insert fresh into newStatus column (or fetch the attribute from the response)
                 var status = newStatus || newCard.getAttribute('data-status') || 'Queued';
                 var col = document.querySelector('.kanban-column[data-status="' + status + '"]');
                 if (col) {
                     var container = col.querySelector('.space-y-4') || col;
                     var placeholder = col.querySelector('.empty-placeholder');
                     if (placeholder) placeholder.remove();
-                    container.insertBefore(newCard, container.firstChild);
+                    if (insertBefore && container.contains(insertBefore)) {
+                        container.insertBefore(newCard, insertBefore);
+                    } else {
+                        container.appendChild(newCard);
+                    }
                 }
                 updateColumnCounts();
                 return;
             }
 
-            // Copy all attributes from newCard to the existing card element
-            // This preserves the DOM node position but updates class, draggable, data-status, etc.
             var attrs = newCard.attributes;
             for (var i = 0; i < attrs.length; i++) {
                 card.setAttribute(attrs[i].name, attrs[i].value);
             }
-            // Replace inner content to reflect updated state (workers, controls, etc.)
             card.innerHTML = newCard.innerHTML;
 
-            // If status changed, move the card element to the target column
             if (newStatus) {
                 var targetCol = document.querySelector('.kanban-column[data-status="' + newStatus + '"]');
                 if (targetCol) {
                     var container = targetCol.querySelector('.space-y-4') || targetCol;
                     var placeholder = targetCol.querySelector('.empty-placeholder');
                     if (placeholder) placeholder.remove();
-                    container.insertBefore(card, container.firstChild);
+                    if (insertBefore && container.contains(insertBefore)) {
+                        container.insertBefore(card, insertBefore);
+                    } else {
+                        container.appendChild(card);
+                    }
                 }
             }
 
@@ -452,7 +455,6 @@ if (kanbanGrid) {
         e.preventDefault();
         var taskId = e.dataTransfer.getData('text/plain');
 
-        // Look up encrypted ID from the card
         var card = document.querySelector('.task-card[data-task-id-encrypted="' + taskId + '"]');
         var taskIdEnc = card ? card.dataset.taskIdEncrypted : taskId;
 
@@ -462,6 +464,18 @@ if (kanbanGrid) {
 
         if (card && card.getAttribute('data-status') === newStatus) return;
 
+        var container = col.querySelector('.space-y-4') || col;
+        var dropY = e.clientY;
+        var insertBefore = null;
+        var cards = container.querySelectorAll('.task-card');
+        for (var i = 0; i < cards.length; i++) {
+            var rect = cards[i].getBoundingClientRect();
+            if (dropY < rect.top + rect.height / 2) {
+                insertBefore = cards[i];
+                break;
+            }
+        }
+
         var formData = new FormData();
         formData.append('taskIdEncrypted', taskIdEnc);
         formData.append('newStatus', newStatus);
@@ -469,7 +483,7 @@ if (kanbanGrid) {
         fetch('/Dashboard/ChangeStatus', { method: 'POST', body: formData })
             .then(function (r) {
                 if (r.ok) {
-                    refreshTaskCard(taskIdEnc, newStatus);
+                    refreshTaskCard(taskIdEnc, newStatus, insertBefore);
                     showToast('Task moved to ' + newStatus, 'success', null, col);
                 } else {
                     showToast('Status change failed: ' + r.status, 'error');
@@ -636,6 +650,56 @@ function openCreateTaskPopup(projectIdEnc) {
         .then(function (html) {
             openModal(html);
             initCreateTaskForm(document.getElementById('modal-content'));
+        })
+        .catch(function (err) {
+            showToast('Failed to load form: ' + err.message, 'error');
+        });
+}
+
+function initCreateWorkerForm(container) {
+    var form = container.querySelector('#createWorkerForm');
+    if (!form) return;
+    if (window.initSkillSelectors) initSkillSelectors(container);
+    form.addEventListener('submit', function (e) {
+        if (!window.validateSkillSelection(this)) {
+            e.preventDefault();
+            return;
+        }
+        e.preventDefault();
+        var btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Creating...';
+        var formData = new FormData(this);
+        fetch('/Worker/Create', { method: 'POST', body: formData })
+            .then(function (r) {
+                if (r.redirected) {
+                    closeModal();
+                    window.showToast('Worker created successfully.', 'success');
+                    location.reload();
+                } else {
+                    return r.text().then(function (html) {
+                        window.showToast('Failed to create worker.', 'error');
+                        btn.disabled = false;
+                        btn.textContent = 'Create Worker';
+                    });
+                }
+            })
+            .catch(function (err) {
+                window.showToast('Error: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Create Worker';
+            });
+    });
+}
+
+function openCreateWorkerPopup(projectIdEnc) {
+    var url = '/Dashboard/CreateWorkerPopup';
+    if (projectIdEnc) url += '?projectId=' + projectIdEnc;
+    fetch(url)
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+            openModal(html);
+            initCreateWorkerForm(document.getElementById('modal-content'));
         })
         .catch(function (err) {
             showToast('Failed to load form: ' + err.message, 'error');

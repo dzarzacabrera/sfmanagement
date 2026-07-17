@@ -403,6 +403,18 @@ public class DashboardController : Controller
         return PartialView("_CreateTaskModal", vm);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> CreateWorkerPopup(
+        [FromQuery] string? projectId,
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
+        ViewBag.AllSkills = skills;
+        ViewBag.ReturnProjectId = projectId;
+        return PartialView("_CreateWorkerModal");
+    }
+
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AddWorkersToProject(
