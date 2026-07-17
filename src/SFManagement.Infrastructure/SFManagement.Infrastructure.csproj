@@ -9,10 +9,20 @@
     <PackageReference Include="Pgvector" Version="0.3.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Seed\init.sql">
+      <LogicalName>SFManagement.Infrastructure.Seed.init.sql</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <Target Name="CopySeedScript" BeforeTargets="BeforeBuild;BeforeRebuild">
+    <Copy SourceFiles="..\..\..\sfmanagement\database\init.sql" DestinationFiles="Seed\init.sql" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

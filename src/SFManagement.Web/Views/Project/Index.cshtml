@@ -9,6 +9,8 @@
     </a>
 }
 
+@if (Model.Count > 0)
+{
 <div class="flex mb-6">
     <div class="flex items-stretch flex-1">
         <div class="relative flex-1 min-w-0">
@@ -42,6 +44,7 @@
         </div>
     </div>
 </div>
+}
 
 @if (Model.Count == 0)
 {

@@ -15,9 +15,12 @@
     </a>
 }
 
+@if (Model.Count > 0)
+{
 <input type="text" id="workerSearch"
        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm mb-6 focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
        placeholder="Search workers by name...">
+}
 
 @if (Model.Count == 0)
 {

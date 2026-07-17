@@ -1,6 +1,8 @@
 using SFManagement.Application.Abstractions;
 using SFManagement.Infrastructure;
+using SFManagement.Infrastructure.Data;
 using SFManagement.Infrastructure.Security;
+using SFManagement.Web.Health;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -20,6 +22,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddInfrastructure(connectionString);
 builder.Services.AddSingleton<IIdEncryptionService>(new IdEncryptionService(encryptionKey));
 
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database");
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -35,5 +40,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHealthChecks("/health");
 
 app.Run();

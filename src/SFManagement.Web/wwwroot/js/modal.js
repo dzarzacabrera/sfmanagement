@@ -74,8 +74,9 @@ function removeMobileSheet() {
     if (closeDesktop) closeDesktop.style.display = '';
 }
 
-function openModal(html) {
+function openModal(html, small) {
     var root = document.getElementById('modal-root');
+    var panel = document.getElementById('modal-panel');
     var content = document.getElementById('modal-content');
     lastFocusedElement = document.activeElement;
 
@@ -84,6 +85,12 @@ function openModal(html) {
     });
 
     content.innerHTML = html;
+
+    if (small) {
+        panel.classList.add('modal-sm');
+    } else {
+        panel.classList.remove('modal-sm');
+    }
 
     isMobileModal = window.innerWidth < 640;
     if (isMobileModal) {
@@ -132,6 +139,7 @@ function closeModal() {
     setTimeout(function () {
         root.classList.add('hidden');
         root.classList.remove('flex', exitClass, exitActiveClass);
+        panel.classList.remove('modal-sm');
         removeMobileSheet();
 
         var scrollY = parseInt(document.body.dataset.scrollY || '0');
