@@ -96,7 +96,7 @@ else
     <h2 class="text-lg font-semibold dark:text-white">Team</h2>
     @if (!Model.IsFinalized)
     {
-        <a href="/Worker/Create?projectId=@Model.IdEncrypted" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">Add Worker</a>
+        <button onclick="openCreateWorkerPopup('@Model.IdEncrypted')" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep cursor-pointer">Add Worker</button>
     }
 </div>
 @if (totalWorkers > 0)
