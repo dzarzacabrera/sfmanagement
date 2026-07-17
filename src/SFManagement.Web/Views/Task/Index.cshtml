@@ -94,6 +94,7 @@
 }
 else
 {
+    <div id="taskGridWrapper">
     <div id="taskCards" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         @foreach (var task in Model)
         {
@@ -104,6 +105,7 @@ else
             var isArchived = task.Status == ProjectTaskStatus.Archived;
 
             <div class="task-card rounded-xl bg-white border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative flex flex-col justify-between"
+                 data-pg-item
                  data-task-id="@task.IdEncrypted"
                  data-title="@task.Title.ToLower()"
                  data-project="@task.ProjectIdEncrypted"
@@ -126,7 +128,7 @@ else
                         <span class="truncate">@projectNameShort</span>
                     </p>
                     <div class="flex items-center gap-2 flex-wrap mt-3">
-                        <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Status:</span>
+                        <span class="text-gray-700 dark:text-gray-300 font-medium" style="font-size:13px;">Status:</span>
                         <span data-status-badge class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
                             @(task.Status == ProjectTaskStatus.InProgress ? "bg-amber-100 text-amber-700" :
                               task.Status == ProjectTaskStatus.Test ? "bg-purple-100 text-purple-700" :
@@ -135,7 +137,7 @@ else
                               "bg-blue-100 text-blue-700")">
                             @task.Status
                         </span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Priority:</span>
+                        <span class="text-gray-700 dark:text-gray-300 font-medium" style="font-size:13px;">Priority:</span>
                         <span class="px-2 py-0.5 rounded-full text-sm sm:text-xs font-medium
                             @(task.Criticality == Criticality.Critical ? "bg-red-100 text-red-700" :
                               task.Criticality == Criticality.High ? "bg-orange-100 text-orange-700" :
@@ -223,6 +225,7 @@ else
                 var isArchived = task.Status == ProjectTaskStatus.Archived;
 
                 <div class="task-row grid grid-cols-12 items-center gap-4 border-b border-gray-100 last:border-b-0 py-3 px-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors cursor-pointer @rowColors[Math.Abs(task.ProjectId) % 10]"
+                     data-pg-item
                      data-task-id="@task.IdEncrypted"
                      data-title="@task.Title.ToLower()"
                      data-project="@task.ProjectIdEncrypted"
@@ -338,10 +341,13 @@ else
             }
         </div>
     </div>
+</div>
 
     <div id="emptyState" class="hidden text-center py-12">
         <p class="text-gray-400 dark:text-gray-500">No tasks match your search.</p>
     </div>
+
+    @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.Count, "tasks"), new ViewDataDictionary(ViewData) { { "PaginationGrid", "taskGridWrapper" } })
 }
 
 <script>
@@ -351,6 +357,7 @@ else
         document.getElementById('viewCards').className = 'p-2.5 transition-colors bg-blue-50 text-brand';
         document.getElementById('viewList').className = 'p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700';
         localStorage.setItem('taskViewMode', 'cards');
+        window.paginationReRender('taskGridWrapper');
     }
 
     function switchToList() {
@@ -359,6 +366,7 @@ else
         document.getElementById('viewList').className = 'p-2.5 transition-colors bg-blue-50 text-brand';
         document.getElementById('viewCards').className = 'p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700';
         localStorage.setItem('taskViewMode', 'list');
+        window.paginationReRender('taskGridWrapper');
     }
 
     function filterTasks() {
@@ -366,31 +374,38 @@ else
         var project = document.getElementById('projectFilter').value;
         localStorage.setItem('taskSearchQuery', document.getElementById('taskSearch').value);
         localStorage.setItem('taskProjectFilter', project);
-        var total = 0, hidden = 0;
-        document.querySelectorAll('.task-card, .task-row').forEach(function (el) {
-            total++;
+        var items = document.querySelectorAll('.task-card, .task-row');
+        var hidden = 0;
+        items.forEach(function (el) {
             var match = true;
             if (q && !el.dataset.title.includes(q)) match = false;
             if (match && project && el.dataset.project !== project) match = false;
-            el.style.display = match ? '' : 'none';
+            el.dataset.pgFiltered = match ? '' : 'true';
             if (!match) hidden++;
         });
-        document.getElementById('emptyState').classList.toggle('hidden', hidden !== total);
+        document.getElementById('emptyState').classList.toggle('hidden', hidden !== items.length);
         var clearBtn = document.getElementById('clearSearch');
         if (clearBtn) clearBtn.classList.toggle('hidden', !q);
     }
 
     var searchInput = document.getElementById('taskSearch');
     if (searchInput) {
-        searchInput.addEventListener('input', filterTasks);
+        searchInput.addEventListener('input', function () {
+            filterTasks();
+            window.paginationRefresh('taskGridWrapper');
+        });
     }
     document.getElementById('clearSearch')?.addEventListener('click', function () {
         document.getElementById('taskSearch').value = '';
         localStorage.setItem('taskSearchQuery', '');
         filterTasks();
+        window.paginationRefresh('taskGridWrapper');
         document.getElementById('taskSearch').focus();
     });
-    document.getElementById('projectFilter')?.addEventListener('change', filterTasks);
+    document.getElementById('projectFilter')?.addEventListener('change', function () {
+        filterTasks();
+        window.paginationRefresh('taskGridWrapper');
+    });
 
     document.getElementById('viewCards')?.addEventListener('click', function () {
         if (document.getElementById('taskCards').classList.contains('hidden')) {
@@ -412,26 +427,28 @@ else
         }
     });
 
-    var savedView = localStorage.getItem('taskViewMode');
-    var savedQuery = localStorage.getItem('taskSearchQuery');
-    var savedProject = localStorage.getItem('taskProjectFilter');
+    document.addEventListener('DOMContentLoaded', function () {
+        var savedView = localStorage.getItem('taskViewMode');
+        var savedQuery = localStorage.getItem('taskSearchQuery');
+        var savedProject = localStorage.getItem('taskProjectFilter');
 
-    if (savedView === 'list' && !mql.matches) {
-        switchToList();
-    } else {
-        if (mql.matches) switchToCards();
-    }
+        if (savedView === 'list' && !mql.matches) {
+            switchToList();
+        } else {
+            if (mql.matches) switchToCards();
+        }
 
-    if (savedQuery && searchInput) {
-        searchInput.value = savedQuery;
-    }
+        if (savedQuery && searchInput) {
+            searchInput.value = savedQuery;
+        }
 
-    var projectFilter = document.getElementById('projectFilter');
-    if (savedProject && projectFilter) {
-        projectFilter.value = savedProject;
-    }
+        var projectFilter = document.getElementById('projectFilter');
+        if (savedProject && projectFilter) {
+            projectFilter.value = savedProject;
+        }
 
-    filterTasks();
+        filterTasks();
+    });
 </script>
 
 <!-- safelist: bg-blue-50/40 border-l-4 border-l-blue-300 bg-indigo-50/40 border-l-4 border-l-indigo-300 bg-emerald-50/40 border-l-4 border-l-emerald-300 bg-amber-50/40 border-l-4 border-l-amber-300 bg-fuchsia-50/40 border-l-4 border-l-fuchsia-300 bg-cyan-50/40 border-l-4 border-l-cyan-300 bg-rose-50/40 border-l-4 border-l-rose-300 bg-violet-50/40 border-l-4 border-l-violet-300 bg-lime-50/40 border-l-4 border-l-lime-300 bg-slate-50/40 border-l-4 border-l-slate-400 -->

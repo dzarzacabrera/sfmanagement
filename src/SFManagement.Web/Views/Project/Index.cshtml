@@ -55,10 +55,12 @@
 }
 else
 {
+    <div id="projectGridWrapper">
     <div id="projectCards" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         @foreach (var project in Model)
         {
             <div class="project-card bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative flex flex-col justify-between"
+                 data-pg-item
                  data-name="@project.Name.ToLower()"
                  onclick="location.href='/Project/Detail?projectId=@project.IdEncrypted'">
                 @if (!project.IsFinalized)
@@ -75,7 +77,7 @@ else
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 pr-12">@project.Name</h2>
                     <div class="flex items-center gap-2 mt-1">
-                        <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Status:</span>
+                        <span class="text-gray-700 font-medium" style="font-size:13px;">Status:</span>
                         @if (project.IsFinalized)
                         {
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
@@ -134,6 +136,7 @@ else
             @foreach (var project in Model)
             {
                 <div class="project-row grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-4 border-b border-gray-100 last:border-b-0 py-2 sm:py-3 px-3 sm:px-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                     data-pg-item
                      data-name="@project.Name.ToLower()"
                      onclick="location.href='/Project/Detail?projectId=@project.IdEncrypted'">
                     <div class="sm:col-span-4 font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
@@ -230,10 +233,13 @@ else
             }
         </div>
     </div>
+</div>
 
     <div id="emptyState" class="hidden text-center py-12">
         <p class="text-gray-400 dark:text-gray-500">No projects match your search.</p>
     </div>
+
+    @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.Count, "projects"), new ViewDataDictionary(ViewData) { { "PaginationGrid", "projectGridWrapper" } })
 }
 
 <script>
@@ -243,6 +249,7 @@ else
         document.getElementById('viewCards').className = 'p-2.5 transition-colors bg-blue-50 text-brand';
         document.getElementById('viewList').className = 'p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700';
         localStorage.setItem('projectViewMode', 'cards');
+        window.paginationReRender('projectGridWrapper');
     }
 
     function switchToList() {
@@ -251,34 +258,35 @@ else
         document.getElementById('viewList').className = 'p-2.5 transition-colors bg-blue-50 text-brand';
         document.getElementById('viewCards').className = 'p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700';
         localStorage.setItem('projectViewMode', 'list');
+        window.paginationReRender('projectGridWrapper');
     }
 
     var searchInput = document.getElementById('projectSearch');
     var clearBtn = document.getElementById('clearSearch');
     if (searchInput && clearBtn) {
-        function toggleClear() {
-            clearBtn.classList.toggle('hidden', !searchInput.value);
+        function applySearch() {
+            var q = searchInput.value.toLowerCase().trim();
+            localStorage.setItem('projectSearchQuery', searchInput.value);
+            var items = document.querySelectorAll('.project-card, .project-row');
+            var hidden = 0;
+            items.forEach(function (el) {
+                var match = !q || el.dataset.name.includes(q);
+                el.dataset.pgFiltered = match ? '' : 'true';
+                if (!match) hidden++;
+            });
+            document.getElementById('emptyState').classList.toggle('hidden', hidden !== items.length);
+            clearBtn.classList.toggle('hidden', !q);
         }
         searchInput.addEventListener('input', function () {
-            var q = this.value.toLowerCase().trim();
-            localStorage.setItem('projectSearchQuery', this.value);
-            document.querySelectorAll('.project-card, .project-row').forEach(function (el) {
-                var match = !q || el.dataset.name.includes(q);
-                el.style.display = match ? '' : 'none';
-            });
-            var total = document.querySelectorAll('.project-card, .project-row').length;
-            var hidden = 0;
-            document.querySelectorAll('.project-card, .project-row').forEach(function (el) {
-                if (el.style.display === 'none') hidden++;
-            });
-            document.getElementById('emptyState').classList.toggle('hidden', hidden !== total);
-            toggleClear();
+            applySearch();
+            // Reset to page 1 on new search
+            window.paginationRefresh('projectCards');
         });
         clearBtn.addEventListener('click', function () {
             searchInput.value = '';
             localStorage.setItem('projectSearchQuery', '');
-            var evt = new Event('input', { bubbles: true });
-            searchInput.dispatchEvent(evt);
+            applySearch();
+            window.paginationRefresh('projectCards');
             searchInput.focus();
         });
     }
@@ -303,18 +311,20 @@ else
         }
     });
 
-    var savedView = localStorage.getItem('projectViewMode');
-    var savedQuery = localStorage.getItem('projectSearchQuery');
+    document.addEventListener('DOMContentLoaded', function () {
+        var savedView = localStorage.getItem('projectViewMode');
+        var savedQuery = localStorage.getItem('projectSearchQuery');
 
-    if (savedView === 'list' && !mql.matches) {
-        switchToList();
-    } else {
-        if (mql.matches) switchToCards();
-    }
+        if (savedView === 'list' && !mql.matches) {
+            switchToList();
+        } else {
+            if (mql.matches) switchToCards();
+        }
 
-    if (savedQuery && searchInput) {
-        searchInput.value = savedQuery;
-        var evt = new Event('input', { bubbles: true });
-        searchInput.dispatchEvent(evt);
-    }
+        if (savedQuery && searchInput) {
+            searchInput.value = savedQuery;
+            var evt = new Event('input', { bubbles: true });
+            searchInput.dispatchEvent(evt);
+        }
+    });
 </script>

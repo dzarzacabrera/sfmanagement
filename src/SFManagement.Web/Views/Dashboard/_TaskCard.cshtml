@@ -85,7 +85,7 @@
                     var canBack = Model.Status != ProjectTaskStatus.Queued;
                     <button type="button" class="text-sm font-medium px-2 py-1.5 rounded border @(canBack ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canBack ? "" : "pointer-events-none")"
                             onclick="@(canBack ? "moveTaskStatus(\'" + Model.IdEncrypted + "\', -1)" : "")"
-                            data-tooltip="Move to previous status">&larr;</button>
+                            data-tooltip="Move to previous status">&lt;</button>
                     <button type="button" class="flex items-center gap-1.5 px-2.5 py-1.5 border border-brand rounded-lg text-sm font-semibold text-brand hover:bg-brand hover:text-white transition-colors"
                             onclick="openStatusSheet('@Model.IdEncrypted', '@Model.Status', this)">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@
                     var canForward = Model.Status == ProjectTaskStatus.Queued || Model.Status == ProjectTaskStatus.InProgress || Model.Status == ProjectTaskStatus.Test;
                     <button type="button" class="text-sm font-medium px-2 py-1.5 rounded border @(canForward ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canForward ? "" : "pointer-events-none")"
                             onclick="@(canForward ? "moveTaskStatus(\'" + Model.IdEncrypted + "\', 1)" : "")"
-                            data-tooltip="Move to next status">&rarr;</button>
+                            data-tooltip="Move to next status">&gt;</button>
                 }
             </div>
             <div class="flex items-center gap-1.5 ml-auto">

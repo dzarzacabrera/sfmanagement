@@ -1,0 +1,45 @@
+@model PaginationViewModel
+@{
+    var grid = ViewBag.PaginationGrid ?? "";
+    var uniqueId = grid;
+}
+<div class="flex items-center justify-between mt-3 mb-4 pagination-bar"
+     data-pg-root="@uniqueId"
+     data-pg-grid="@grid"
+     data-pg-total="@Model.Total"
+     data-pg-label="@Model.Label">
+    <span class="text-sm text-gray-500 dark:text-gray-400" data-pg-info="@uniqueId">1-@(Math.Min(Model.PageSize, Model.Total)) of @Model.Total @Model.Label</span>
+    <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1" data-pg-nav="@uniqueId">
+            <button data-pg-prev="@uniqueId"
+                    class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:pointer-events-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#96c0d9]"
+                    disabled>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <span data-pg-pages="@uniqueId" class="text-xs tabular-nums text-gray-600 dark:text-gray-300 min-w-[4rem] text-center">1 / 1</span>
+            <button data-pg-next="@uniqueId"
+                    class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:pointer-events-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#96c0d9]"
+                    disabled>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+        <div class="relative flex items-center gap-1.5">
+            <span class="text-xs text-gray-400 dark:text-gray-500">Show:</span>
+            <select data-pg-size="@uniqueId"
+                    class="text-xs border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-800 dark:text-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#96c0d9] appearance-none cursor-pointer pr-6">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <svg class="w-3 h-3 text-gray-400 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </div>
+    </div>
+</div>

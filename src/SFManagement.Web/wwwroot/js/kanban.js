@@ -765,10 +765,19 @@ function moveTaskStatus(taskIdEnc, direction) {
     changeStatus(taskIdEnc, STATUS_FLOW[nextIdx]);
 }
 
+var _activeStatusBtn = null;
+
 function openStatusSheet(taskIdEnc, currentStatus, btn) {
     if (window.innerWidth >= 640 && btn) {
+        if (_activeStatusBtn === btn) {
+            closeStatusSheet();
+            _activeStatusBtn = null;
+            return;
+        }
+        _activeStatusBtn = btn;
         openStatusDropdown(taskIdEnc, currentStatus, btn);
     } else {
+        _activeStatusBtn = null;
         openStatusMobileSheet(taskIdEnc, currentStatus);
     }
 }
@@ -874,6 +883,7 @@ function openStatusDropdown(taskIdEnc, currentStatus, btn) {
 }
 
 function closeStatusSheet() {
+    _activeStatusBtn = null;
     var sheet = document.getElementById('status-bottom-sheet');
     if (!sheet) return;
     document.body.appendChild(sheet);

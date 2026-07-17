@@ -47,3 +47,5 @@ public record SkillCatalogueItem(long Id, string Name, int Position)
 }
 
 public record CriticalityOption(Criticality Value, string Label);
+
+public record PaginationViewModel(int Total, string Label = "items", int PageSize = 20);
