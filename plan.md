@@ -125,27 +125,26 @@
 | 4.2 | `DashboardController` (Index, AssignPopup, EvaluationPopup, POST actions) | `Web/Controllers/DashboardController.cs` | ✅ |
 | 4.3 | Vista Dashboard Kanban: 4 columnas responsivas (Queued, In Progress, Test, Finish) | `Web/Views/Dashboard/Index.cshtml` | ✅ |
 | 4.4 | `ProjectController` — añadir acción `Detail` GET + vista con info del proyecto y tareas vinculadas | `Web/Controllers/ProjectController.cs`, `Web/Views/Project/Detail.cshtml` | ✅ |
-| 4.5 | Vista Create Project — reemplazar textarea por `<input type="file" accept=".md">` + procesar contenido en POST | `Web/Views/Project/Create.cshtml`, `ProjectController.Create POST` | ✅ |
-| 4.6 | `TaskController` (Create GET/POST, ChangeStatus) | `Web/Controllers/TaskController.cs` | ✅ |
-| 4.7 | Vista Create Task — reemplazar inputs numéricos por **Skill Pills Selector** (búsqueda + pills + nivel numérico en zona seleccionadas) | `Web/Views/Task/Create.cshtml`, `Web/Views/Shared/_SkillSelector.cshtml` | ✅ |
-| 4.8 | `WorkerController` — añadir acción `Edit` GET/POST + vista con nombre + Skill Pills Selector pre-cargado | `Web/Controllers/WorkerController.cs`, `Web/Views/Worker/Edit.cshtml` | ✅ |
-| 4.9 | Vista Worker Detail: tabla cronológica inversa de evaluaciones + enlace "Editar" | `Web/Views/Worker/Detail.cshtml` | ✅ |
-| 4.10 | Partial View: Popup asignación worker (glassmorphism backdrop-blur-sm) | `Web/Views/Dashboard/_AssignWorkerModal.cshtml` | ✅ |
-| 4.11 | Partial View: Modal evaluación desempeño (rating por skill, carga skills desde BD) | `Web/Views/Dashboard/_EvaluationModal.cshtml` | ✅ |
-| 4.12 | ViewModels: `DashboardViewModel`, `AssignWorkerViewModel`, `EvaluationViewModel`, `WorkerHistoryViewModel` | `Web/ViewModels/` | ✅ |
-| 4.13 | **kanban.js** — cambiar estado tarea vía fetch + mover card entre columnas **sin recargar** (DOM in-place) | `Web/wwwroot/js/kanban.js` | ✅ |
-| 4.14 | **modal.js** — focus trap, animación CSS entrada/salida (opacity/transform), click outside, Escape key | `Web/wwwroot/js/modal.js` | ✅ |
-| 4.15 | **skill-selector.js** — componente Vanilla JS: input búsqueda, pills no-seleccionadas filtrables, pills seleccionadas con input nivel (0-10), siempre visibles | `Web/wwwroot/js/skill-selector.js` | ✅ |
-| 4.16 | `SkillController` — CRUD skills catálogo (Index, Create, Edit, ToggleActive) | `Web/Controllers/SkillController.cs` | ✅ |
-| 4.17 | Vistas Skill: `Index.cshtml` (tabla skills activas/inactivas + toggle), `Create.cshtml` (solo nombre), `Edit.cshtml` (solo nombre) | `Web/Views/Skill/` | ✅ |
-| 4.18 | **Query** `GetAllSkillsQueryHandler` — SELECT skills activas desde BD | `Infrastructure/Handlers/Queries/GetAllSkillsQueryHandler.cs` | ✅ |
-| 4.19 | **Command** `ToggleSkillActiveCommand` con Handler — soft-delete / reactivar skill | `Application/Commands/ToggleSkillActiveCommand.cs`, `Infrastructure/Handlers/Commands/ToggleSkillActiveCommandHandler.cs` | ✅ |
-| 4.20 | **Database**: `vector(12)` → `vector(1024)`, columna `is_active` en skills_catalogue, stored procedure `sp_add_skill`, función `util_pad_vector()` para seed | `database/init.sql`, `database/stored_procedures.sql` | ✅ |
-| 4.21 | **E2E Test** — Skills CRUD (crear → listar → desactivar → reactivar) | `tests/SFManagement.E2ETests/SkillsCrudTests.cs` | ✅ |
-| 4.22 | **E2E Test** — Worker Edit (editar nombre + skills) | `tests/SFManagement.E2ETests/WorkerEditFlowTests.cs` | ✅ |
-| 4.23 | Actualizar CHANGELOG.md con v0.4.0 | `CHANGELOG.md` | ✅ |
+| 4.5 | `TaskController` (Create GET/POST, ChangeStatus) | `Web/Controllers/TaskController.cs` | ✅ |
+| 4.6 | Vista Create Task — reemplazar inputs numéricos por **Skill Pills Selector** (búsqueda + pills + nivel numérico en zona seleccionadas) | `Web/Views/Task/Create.cshtml`, `Web/Views/Shared/_SkillSelector.cshtml` | ✅ |
+| 4.7 | `WorkerController` — añadir acción `Edit` GET/POST + vista con nombre + Skill Pills Selector pre-cargado | `Web/Controllers/WorkerController.cs`, `Web/Views/Worker/Edit.cshtml` | ✅ |
+| 4.8 | Vista Worker Detail: tabla cronológica inversa de evaluaciones + enlace "Editar" | `Web/Views/Worker/Detail.cshtml` | ✅ |
+| 4.9 | Partial View: Popup asignación worker (glassmorphism backdrop-blur-sm) | `Web/Views/Dashboard/_AssignWorkerModal.cshtml` | ✅ |
+| 4.10 | Partial View: Modal evaluación desempeño (rating por skill, carga skills desde BD) | `Web/Views/Dashboard/_EvaluationModal.cshtml` | ✅ |
+| 4.11 | ViewModels: `DashboardViewModel`, `AssignWorkerViewModel`, `EvaluationViewModel`, `WorkerHistoryViewModel` | `Web/ViewModels/` | ✅ |
+| 4.12 | **kanban.js** — cambiar estado tarea vía fetch + mover card entre columnas **sin recargar** (DOM in-place) | `Web/wwwroot/js/kanban.js` | ✅ |
+| 4.13 | **modal.js** — focus trap, animación CSS entrada/salida (opacity/transform), click outside, Escape key | `Web/wwwroot/js/modal.js` | ✅ |
+| 4.14 | **skill-selector.js** — componente Vanilla JS: input búsqueda, pills no-seleccionadas filtrables, pills seleccionadas con input nivel (0-10), siempre visibles | `Web/wwwroot/js/skill-selector.js` | ✅ |
+| 4.15 | `SkillController` — CRUD skills catálogo (Index, Create, Edit, ToggleActive) | `Web/Controllers/SkillController.cs` | ✅ |
+| 4.16 | Vistas Skill: `Index.cshtml` (tabla skills activas/inactivas + toggle), `Create.cshtml` (solo nombre), `Edit.cshtml` (solo nombre) | `Web/Views/Skill/` | ✅ |
+| 4.17 | **Query** `GetAllSkillsQueryHandler` — SELECT skills activas desde BD | `Infrastructure/Handlers/Queries/GetAllSkillsQueryHandler.cs` | ✅ |
+| 4.18 | **Command** `ToggleSkillActiveCommand` con Handler — soft-delete / reactivar skill | `Application/Commands/ToggleSkillActiveCommand.cs`, `Infrastructure/Handlers/Commands/ToggleSkillActiveCommandHandler.cs` | ✅ |
+| 4.19 | **Database**: `vector(12)` → `vector(1024)`, columna `is_active` en skills_catalogue, stored procedure `sp_add_skill`, función `util_pad_vector()` para seed | `database/init.sql`, `database/stored_procedures.sql` | ✅ |
+| 4.20 | **E2E Test** — Skills CRUD (crear → listar → desactivar → reactivar) | `tests/SFManagement.E2ETests/SkillsCrudTests.cs` | ✅ |
+| 4.21 | **E2E Test** — Worker Edit (editar nombre + skills) | `tests/SFManagement.E2ETests/WorkerEditFlowTests.cs` | ✅ |
+| 4.22 | Actualizar CHANGELOG.md con v0.4.0 | `CHANGELOG.md` | ✅ |
 
-### Detalle Skill Pills Selector (tareas 4.7, 4.8, 4.15)
+### Detalle Skill Pills Selector (tareas 4.6, 4.7, 4.14)
 
 **Comportamiento:**
 1. Carga skills desde ViewBag (lista `SkillDto` con id, name, vector_position)
@@ -193,7 +192,7 @@
 | 7.2 | Test extremo: worker con skill en 0.0, recibe evaluación "mal" con criticidad "critical" (×2.0), debe quedar en 0.0 (clamping inferior) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
 | 7.3 | Test extremo: worker con skill en 9.5, recibe "muy_bien" con criticidad "critical" (×2.0), debe quedar en 10.0 (clamping superior: 9.5 + 0.5×2.0 = 10.5 → clamp a 10.0) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
 | 7.4 | ADR 005: documentar algoritmo de cálculo de XP con fórmula, multiplicadores y clamping | `docs/005-decision-xp-calculation-algorithm.md` |
-| 7.5 | Auditoría OWASP: revisar inyección SQL (parametrización), XSS en Razor (Html.Encode), saneamiento subida .md, cabeceras HTTP security | `docs/006-owasp-security-audit.md` |
+| 7.5 | Auditoría OWASP: revisar inyección SQL (parametrización), XSS en Razor (Html.Encode), cabeceras HTTP security | `docs/006-owasp-security-audit.md` |
 | 7.6 | Actualizar `CHANGELOG.md` con v1.0.0 (Added: todas las fases, Fixed: clamping edge cases, Security: OWASP mitigaciones, UI Polish, ID Encryption) | `CHANGELOG.md` |
 | 7.7 | Actualizar `README.md` con descripción técnica, instrucciones de despliegue (docker-compose up), y enlaces a ADRs | `README.md` |
 
