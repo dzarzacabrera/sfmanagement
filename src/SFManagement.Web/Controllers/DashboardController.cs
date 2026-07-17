@@ -373,6 +373,36 @@ public class DashboardController : Controller
         return PartialView("_AddWorkerToProjectModal", vm);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> CreateTaskPopup(
+        [FromQuery] string projectId,
+        [FromServices] IGetAllProjectsQueryHandler projectsHandler,
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(projectId, out var pid)) return NotFound();
+        var projects = (await projectsHandler.HandleAsync(new GetAllProjectsQuery())).Where(p => !p.IsFinalized).ToList();
+        var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
+        var criticalities = new List<CriticalityOption>
+        {
+            new(Criticality.Low, "Low"),
+            new(Criticality.Medium, "Medium"),
+            new(Criticality.High, "High"),
+            new(Criticality.Critical, "Critical"),
+        };
+
+        ViewBag.AllSkills = skills;
+
+        var vm = new CreateTaskViewModel(pid,
+            projects.Select(p => p with { IdEncrypted = enc.Encrypt(p.Id) }).ToList(),
+            skills.Select(s => new SkillCatalogueItem(s.Id, s.Name, s.VectorPosition) { IdEncrypted = enc.Encrypt(s.Id) }).ToList(),
+            criticalities)
+        {
+            ProjectIdEncrypted = enc.Encrypt(pid)
+        };
+        return PartialView("_CreateTaskModal", vm);
+    }
+
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AddWorkersToProject(
