@@ -45,6 +45,7 @@ else
                     .Take(2).Select(w => w[0]))).ToUpper();
 
             <div class="worker-card bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow cursor-pointer dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative"
+                 data-pg-item
                  data-name="@worker.Name.ToLower()"
                  onclick="location.href='/Worker/Detail?workerId=@worker.IdEncrypted'">
                 <a href="/Worker/Edit?workerId=@worker.IdEncrypted"
@@ -75,7 +76,7 @@ else
                         <div class="skill-row flex items-center gap-2 text-sm @(i >= 4 ? "hidden extra-skill" : "")">
                             <span class="text-gray-700 dark:text-gray-300 flex-[36] min-[1800px]:flex-[34] min-w-0 truncate">@skill.Name</span>
                             <div class="flex-[54] min-[1800px]:flex-[60] h-1.5 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700">
-                                <div class="h-full bg-brand-dark rounded-full transition-all" style="width: @(skill.Value / 10.0 * 100)%"></div>
+                                 <div class="h-full bg-brand-dark rounded-full transition-all" style="width: @((skill.Value / 10.0 * 100).ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
                             </div>
                             <span class="font-bold text-gray-900 dark:text-gray-100 flex-[10] min-[1800px]:flex-[6] text-right tabular-nums">@skill.Value.ToString("0.00")</span>
                         </div>
@@ -97,20 +98,23 @@ else
     <div id="emptyState" class="hidden text-center py-12">
         <p class="text-gray-400">No workers match your search.</p>
     </div>
+
+    @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.Count, "workers"), new ViewDataDictionary(ViewData) { { "PaginationGrid", "workerGrid" } })
 }
 
 <script>
-    document.getElementById('workerSearch')?.addEventListener('input', function () {
+        document.getElementById('workerSearch')?.addEventListener('input', function () {
         var q = this.value.toLowerCase().trim();
         var cards = document.querySelectorAll('.worker-card');
         var visibleCount = 0;
         cards.forEach(function (c) {
             var match = !q || c.dataset.name.includes(q);
-            c.style.display = match ? '' : 'none';
+            c.dataset.pgFiltered = match ? '' : 'true';
             if (match) visibleCount++;
         });
         var es = document.getElementById('emptyState');
         if (es) es.classList.toggle('hidden', visibleCount > 0);
+        window.paginationRefresh('workerGrid');
     });
 
     document.querySelectorAll('.toggle-skills').forEach(function (btn) {

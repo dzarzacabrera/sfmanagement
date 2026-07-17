@@ -43,7 +43,6 @@
 @{
     var totalTasks = Model.Tasks?.Count ?? 0;
     var totalWorkers = Model.Workers?.Count ?? 0;
-    var md6 = 6; var mm4 = 4;
 }
 
 <div class="flex items-center justify-between mb-3">
@@ -58,20 +57,19 @@
     <div id="project-tasks" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 mb-4">
         @for (int i = 0; i < totalTasks; i++)
         {
-            var hiddenClass = i >= md6 ? "hidden" : i >= mm4 ? "hidden sm:block" : "";
             var task = Model.Tasks![i];
-            <div class="task-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer @hiddenClass"
-                 data-index="@i"
+            <div class="task-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer"
+                 data-pg-item
                  onclick="window.location='/Task/Detail?taskId=@task.IdEncrypted'">
                 <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">@task.Title</div>
                 <div class="flex items-center gap-2 mt-1">
-                    <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Priority:</span>
+                    <span class="text-gray-700 font-medium" style="font-size:13px;">Priority:</span>
                     <span class="px-1.5 py-0.5 rounded-full text-xs font-medium
                         @(task.Criticality == SFManagement.Domain.Enums.Criticality.Critical ? "bg-red-100 text-red-700" :
                           task.Criticality == SFManagement.Domain.Enums.Criticality.High ? "bg-orange-100 text-orange-700" :
                           task.Criticality == SFManagement.Domain.Enums.Criticality.Medium ? "bg-blue-100 text-blue-700" :
                           "bg-gray-100 text-gray-600")">@task.Criticality</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Status:</span>
+                    <span class="text-gray-700 font-medium" style="font-size:13px;">Status:</span>
                     <span class="px-1.5 py-0.5 rounded-full text-xs font-medium
                         @(task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InProgress ? "bg-amber-100 text-amber-700" :
                           task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Test ? "bg-purple-100 text-purple-700" :
@@ -82,10 +80,7 @@
             </div>
         }
     </div>
-    if (totalTasks > md6)
-    {
-        <button onclick="toggleSection('project-tasks', 6, 4, this)" class="toggle-btn text-sm font-medium text-brand hover:text-brand-deep mb-6" data-total="@totalTasks" data-label="tasks">+ tasks</button>
-    }
+    @await Html.PartialAsync("_Pagination", new PaginationViewModel(totalTasks, "tasks"), new ViewDataDictionary(ViewData) { { "PaginationGrid", "project-tasks" } })
 }
 else
 {
@@ -104,10 +99,9 @@ else
     <div id="project-workers" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 mb-4">
         @for (int i = 0; i < totalWorkers; i++)
         {
-            var hiddenClass = i >= md6 ? "hidden" : i >= mm4 ? "hidden sm:block" : "";
             var worker = Model.Workers![i];
-            <div class="worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer @hiddenClass"
-                 data-index="@i"
+            <div class="worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer"
+                 data-pg-item
                  onclick="window.location='/Worker/Detail?workerId=@worker.IdEncrypted'">
                 <div class="flex items-center justify-between">
                     <div>
@@ -122,51 +116,10 @@ else
             </div>
         }
     </div>
-    if (totalWorkers > md6)
-    {
-        <button onclick="toggleSection('project-workers', 6, 4, this)" class="toggle-btn text-sm font-medium text-brand hover:text-brand-deep mb-6" data-total="@totalWorkers" data-label="workers">+ workers</button>
-    }
+    @await Html.PartialAsync("_Pagination", new PaginationViewModel(totalWorkers, "workers"), new ViewDataDictionary(ViewData) { { "PaginationGrid", "project-workers" } })
 }
 else
 {
     <p class="text-gray-400 italic dark:text-gray-400 mb-6">No workers assigned.</p>
 }
 
-<script>
-function initToggleButtons() {
-    var isMobile = window.innerWidth < 640;
-    document.querySelectorAll('.toggle-btn').forEach(function (btn) {
-        if (btn.dataset.expanded !== 'true') {
-            var total = parseInt(btn.dataset.total);
-            var limit = isMobile ? 4 : 6;
-            btn.textContent = '+ ' + (total - limit) + ' ' + btn.dataset.label;
-        }
-    });
-}
-
-function toggleSection(gridId, maxDesktop, maxMobile, btn) {
-    var grid = document.getElementById(gridId);
-    var isExpanded = grid.dataset.expanded === 'true';
-    var cards = grid.querySelectorAll('.task-card, .worker-card');
-    var total = cards.length;
-
-    cards.forEach(function (c) {
-        var idx = parseInt(c.dataset.index);
-        c.classList.remove('hidden', 'sm:block');
-        if (isExpanded) {
-            if (idx >= maxDesktop) {
-                c.classList.add('hidden');
-            } else if (idx >= maxMobile) {
-                c.classList.add('hidden', 'sm:block');
-            }
-        }
-    });
-
-    grid.dataset.expanded = isExpanded ? 'false' : 'true';
-    btn.dataset.expanded = isExpanded ? 'false' : 'true';
-    var limit = window.innerWidth < 640 ? maxMobile : maxDesktop;
-    btn.textContent = isExpanded ? '+ ' + (total - limit) + ' ' + btn.dataset.label : 'Show Less';
-}
-
-document.addEventListener('DOMContentLoaded', initToggleButtons);
-</script>
