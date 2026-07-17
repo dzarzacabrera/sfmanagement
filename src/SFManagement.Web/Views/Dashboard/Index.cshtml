@@ -29,10 +29,10 @@
     @if (!Model.IsFinalized)
     {
         <div class="flex items-center gap-2">
-            <a href="/Task/Create?projectId=@Model.ProjectIdEncrypted"
-               class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep">
+            <button onclick="openCreateTaskPopup('@Model.ProjectIdEncrypted')"
+                    class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep">
                 + New Task
-            </a>
+            </button>
             @if (Model.HasWorkersToAssignToProject)
             {
                 <button id="btn-add-worker" onclick="openAddWorkerPopup('@Model.ProjectIdEncrypted')"

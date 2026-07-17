@@ -50,7 +50,7 @@
     <h2 class="text-lg font-semibold dark:text-white">Tasks</h2>
     @if (!Model.IsFinalized)
     {
-        <a href="/Task/Create?projectId=@Model.IdEncrypted" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep">Add Task</a>
+        <button onclick="openCreateTaskPopup('@Model.IdEncrypted')" class="bg-brand text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-deep dark:bg-brand dark:hover:bg-brand-deep cursor-pointer">Add Task</button>
     }
 </div>
 @if (totalTasks > 0)

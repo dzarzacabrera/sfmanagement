@@ -105,11 +105,10 @@ else
                            onclick="event.stopPropagation()">
                             Dashboard
                         </a>
-                        <a href="/Task/Create?projectId=@project.IdEncrypted"
-                           class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap"
-                           onclick="event.stopPropagation()">
+                        <button onclick="event.stopPropagation(); openCreateTaskPopup('@project.IdEncrypted')"
+                                class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 whitespace-nowrap cursor-pointer">
                             + Task
-                        </a>
+                        </button>
                         var availMap = ViewBag.AvailableWorkersPerProject as Dictionary<long, bool>;
                         var hasWorkers = availMap?.GetValueOrDefault(project.Id) ?? true;
                         if (hasWorkers)
@@ -181,13 +180,13 @@ else
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </a>
-                                <a href="/Task/Create?projectId=@project.IdEncrypted"
-                                   class="p-2 rounded-lg text-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
-                                   title="Add task">
+                                <button onclick="openCreateTaskPopup('@project.IdEncrypted')"
+                                        class="p-2 rounded-lg text-green-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
+                                        title="Add task">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
-                                </a>
+                                </button>
                                 <button onclick="openAddWorkerPopup('@project.IdEncrypted')"
                                         class="p-2 rounded-lg text-purple-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                         title="Add worker">

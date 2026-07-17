@@ -594,6 +594,54 @@ function finalizeProject(projectIdEnc, btn) {
         });
 }
 
+function initCreateTaskForm(container) {
+    var form = container.querySelector('#createTaskForm');
+    if (!form) return;
+    if (window.initSkillSelectors) initSkillSelectors(container);
+    form.addEventListener('submit', function (e) {
+        if (!window.validateSkillSelection(this)) {
+            e.preventDefault();
+            return;
+        }
+        e.preventDefault();
+        var btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Creating...';
+        var formData = new FormData(this);
+        fetch('/Task/Create', { method: 'POST', body: formData })
+            .then(function (r) {
+                if (r.redirected) {
+                    closeModal();
+                    window.showToast('Task created successfully.', 'success');
+                    location.reload();
+                } else {
+                    return r.text().then(function (html) {
+                        window.showToast('Failed to create task.', 'error');
+                        btn.disabled = false;
+                        btn.textContent = 'Create Task';
+                    });
+                }
+            })
+            .catch(function (err) {
+                window.showToast('Error: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Create Task';
+            });
+    });
+}
+
+function openCreateTaskPopup(projectIdEnc) {
+    fetch('/Dashboard/CreateTaskPopup?projectId=' + projectIdEnc)
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+            openModal(html);
+            initCreateTaskForm(document.getElementById('modal-content'));
+        })
+        .catch(function (err) {
+            showToast('Failed to load form: ' + err.message, 'error');
+        });
+}
+
 function openAddWorkerPopup(projectIdEnc) {
     var col = document.querySelector('.kanban-column');
     var skel = col ? showSkeleton(col) : null;
@@ -603,11 +651,34 @@ function openAddWorkerPopup(projectIdEnc) {
         .then(function (html) {
             if (skel) skel.remove();
             openModal(html);
+            initWorkerFilter();
         })
         .catch(function (err) {
             if (skel) skel.remove();
             showToast('Failed to load popup: ' + err.message, 'error');
         });
+}
+
+function initWorkerFilter() {
+    var input = document.getElementById('workerFilter');
+    var clearBtn = document.getElementById('clearWorkerFilter');
+    if (!input || !clearBtn) return;
+    function toggleClear() {
+        clearBtn.classList.toggle('hidden', !input.value);
+    }
+    input.addEventListener('input', function () {
+        var q = this.value.toLowerCase().trim();
+        document.querySelectorAll('#addWorkerList .worker-card').forEach(function (el) {
+            var match = !q || el.dataset.name.includes(q);
+            el.style.display = match ? '' : 'none';
+        });
+        toggleClear();
+    });
+    clearBtn.addEventListener('click', function () {
+        input.value = '';
+        input.dispatchEvent(new Event('input'));
+        input.focus();
+    });
 }
 
 // Status flow: Queued (0) -> InProgress (1) -> Test (2) -> Finish (3)
