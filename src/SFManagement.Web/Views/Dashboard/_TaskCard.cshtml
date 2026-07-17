@@ -55,11 +55,11 @@
                     var extraWorkers = Model.AssignedWorkers.Count - visibleWorkers.Count;
                     foreach (var worker in visibleWorkers)
                     {
-                        <span class="inline-flex items-center gap-1 text-sm sm:text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50">
+                        <span class="inline-flex items-center gap-1 text-sm sm:text-xs px-2 py-0.5 rounded-md bg-brand-light/40 text-brand font-medium border border-brand-dark/30 dark:bg-brand/20 dark:text-brand dark:border-brand-deep/40">
                             @worker.WorkerName
                             @if (Model.Status != ProjectTaskStatus.Finish)
                             {
-                                <button type="button" class="text-blue-400 hover:text-red-500 font-bold text-sm leading-none ml-0.5 transition-colors"
+                                <button type="button" class="text-brand/70 hover:text-red-500 font-bold text-sm leading-none ml-0.5 transition-colors"
                                         data-tooltip="Remove @worker.WorkerName"
                                         onclick="removeWorker('@Model.IdEncrypted', '@worker.WorkerIdEncrypted', this)">
                                     &times;
