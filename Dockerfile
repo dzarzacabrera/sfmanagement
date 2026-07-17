@@ -6,7 +6,7 @@ COPY src/SFManagement.Application/SFManagement.Application.csproj src/SFManageme
 COPY src/SFManagement.Infrastructure/SFManagement.Infrastructure.csproj src/SFManagement.Infrastructure/
 COPY src/SFManagement.Web/SFManagement.Web.csproj src/SFManagement.Web/
 COPY SFManagement.sln .
-RUN dotnet restore
+RUN dotnet restore src/SFManagement.Web/SFManagement.Web.csproj
 
 COPY . .
 RUN dotnet publish src/SFManagement.Web/SFManagement.Web.csproj -c Release -o /publish
