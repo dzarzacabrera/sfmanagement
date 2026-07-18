@@ -53,7 +53,7 @@ internal sealed class GetTaskByIdQueryHandler(INpgsqlConnectionFactory connectio
         NpgsqlConnection connection, long taskId)
     {
         await using var cmd = new NpgsqlCommand(
-            "SELECT w.id AS worker_id, w.name AS worker_name " +
+            "SELECT w.id AS worker_id, w.name AS worker_name, w.role AS worker_role " +
             "FROM task_assignments ta " +
             "INNER JOIN workers w ON w.id = ta.worker_id " +
             "WHERE ta.task_id = $1 " +
@@ -66,7 +66,7 @@ internal sealed class GetTaskByIdQueryHandler(INpgsqlConnectionFactory connectio
         {
             var m = new DataReaderMapper(reader);
             result.Add(new AssignedWorkerDto(
-                m.GetInt32("worker_id"), m.GetString("worker_name")));
+                m.GetInt32("worker_id"), m.GetString("worker_name"), m.GetString("worker_role")));
         }
 
         return result.Count > 0 ? result : null;

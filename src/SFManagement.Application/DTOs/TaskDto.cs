@@ -4,7 +4,7 @@ namespace SFManagement.Application.DTOs;
 
 public record TaskSkillDto(string SkillName, int SkillPosition, float RequiredLevel);
 
-public record AssignedWorkerDto(long WorkerId, string WorkerName)
+public record AssignedWorkerDto(long WorkerId, string WorkerName, string Role = "")
 {
     public string WorkerIdEncrypted { get; init; } = "";
 }
