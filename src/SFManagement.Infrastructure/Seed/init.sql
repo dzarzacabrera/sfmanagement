@@ -19,12 +19,6 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
-DO $$ BEGIN
-    ALTER TYPE task_status ADD VALUE IF NOT EXISTS 'Archived';
-EXCEPTION WHEN duplicate_object THEN NULL;
-WHEN SQLSTATE '42704' THEN NULL;
-END $$;
-
 -- =========================================================================
 -- 2. TABLES
 -- =========================================================================

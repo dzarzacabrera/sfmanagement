@@ -15,7 +15,7 @@
 <div class="task-card bg-white rounded-xl border border-gray-200 border-l-4 @color p-4 shadow-sm hover:shadow-md transition-shadow duration-200 @(isQueuedAndUnassigned ? "cursor-default" : "cursor-move") dark:bg-gray-800 dark:border-gray-700"
      data-task-id-encrypted="@Model.IdEncrypted" data-status="@Model.Status" draggable="@(!isQueuedAndUnassigned ? "true" : "false")">
     <div class="flex items-start justify-between gap-3">
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">@Model.Title</h3>
+        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 leading-tight">@Model.Title</h3>
         <span class="text-sm sm:text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0
             @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-200" :
               Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-200" :
@@ -26,7 +26,7 @@
     </div>
     @if (!string.IsNullOrEmpty(Model.Description))
     {
-        <p class="text-base sm:text-sm text-gray-500 mt-2 line-clamp-2 dark:text-gray-400 leading-relaxed" data-tooltip="@Model.Description">@Model.Description</p>
+        <p class="text-sm text-gray-500 mt-2 line-clamp-2 dark:text-gray-400 leading-relaxed" data-tooltip="@Model.Description">@Model.Description</p>
     }
     @if (Model.Skills?.Count > 0)
     {
