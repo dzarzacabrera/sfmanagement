@@ -71,8 +71,10 @@ public sealed class TaskEditRestrictionTests(SfManagementFixture fixture)
         await createProject.HandleAsync(projectCmd);
 
         var createTask = services.GetRequiredService<ICommandHandler<CreateTaskCommand>>();
+        var skills = new float[1024];
+        skills[0] = 1.0f;
         var taskCmd = new CreateTaskCommand(projectCmd.CreatedId, "Test Task", null,
-            Criticality.Medium, new float[1024]);
+            Criticality.Medium, skills);
         await createTask.HandleAsync(taskCmd);
 
         return (projectCmd.CreatedId, taskCmd.CreatedId);
