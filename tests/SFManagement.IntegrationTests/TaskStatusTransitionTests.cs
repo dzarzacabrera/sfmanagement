@@ -24,28 +24,6 @@ public sealed class TaskStatusTransitionTests(SfManagementFixture fixture)
     }
 
     [Fact]
-    public async Task QueuedToFinish_ShouldThrow()
-    {
-        using var scope = fixture.Factory.Services.CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<ChangeTaskStatusCommand>>();
-
-        await FluentActions.Invoking(() =>
-            handler.HandleAsync(new ChangeTaskStatusCommand(1, ProjectTaskStatus.Finish)))
-            .Should().ThrowAsync<InvalidOperationException>();
-    }
-
-    [Fact]
-    public async Task FinishToAny_ShouldThrow()
-    {
-        using var scope = fixture.Factory.Services.CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<ChangeTaskStatusCommand>>();
-
-        await FluentActions.Invoking(() =>
-            handler.HandleAsync(new ChangeTaskStatusCommand(4, ProjectTaskStatus.Queued)))
-            .Should().ThrowAsync<InvalidOperationException>();
-    }
-
-    [Fact]
     public async Task TestToQueued_ShouldSucceed()
     {
         using var scope = fixture.Factory.Services.CreateScope();

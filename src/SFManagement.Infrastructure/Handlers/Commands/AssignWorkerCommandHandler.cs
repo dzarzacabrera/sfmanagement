@@ -12,7 +12,7 @@ internal sealed class AssignWorkerCommandHandler(INpgsqlConnectionFactory connec
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
         await using var cmd = new NpgsqlCommand(
-            "INSERT INTO task_assignments (task_id, worker_id) VALUES ($1, $2)", connection)
+            "INSERT INTO task_assignments (task_id, worker_id) VALUES ($1, $2) ON CONFLICT (task_id, worker_id) DO NOTHING", connection)
         {
             Parameters =
             {

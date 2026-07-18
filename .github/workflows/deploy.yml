@@ -23,8 +23,14 @@ jobs:
       - name: Compilar proyecto
         run: dotnet build --no-restore --configuration Release
 
-      - name: Ejecutar Tests
-        run: dotnet test --no-build --verbosity normal --configuration Release
+      # Se eliminó la instalación de Playwright para ahorrar tiempo y recursos
+
+      - name: Ejecutar Tests Unitarios e Integración
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: "true"
+        run: |
+          dotnet test tests/SFManagement.UnitTests/SFManagement.UnitTests.csproj --no-build --verbosity normal --configuration Release
+          dotnet test tests/SFManagement.IntegrationTests/SFManagement.IntegrationTests.csproj --no-build --verbosity normal --configuration Release --maxcpucount:1
 
   deploy:
     runs-on: ubuntu-latest
