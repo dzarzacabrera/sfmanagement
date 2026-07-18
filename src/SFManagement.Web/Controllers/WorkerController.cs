@@ -127,6 +127,27 @@ public class WorkerController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> TaskDetailPopup(
+        [FromQuery] string workerId,
+        [FromQuery] string taskId,
+        [FromServices] IGetTaskByIdQueryHandler taskHandler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(taskId, out var tid)) return NotFound();
+        var task = await taskHandler.HandleAsync(new GetTaskByIdQuery(tid));
+        if (task is null) return NotFound();
+        var taskWithIds = task with
+        {
+            IdEncrypted = enc.Encrypt(tid),
+            ProjectIdEncrypted = enc.Encrypt(task.ProjectId),
+            AssignedWorkers = task.AssignedWorkers?
+                .Select(w => w with { WorkerIdEncrypted = enc.Encrypt(w.WorkerId) })
+                .ToList()
+        };
+        return PartialView("~/Views/Shared/_TaskDetailPopup.cshtml", taskWithIds);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Edit(
         [FromQuery] string workerId,
         [FromServices] IGetAllWorkersQueryHandler allWorkersHandler,

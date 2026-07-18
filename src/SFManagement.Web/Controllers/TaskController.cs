@@ -95,6 +95,35 @@ public class TaskController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> WorkerDetailPopup(
+        [FromQuery] string taskId,
+        [FromQuery] string workerId,
+        [FromServices] IGetTaskByIdQueryHandler taskHandler,
+        [FromServices] IGetAllWorkersQueryHandler allWorkersHandler,
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(taskId, out var tid)) return NotFound();
+        if (!enc.TryDecrypt(workerId, out var wid)) return NotFound();
+        var task = await taskHandler.HandleAsync(new GetTaskByIdQuery(tid));
+        if (task is null) return NotFound();
+        var assigned = task.AssignedWorkers?.FirstOrDefault(w => w.WorkerId == wid);
+        if (assigned is null) return NotFound();
+
+        var workers = await allWorkersHandler.HandleAsync(new GetAllWorkersQuery());
+        var worker = workers.FirstOrDefault(w => w.Id == wid);
+        if (worker is null) return NotFound();
+        var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
+        var vm = new WorkerDetailPopupViewModel(
+            worker with { IdEncrypted = enc.Encrypt(wid) },
+            skills)
+        {
+            WorkerIdEncrypted = enc.Encrypt(wid)
+        };
+        return PartialView("~/Views/Shared/_WorkerDetailPopup.cshtml", vm);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Edit(
         [FromQuery] string taskId,
         [FromServices] IGetTaskByIdQueryHandler taskHandler,

@@ -1,0 +1,57 @@
+@model SFManagement.Web.ViewModels.WorkerDetailPopupViewModel
+@using System.Linq
+@using SFManagement.Application.DTOs
+
+<div class="flex flex-col h-full">
+@{
+    var worker = Model.Worker;
+    var skillsVector = worker.SkillsVector;
+    var workerSkills = Model.AllSkills
+        .Select(s => new { s.Name, Value = skillsVector.ElementAtOrDefault(s.VectorPosition) })
+        .Where(s => s.Value > 0)
+        .OrderByDescending(s => s.Value)
+        .ToList();
+}
+
+<div class="shrink-0 px-6 pt-6 pb-3 border-b border-gray-100 dark:border-gray-700 flex items-start justify-between gap-3">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate mb-1">@worker.Name</h2>
+        @if (!string.IsNullOrEmpty(worker.Role))
+        {
+            <p class="text-sm text-gray-500 dark:text-gray-400">@worker.Role</p>
+        }
+    </div>
+    </div>
+
+<div class="flex-1 overflow-y-auto px-6 py-4">
+    <div class="flex gap-3 mb-4 text-sm text-gray-500 dark:text-gray-400">
+        <span class="px-2.5 py-1 rounded-md bg-gray-50 dark:bg-gray-700/50">@worker.ActiveTaskCount active tasks</span>
+        <span class="px-2.5 py-1 rounded-md bg-gray-50 dark:bg-gray-700/50">@worker.EvaluationCount evaluations</span>
+    </div>
+
+    @if (workerSkills.Count > 0)
+    {
+        <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Skills</h3>
+        <div class="flex flex-col gap-1.5 mb-2">
+            @foreach (var skill in workerSkills)
+            {
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="text-gray-700 dark:text-gray-300 flex-[36] min-w-0 truncate" data-tooltip="@skill.Name">@skill.Name</span>
+                    <div class="flex-[54] h-1.5 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700">
+                        <div class="h-full bg-brand-dark rounded-full" style="width: @(((double)(skill.Value / 10.0 * 100)).ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                    </div>
+                    <span class="font-bold text-gray-900 dark:text-gray-100 flex-[10] text-right tabular-nums">@skill.Value.ToString("0.00")</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<div class="flex justify-end gap-2 px-6 pb-4 pt-4 shrink-0 border-t border-gray-100 dark:border-gray-700">
+    <button type="button" onclick="closeModal()"
+            class="modal-close-btn px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+        Close
+    </button>
+    <a href="/Worker/Detail?workerId=@Model.WorkerIdEncrypted" onclick="closeModal()" role="button" tabindex="0" class="px-5 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep font-medium">Open Detail</a>
+</div>
+</div>

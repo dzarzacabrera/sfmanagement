@@ -19,6 +19,8 @@ function applyMobileSheet() {
 
     panel.style.borderRadius = '1rem 1rem 0 0';
     panel.style.maxWidth = '100%';
+    panel.style.width = '100%';
+    panel.style.margin = '0';
     panel.style.maxHeight = '90dvh';
     panel.style.height = 'auto';
     panel.style.transform = '';
@@ -26,6 +28,7 @@ function applyMobileSheet() {
 
     content.style.height = 'calc(90dvh - 48px)';
     content.style.maxHeight = 'calc(90dvh - 48px)';
+    content.style.overflowX = 'hidden';
 
     var titleDiv = content.querySelector('.shrink-0');
     if (titleDiv) {
@@ -124,7 +127,7 @@ function openModal(html, small) {
     });
 
     setTimeout(function () {
-        var firstInput = content.querySelector('input, select, textarea, button');
+        var firstInput = content.querySelector('input:not([type="hidden"]), select, textarea, button:not([aria-label="Close"]):not(.modal-close-btn)');
         if (firstInput) firstInput.focus();
     }, 100);
 }

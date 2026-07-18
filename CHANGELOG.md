@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-07-18
+
+### Added
+
+- **Detail cards open a popup / bottom sheet on click:**
+  - New shared partials `Views/Shared/_TaskDetailPopup.cshtml` and `Views/Shared/_WorkerDetailPopup.cshtml` render a compact detail panel.
+  - New controller actions returning the partials: `ProjectController.TaskDetailPopup` / `WorkerDetailPopup`, `TaskController.WorkerDetailPopup`, `WorkerController.TaskDetailPopup`.
+  - `openTaskDetailPopup` and `openWorkerDetailPopup` JS helpers in `kanban.js` fetch the partial and call `openModal` (popup on desktop, bottom sheet on mobile).
+  - Project Detail task cards and team cards, Task Detail assigned-worker cards, and Worker Detail active-task cards now open the detail popup instead of navigating away.
+  - Popups include a footer with a "Close" button and an "Open Detail" button that navigates to the full detail page.
+- **Edit button on Project Detail:** added the `Edit` action button in the `ActionButtons` section of `Project/Detail.cshtml` (hidden when the project is closed).
+
+### Changed
+
+- **Popup / bottom sheet presentation:**
+  - Detail popups now open as a normal centered popup on desktop (no longer forced into a bottom-sheet style) and as a bottom sheet on mobile devices.
+  - Bottom sheet now uses the full available width with no left margin and no horizontal scroll (`applyMobileSheet` forces `width:100%`, `margin:0` and `overflow-x:hidden`).
+  - The close button is no longer auto-focused when a popup opens (excluded from the initial focus target in `modal.js`).
+  - Long titles inside the bottom sheet are truncated with an ellipsis (added `min-w-0 flex-1` to the header container in both detail popups).
+- **Section heading styling:** in Task Detail (page and popup) and Worker Detail popup, section titles (`Required Skills`, `Assigned Workers`, `Skills`, `Project`) are now black, 16px (`text-base font-semibold`), without uppercase or turquoise color.
+- **Field label styling:** in Task Detail, the `Status`, `Priority` and `Project` labels now use darker gray (`text-gray-700`) with a trailing colon, matching the rest of the form.
+- **Role / Project text color:** any displayed `Role` or `Project`/`ProjectName` text now uses `text-gray-500` instead of `text-gray-400` across detail pages and popups.
+- **Assigned Worker cards in Task Detail popup:** rendered as standard cards (name on top, role below) instead of a compact row, and clickable to open the worker detail popup.
+
+### Fixed
+
+- **Worker not found from Task Detail:** the `TaskController.WorkerDetailPopup` action now decrypts the worker id first and matches by raw `WorkerId` (the handler's `AssignedWorkers` did not populate `WorkerIdEncrypted`, causing a false "Worker not found").
+- **Missing worker ids in task popups:** `ProjectController.TaskDetailPopup` and `WorkerController.TaskDetailPopup` now populate `WorkerIdEncrypted` on each assigned worker before rendering the partial, so the assigned-worker cards open correctly.
+
 ## [0.10.0] - 2026-07-18
 
 ### Added

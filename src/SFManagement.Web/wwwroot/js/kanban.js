@@ -724,6 +724,40 @@ function openCreateWorkerPopup(projectIdEnc) {
         });
 }
 
+function openTaskDetailPopup(projectIdEnc, taskIdEnc) {
+    var url = '/Project/TaskDetailPopup?taskId=' + encodeURIComponent(taskIdEnc);
+    if (projectIdEnc) url += '&projectId=' + encodeURIComponent(projectIdEnc);
+    else url = '/Worker/TaskDetailPopup?taskId=' + encodeURIComponent(taskIdEnc);
+    fetch(url)
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+            if (html.trim().length === 0) { showToast('Task not found.', 'error'); return; }
+            openModal(html);
+        })
+        .catch(function (err) {
+            showToast('Failed to load task: ' + err.message, 'error');
+        });
+}
+
+function openWorkerDetailPopup(projectIdEnc, workerIdEnc, taskIdEnc) {
+    var url;
+    if (taskIdEnc) {
+        url = '/Task/WorkerDetailPopup?taskId=' + encodeURIComponent(taskIdEnc) + '&workerId=' + encodeURIComponent(workerIdEnc);
+    } else {
+        url = '/Project/WorkerDetailPopup?workerId=' + encodeURIComponent(workerIdEnc);
+        if (projectIdEnc) url += '&projectId=' + encodeURIComponent(projectIdEnc);
+    }
+    fetch(url)
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+            if (html.trim().length === 0) { showToast('Worker not found.', 'error'); return; }
+            openModal(html);
+        })
+        .catch(function (err) {
+            showToast('Failed to load worker: ' + err.message, 'error');
+        });
+}
+
 function openAddWorkerPopup(projectIdEnc) {
     var col = document.querySelector('.kanban-column');
     var skel = col ? showSkeleton(col) : null;
