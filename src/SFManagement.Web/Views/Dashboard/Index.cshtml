@@ -44,8 +44,14 @@
                     class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors cursor-pointer whitespace-nowrap">
                 Close Project
             </button>
-        </div>
+    </div>
     }
+}
+
+@section Scripts {
+    <script>
+        localStorage.setItem('lastProjectId', '@Model.ProjectIdEncrypted');
+    </script>
 }
 
 @if (Model.IsFinalized)
