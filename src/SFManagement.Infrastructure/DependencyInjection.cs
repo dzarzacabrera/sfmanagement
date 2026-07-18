@@ -13,11 +13,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
     {
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-        dataSourceBuilder.UseVector();
-        var dataSource = dataSourceBuilder.Build();
-        services.AddSingleton(dataSource);
-        services.AddSingleton<INpgsqlConnectionFactory>(new NpgsqlConnectionFactory(dataSource));
+        var recyclableDataSource = new RecyclableNpgsqlDataSource(connectionString);
+        services.AddSingleton(recyclableDataSource);
+        services.AddSingleton<INpgsqlConnectionFactory>(new NpgsqlConnectionFactory(recyclableDataSource));
 
         services.AddTransient<ICommandHandler<CreateProjectCommand>, CreateProjectCommandHandler>();
         services.AddTransient<ICommandHandler<CreateTaskCommand>, CreateTaskCommandHandler>();

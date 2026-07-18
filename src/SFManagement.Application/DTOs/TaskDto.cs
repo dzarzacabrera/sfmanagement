@@ -7,6 +7,8 @@ public record TaskSkillDto(string SkillName, int SkillPosition, float RequiredLe
 public record AssignedWorkerDto(long WorkerId, string WorkerName, string Role = "")
 {
     public string WorkerIdEncrypted { get; init; } = "";
+    public int ActiveTaskCount { get; init; }
+    public int EvaluationCount { get; init; }
 }
 
 public record TaskDto(

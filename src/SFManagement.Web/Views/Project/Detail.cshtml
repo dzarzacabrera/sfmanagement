@@ -109,18 +109,18 @@ else
         @for (int i = 0; i < totalWorkers; i++)
         {
             var worker = Model.Workers![i];
-            <div class="worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer"
+            <div class="worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-3 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer"
                  data-pg-item
                  onclick="openWorkerDetailPopup('@Model.IdEncrypted', '@worker.IdEncrypted', null)">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">@worker.Name</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">@worker.Role</p>
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight truncate">@worker.Name</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">@worker.Role</p>
                     </div>
-                </div>
-                <div class="flex gap-3 mt-3 text-sm text-gray-500 dark:text-gray-400">
-                    <span>@worker.ActiveTaskCount active tasks</span>
-                    <span>@worker.EvaluationCount evaluations</span>
+                    <div class="shrink-0 text-right text-[13px] sm:text-[11px] text-gray-500 dark:text-gray-500">
+                        @worker.ActiveTaskCount active task@(worker.ActiveTaskCount == 1 ? "" : "s")<br>
+                        @worker.EvaluationCount evaluations
+                    </div>
                 </div>
             </div>
         }

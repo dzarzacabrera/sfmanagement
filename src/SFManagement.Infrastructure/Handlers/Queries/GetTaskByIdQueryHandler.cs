@@ -53,7 +53,11 @@ internal sealed class GetTaskByIdQueryHandler(INpgsqlConnectionFactory connectio
         NpgsqlConnection connection, long taskId)
     {
         await using var cmd = new NpgsqlCommand(
-            "SELECT w.id AS worker_id, w.name AS worker_name, w.role AS worker_role " +
+            "SELECT w.id AS worker_id, w.name AS worker_name, w.role AS worker_role, " +
+            "(SELECT COUNT(*) FROM task_assignments ta2 " +
+            " INNER JOIN tasks t2 ON t2.id = ta2.task_id " +
+            " WHERE ta2.worker_id = w.id AND t2.status NOT IN ('Finish', 'Archived') AND t2.project_id NOT IN (SELECT id FROM projects WHERE is_finalized)) AS active_task_count, " +
+            "(SELECT COUNT(*) FROM performance_evaluations pe WHERE pe.worker_id = w.id) AS evaluation_count " +
             "FROM task_assignments ta " +
             "INNER JOIN workers w ON w.id = ta.worker_id " +
             "WHERE ta.task_id = $1 " +
@@ -66,7 +70,11 @@ internal sealed class GetTaskByIdQueryHandler(INpgsqlConnectionFactory connectio
         {
             var m = new DataReaderMapper(reader);
             result.Add(new AssignedWorkerDto(
-                m.GetInt32("worker_id"), m.GetString("worker_name"), m.GetString("worker_role")));
+                m.GetInt32("worker_id"), m.GetString("worker_name"), m.GetString("worker_role"))
+            {
+                ActiveTaskCount = m.GetInt32("active_task_count"),
+                EvaluationCount = m.GetInt32("evaluation_count")
+            });
         }
 
         return result.Count > 0 ? result : null;

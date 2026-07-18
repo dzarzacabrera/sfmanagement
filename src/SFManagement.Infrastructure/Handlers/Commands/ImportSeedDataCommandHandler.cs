@@ -5,7 +5,9 @@ using SFManagement.Infrastructure.Data;
 
 namespace SFManagement.Infrastructure.Handlers.Commands;
 
-internal sealed class ImportSeedDataCommandHandler(INpgsqlConnectionFactory connectionFactory)
+internal sealed class ImportSeedDataCommandHandler(
+    INpgsqlConnectionFactory connectionFactory,
+    RecyclableNpgsqlDataSource dataSource)
     : ICommandHandler<ImportSeedDataCommand>
 {
     public async Task HandleAsync(ImportSeedDataCommand command)
@@ -16,5 +18,7 @@ internal sealed class ImportSeedDataCommandHandler(INpgsqlConnectionFactory conn
 
         await using var seedCmd = new NpgsqlCommand(initSql, connection);
         await seedCmd.ExecuteNonQueryAsync();
+
+        dataSource.Recycle();
     }
 }

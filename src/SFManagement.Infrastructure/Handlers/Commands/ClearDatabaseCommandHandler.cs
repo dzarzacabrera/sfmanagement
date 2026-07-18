@@ -5,15 +5,17 @@ using SFManagement.Infrastructure.Data;
 
 namespace SFManagement.Infrastructure.Handlers.Commands;
 
-internal sealed class ClearDatabaseCommandHandler(INpgsqlConnectionFactory connectionFactory)
+internal sealed class ClearDatabaseCommandHandler(
+    INpgsqlConnectionFactory connectionFactory,
+    RecyclableNpgsqlDataSource dataSource)
     : ICommandHandler<ClearDatabaseCommand>
 {
     public async Task HandleAsync(ClearDatabaseCommand command)
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
 
-        await using var truncateCmd = new NpgsqlCommand(@"
-            TRUNCATE TABLE
+        await using var dropCmd = new NpgsqlCommand(@"
+            DROP TABLE IF EXISTS
                 performance_evaluations,
                 task_assignments,
                 tasks,
@@ -21,8 +23,13 @@ internal sealed class ClearDatabaseCommandHandler(INpgsqlConnectionFactory conne
                 projects,
                 workers,
                 skills_catalogue
-            RESTART IDENTITY CASCADE;
+            CASCADE;
+
+            DROP TYPE IF EXISTS task_status;
+            DROP TYPE IF EXISTS criticality;
         ", connection);
-        await truncateCmd.ExecuteNonQueryAsync();
+        await dropCmd.ExecuteNonQueryAsync();
+
+        dataSource.Recycle();
     }
 }

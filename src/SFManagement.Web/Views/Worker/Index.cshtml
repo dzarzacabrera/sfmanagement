@@ -72,7 +72,7 @@ else
                     @worker.ActiveTaskCount tasks | @worker.EvaluationCount evaluations
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-1.5">
                     @for (int i = 0; i < workerSkills.Count; i++)
                     {
                         var skill = workerSkills[i];
@@ -89,7 +89,7 @@ else
                 @if (workerSkills.Count > 4)
                 {
                     <button type="button"
-                            class="toggle-skills mt-3 text-sm text-brand hover:text-brand-deep font-medium w-full text-left py-2 -mb-1"
+                            class="toggle-skills mt-3 text-sm text-brand hover:text-brand-deep font-medium w-full text-left -mb-1"
                             data-expanded="false">
                         + @(workerSkills.Count - 4) more skills
                     </button>

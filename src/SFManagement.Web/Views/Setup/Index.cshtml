@@ -101,6 +101,7 @@
             .then(function (data) {
                 setLoading(btn, false);
                 if (data.success) {
+                    localStorage.removeItem('lastProjectId');
                     showToast('Database cleared successfully.', 'success', null, btn);
                 } else {
                     showToast(data.message || 'Could not clear the database.', 'error', null, btn);
@@ -121,6 +122,7 @@
             .then(function (data) {
                 setLoading(btn, false);
                 if (data.success) {
+                    localStorage.removeItem('lastProjectId');
                     showToast('Sample data imported successfully.', 'success', null, btn);
                 } else {
                     showToast(data.message || 'Could not import the data.', 'error', null, btn);
