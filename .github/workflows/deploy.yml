@@ -6,8 +6,29 @@ on:
       - 'release/sfmanagement.V*'
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar SDK de .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restaurar dependencias
+        run: dotnet restore
+
+      - name: Compilar proyecto
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Ejecutar Tests
+        run: dotnet test --no-build --verbosity normal --configuration Release
+
   deploy:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Trigger Render Deploy Hook
         run: |
