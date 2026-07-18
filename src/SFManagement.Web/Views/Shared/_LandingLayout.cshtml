@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skill Forge Management</title>
+    <link rel="icon" type="image/x-icon" href="~/img/favicon.ico">
+    <link href="~/css/tailwind.css" rel="stylesheet">
+    <style>
+        html, body { overscroll-behavior-y: contain; }
+        button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: none; box-shadow: 0 0 0 4px #96c0d9; }
+        .dark button:focus-visible, .dark a:focus-visible, .dark [tabindex]:focus-visible { box-shadow: 0 0 0 4px rgba(59,129,171,0.4); }
+    </style>
+</head>
+<body class="bg-[#f8fafd] text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100">
+    @RenderBody()
+    <script src="~/js/theme.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
