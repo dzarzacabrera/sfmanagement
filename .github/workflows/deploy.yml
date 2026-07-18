@@ -27,7 +27,9 @@ jobs:
         run: pwsh tests/SFManagement.E2ETests/bin/Release/net10.0/playwright.ps1 install
 
       - name: Ejecutar Tests
-        run: dotnet test --no-build --verbosity normal --configuration Release
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: "true"
+        run: dotnet test --no-build --verbosity normal --configuration Release --maxcpucount:1
 
   deploy:
     runs-on: ubuntu-latest
