@@ -41,6 +41,7 @@ public sealed class PerformanceEvaluationFlowTests(SfManagementE2eFixture fixtur
             new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["taskId"] = "1",
+                ["workerId"] = "1",
                 ["skillPositions"] = "0",
                 ["basePoints"] = "5000"
             }));
