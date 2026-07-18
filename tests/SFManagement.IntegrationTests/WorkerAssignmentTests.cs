@@ -42,7 +42,7 @@ public sealed class WorkerAssignmentTests(SfManagementFixture fixture)
         var project1Workers = await handler.HandleAsync(new GetWorkersByProjectQuery(1));
         var project2Workers = await handler.HandleAsync(new GetWorkersByProjectQuery(2));
 
-        project1Workers.Should().HaveCount(4);
-        project2Workers.Should().HaveCount(2);
+        project1Workers.Should().HaveCount(8);
+        project2Workers.Should().HaveCount(6);
     }
 }

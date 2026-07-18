@@ -173,7 +173,7 @@ INSERT INTO workers (id, name, role, skills_vector) OVERRIDING SYSTEM VALUE VALU
 ON CONFLICT (id) DO NOTHING;
 -- Worker 8: Carlos Moreno Ruiz - Full-Stack Developer (backend-leaning)
 INSERT INTO workers (id, name, role, skills_vector) OVERRIDING SYSTEM VALUE VALUES
-(8, 'Carlos Moreno Ruiz', 'Full-Stack Developer', util_pad_vector(ARRAY[6.0, 4.0, 6.0, 5.5, 4.0, 2.0, 5.0, 5.0, 9.5, 9.0, 8.5, 9.0, 8.0]))
+(8, 'Carlos Moreno Ruiz', 'Full-Stack Developer', util_pad_vector(ARRAY[6.0, 5.5, 6.0, 5.5, 6.0, 3.0, 5.0, 5.0, 9.5, 9.0, 8.5, 9.0, 8.0]))
 ON CONFLICT (id) DO NOTHING;
 
 -- Worker 9: Laura Fernandez Paredes - Sales Account Executive (commercial profile)

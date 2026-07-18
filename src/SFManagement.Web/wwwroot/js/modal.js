@@ -115,6 +115,7 @@ function openModal(html, small) {
     document.body.style.left = '0';
     document.body.style.right = '0';
     document.body.dataset.scrollY = scrollY;
+    document.body.classList.add('modal-open');
 
     requestAnimationFrame(function () {
         root.classList.remove(enterClass);
@@ -148,6 +149,7 @@ function closeModal() {
         document.body.style.left = '';
         document.body.style.right = '';
         document.body.dataset.scrollY = '';
+        document.body.classList.remove('modal-open');
         window.scrollTo(0, scrollY);
 
         if (lastFocusedElement) {
