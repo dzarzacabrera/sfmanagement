@@ -36,7 +36,7 @@
             </span>
         </div>
     </div>
-    <div class="flex flex-col flex-1 min-h-0 px-6 pb-6">
+        <div class="flex flex-col flex-1 min-h-0 overflow-y-auto px-6 pb-6">
         @if (!string.IsNullOrEmpty(Model.Description))
         {
             <p class="text-base sm:text-sm text-gray-500 mb-3 sm:line-clamp-4 line-clamp-3 dark:text-gray-400 leading-relaxed shrink-0">@Model.Description</p>
@@ -128,7 +128,7 @@
             }
         }
 
-        <div id="assignWorkerList" class="flex-1 overflow-y-auto min-h-0 space-y-3 mt-3 pb-4">
+        <div id="assignWorkerList" class="space-y-3 mt-3 pb-4">
 
             @if (Model.MostEfficient != null || Model.GrowUp != null || Model.FastestToFinish != null)
             {
@@ -220,17 +220,17 @@
                 </div>
             }
         </div>
+    </div>
 
-        <div class="flex justify-end gap-2 mt-4 shrink-0">
-            <button type="button" onclick="closeModal()"
-                    class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                Cancel
-            </button>
-            <button id="assignBtn" type="button" disabled
-                    class="px-5 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep font-medium disabled:opacity-40 disabled:cursor-not-allowed"
-                    onclick="submitAssignWorkers('@Model.TaskIdEncrypted')">
-                Assign
-            </button>
-        </div>
+    <div class="flex justify-end gap-2 px-6 pb-4 pt-4 shrink-0 border-t border-gray-100 dark:border-gray-700">
+        <button type="button" onclick="closeModal()"
+                class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            Cancel
+        </button>
+        <button id="assignBtn" type="button" disabled
+                class="px-5 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                onclick="submitAssignWorkers('@Model.TaskIdEncrypted')">
+            Assign
+        </button>
     </div>
 </div>
