@@ -17,7 +17,7 @@ public static class DependencyInjection
         dataSourceBuilder.UseVector();
         var dataSource = dataSourceBuilder.Build();
         services.AddSingleton(dataSource);
-        services.AddSingleton<INpgsqlConnectionFactory, NpgsqlConnectionFactory>();
+        services.AddSingleton<INpgsqlConnectionFactory>(new NpgsqlConnectionFactory(dataSource));
 
         services.AddTransient<ICommandHandler<CreateProjectCommand>, CreateProjectCommandHandler>();
         services.AddTransient<ICommandHandler<CreateTaskCommand>, CreateTaskCommandHandler>();
