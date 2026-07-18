@@ -86,7 +86,7 @@ else
         @foreach (var (status, label, tasks) in new[] {
             ("Queued", "Queued", Model.QueuedTasks),
             ("InProgress", "In Progress", Model.InProgressTasks),
-            ("Test", "Test", Model.BlockedTasks),
+            ("InReview", "In Review", Model.BlockedTasks),
             ("Finish", "Finished", Model.FinishedTasks) })
         {
             <div class="bg-gray-100 rounded-xl p-3 kanban-column dark:bg-gray-800 dark:text-gray-100" data-status="@status">

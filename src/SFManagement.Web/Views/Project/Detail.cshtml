@@ -71,7 +71,7 @@
                     <span class="text-gray-700 font-medium" style="font-size:13px;">Status:</span>
                     <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
                         @(task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InProgress ? "bg-amber-50 text-amber-700 border border-amber-300" :
-                          task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Test ? "bg-purple-50 text-purple-700 border border-purple-300" :
+                          task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InReview ? "bg-purple-50 text-purple-700 border border-purple-300" :
                           task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Finish ? "bg-green-50 text-green-700 border border-green-300" :
                           task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Archived ? "bg-gray-50 text-gray-600 border border-gray-300" :
                           "bg-blue-50 text-blue-700 border border-blue-300")">@task.Status</span>

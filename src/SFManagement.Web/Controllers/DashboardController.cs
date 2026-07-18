@@ -60,7 +60,7 @@ public class DashboardController : Controller
             pid, projectName,
             tasks.Where(t => t.Status == ProjectTaskStatus.Queued).Select(t => MapToCard(t, enc)).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.InProgress).Select(t => MapToCard(t, enc)).ToList(),
-            tasks.Where(t => t.Status == ProjectTaskStatus.Test).Select(t => MapToCard(t, enc)).ToList(),
+            tasks.Where(t => t.Status == ProjectTaskStatus.InReview).Select(t => MapToCard(t, enc)).ToList(),
             tasks.Where(t => t.Status == ProjectTaskStatus.Finish).Select(t => MapToCard(t, enc)).ToList(),
             hasProjectWorkers,
             hasWorkersToAssignToProject,
