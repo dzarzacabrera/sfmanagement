@@ -19,9 +19,26 @@
         var isMobile = window.innerWidth < 640;
 
         var msg = document.createElement('div');
-        var maxW = isMobile ? Math.round(window.innerWidth * 0.8) : 360;
-        msg.style.cssText = 'position:fixed;z-index:9999;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);font-size:14px;font-weight:500;border:1px solid ' + c.border + ';background:' + c.bg + ';color:' + c.text + ';opacity:0;transition:opacity .2s ease;max-width:' + maxW + 'px';
-        msg.innerHTML = (icons[type] || icons.info) + '<span>' + message + '</span>';
+        var maxW = isMobile ? Math.round(window.innerWidth * 0.85) : 360;
+        msg.style.cssText = 'position:fixed;z-index:9999;border-radius:8px;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);font-size:14px;font-weight:500;border:1px solid ' + c.border + ';background:' + c.bg + ';color:' + c.text + ';opacity:0;transition:opacity .2s ease;max-width:' + maxW + 'px';
+
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = '\u00D7';
+        closeBtn.style.cssText = 'position:absolute;top:6px;right:6px;width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border:none;border-radius:50%;background:transparent;color:' + c.text + ';font-size:22px;line-height:1;cursor:pointer;opacity:.6';
+        closeBtn.addEventListener('mouseenter', function () { closeBtn.style.opacity = '1'; });
+        closeBtn.addEventListener('mouseleave', function () { closeBtn.style.opacity = '.6'; });
+        closeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            msg.style.opacity = '0';
+            setTimeout(function () { msg.remove(); }, 200);
+        });
+
+        var body = document.createElement('div');
+        body.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:14px 32px 10px 14px';
+        body.innerHTML = '<span style="flex:1;min-width:0;line-height:1.4">' + message + '</span>';
+
+        msg.appendChild(closeBtn);
+        msg.appendChild(body);
 
         var arrow = document.createElement('div');
         arrow.style.cssText = 'position:absolute;left:50%;bottom:-6px;width:12px;height:12px;background:' + c.bg + ';border-color:' + c.border + ';border-width:0 1px 1px 0;border-style:solid;transform:translateX(-50%) rotate(45deg);';

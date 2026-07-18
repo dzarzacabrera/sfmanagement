@@ -44,7 +44,7 @@
 {
 <div class="flex mb-6">
     <div class="flex items-stretch flex-1">
-        <div class="relative flex-1 min-w-0">
+        <div class="relative flex-1 min-w-0 max-sm:flex-none max-sm:w-1/2">
             <input type="text" id="taskSearch"
                    class="w-full border border-gray-300 rounded-l-lg px-4 py-2.5 pr-8 text-sm relative focus-visible:z-20 focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                    placeholder="Search tasks...">
@@ -57,7 +57,7 @@
             </button>
         </div>
         <select id="projectFilter"
-                class="relative z-10 border border-gray-300 border-l-0 px-3 py-2 pr-3 text-sm rounded-r-lg xl:rounded-none focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
+                class="relative z-10 border border-gray-300 border-l-0 px-3 py-2 pr-3 text-sm rounded-r-lg xl:rounded-none max-sm:w-1/2 max-sm:flex-none focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
             <option value="">All Projects</option>
             @foreach (var p in (IReadOnlyList<ProjectDto>)ViewBag.Projects)
             {
@@ -280,7 +280,7 @@ else
                             </a>
                             @if (isArchived)
                             {
-                                <button onclick="changeStatus('@task.IdEncrypted', 'Finish')"
+                                <button onclick="event.stopPropagation(); changeStatus('@task.IdEncrypted', 'Finish')"
                                         class="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                         title="Restore to Finish">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,7 +290,7 @@ else
                             }
                             else if (!isFinishedAndEvaluated)
                             {
-                                <button onclick="openStatusSheet('@task.IdEncrypted', '@task.Status', this)"
+                                <button onclick="event.stopPropagation(); openStatusSheet('@task.IdEncrypted', '@task.Status', this)"
                                         class="p-2 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9]"
                                         title="Change status">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

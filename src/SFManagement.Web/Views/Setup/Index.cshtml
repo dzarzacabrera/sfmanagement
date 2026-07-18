@@ -58,6 +58,16 @@
         else { spinner.classList.add('hidden'); }
     }
 
+    function setupMobileSheet() {
+        var content = document.getElementById('modal-content');
+        if (content) {
+            content.style.height = 'auto';
+            content.style.maxHeight = 'none';
+        }
+        var panel = document.getElementById('modal-panel');
+        if (panel) panel.style.maxHeight = 'none';
+    }
+
     function openClearModal() {
         var html = ''
             + '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Confirm Deletion</h3>'
@@ -67,6 +77,7 @@
             +   '<button id="modal-confirm-clear" class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700" onclick="confirmClear()">Delete everything</button>'
             + '</div>';
         openModal(html, true);
+        setupMobileSheet();
     }
 
     function openImportModal() {
@@ -78,6 +89,7 @@
             +   '<button id="modal-confirm-import" class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-700" onclick="confirmImport()">Import data</button>'
             + '</div>';
         openModal(html, true);
+        setupMobileSheet();
     }
 
     function confirmClear() {

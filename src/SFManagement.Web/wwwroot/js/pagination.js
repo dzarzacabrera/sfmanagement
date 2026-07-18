@@ -144,7 +144,7 @@
             var id = root.dataset.pgRoot;
             if (!id) return;
             var defaults = {
-                pageSize: 20,
+                pageSize: window.innerWidth < 640 ? 10 : 20,
                 page: 1
             };
 
