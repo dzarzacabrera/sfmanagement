@@ -14,8 +14,8 @@ internal sealed class ClearDatabaseCommandHandler(
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
 
-        await using var dropCmd = new NpgsqlCommand(@"
-            DROP TABLE IF EXISTS
+        await using var truncateCmd = new NpgsqlCommand(@"
+            TRUNCATE TABLE
                 performance_evaluations,
                 task_assignments,
                 tasks,
@@ -23,12 +23,9 @@ internal sealed class ClearDatabaseCommandHandler(
                 projects,
                 workers,
                 skills_catalogue
-            CASCADE;
-
-            DROP TYPE IF EXISTS task_status;
-            DROP TYPE IF EXISTS criticality;
+            RESTART IDENTITY CASCADE;
         ", connection);
-        await dropCmd.ExecuteNonQueryAsync();
+        await truncateCmd.ExecuteNonQueryAsync();
 
         dataSource.Recycle();
     }
