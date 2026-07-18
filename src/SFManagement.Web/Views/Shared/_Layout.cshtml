@@ -34,6 +34,8 @@
         .dark .sidebar-link:hover { background: rgba(33,102,143,0.15); }
         .dark .sidebar-link.active { background: rgba(33,102,143,0.2); }
         .dark .modal-backdrop { background: rgba(0,0,0,0.6); }
+        html, body { overscroll-behavior-y: contain; }
+        body.modal-open { overscroll-behavior-y: contain; touch-action: pan-y; }
         #modal-content { cursor: grab; scrollbar-gutter: stable; }
         #modal-panel.modal-sm { max-width: 28rem; }
         #modal-panel.modal-sm #modal-content { height: auto; max-height: 80vh; padding: 1.5rem; cursor: default; }
@@ -162,7 +164,7 @@
     </div>
 
     <script src="~/js/theme.js"></script>
-    <script src="~/js/modal.js?v=20260713150000"></script>
+    <script src="~/js/modal.js?v=20260718120000"></script>
     <script src="~/js/toast.js?v=20260715140000"></script>
     <script src="~/js/tooltips.js"></script>
     <script src="~/js/skill-selector.js?v=20260717120000"></script>
