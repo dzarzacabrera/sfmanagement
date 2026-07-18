@@ -14,6 +14,11 @@ DO $$ BEGIN
     CREATE TYPE task_status AS ENUM ('Queued', 'InProgress', 'InReview', 'Finish', 'Archived');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+
+DO $$ BEGIN
+    ALTER TYPE task_status RENAME VALUE 'Test' TO 'InReview';
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 DO $$ BEGIN
     CREATE TYPE criticality AS ENUM ('low', 'medium', 'high', 'critical');
 EXCEPTION WHEN duplicate_object THEN NULL;
