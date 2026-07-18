@@ -164,16 +164,25 @@ public class DashboardController : Controller
         return total;
     }
 
+    private static bool TryResolveId(string? encrypted, HttpRequest request, string fallbackField, IIdEncryptionService enc, out long id)
+    {
+        id = 0;
+        var raw = encrypted ?? request.Form[fallbackField].FirstOrDefault();
+        if (string.IsNullOrEmpty(raw)) return false;
+        if (enc.TryDecrypt(raw, out id)) return true;
+        return long.TryParse(raw, out id);
+    }
+
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AssignWorker(
-        [FromForm] string taskIdEncrypted,
-        [FromForm] string workerIdEncrypted,
+        [FromForm] string? taskIdEncrypted,
+        [FromForm] string? workerIdEncrypted,
         [FromServices] ICommandHandler<AssignWorkerCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
-        if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return BadRequest();
-        if (!enc.TryDecrypt(workerIdEncrypted, out var wid)) return BadRequest();
+        if (!TryResolveId(taskIdEncrypted, Request, "taskId", enc, out var tid)) return BadRequest();
+        if (!TryResolveId(workerIdEncrypted, Request, "workerId", enc, out var wid)) return BadRequest();
         await handler.HandleAsync(new AssignWorkerCommand(tid, wid));
         return Ok();
     }
@@ -181,12 +190,12 @@ public class DashboardController : Controller
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AssignWorkers(
-        [FromForm] string taskIdEncrypted,
+        [FromForm] string? taskIdEncrypted,
         [FromForm] string[]? workerIdsEncrypted,
         [FromServices] ICommandHandler<AssignWorkersCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
-        if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return BadRequest();
+        if (!TryResolveId(taskIdEncrypted, Request, "taskId", enc, out var tid)) return BadRequest();
         var workerIds = new List<long>();
         if (workerIdsEncrypted != null)
         {
@@ -203,13 +212,13 @@ public class DashboardController : Controller
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> RemoveWorker(
-        [FromForm] string taskIdEncrypted,
-        [FromForm] string workerIdEncrypted,
+        [FromForm] string? taskIdEncrypted,
+        [FromForm] string? workerIdEncrypted,
         [FromServices] ICommandHandler<RemoveWorkerFromTaskCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
-        if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return BadRequest();
-        if (!enc.TryDecrypt(workerIdEncrypted, out var wid)) return BadRequest();
+        if (!TryResolveId(taskIdEncrypted, Request, "taskId", enc, out var tid)) return BadRequest();
+        if (!TryResolveId(workerIdEncrypted, Request, "workerId", enc, out var wid)) return BadRequest();
         await handler.HandleAsync(new RemoveWorkerFromTaskCommand(tid, wid));
         return Ok();
     }
@@ -217,12 +226,12 @@ public class DashboardController : Controller
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ChangeStatus(
-        [FromForm] string taskIdEncrypted,
+        [FromForm] string? taskIdEncrypted,
         [FromForm] string newStatus,
         [FromServices] ICommandHandler<ChangeTaskStatusCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
-        if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return BadRequest();
+        if (!TryResolveId(taskIdEncrypted, Request, "taskId", enc, out var tid)) return BadRequest();
         var status = Enum.Parse<ProjectTaskStatus>(newStatus, ignoreCase: true);
         await handler.HandleAsync(new ChangeTaskStatusCommand(tid, status));
         return Ok();
@@ -303,16 +312,16 @@ public class DashboardController : Controller
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> SubmitEvaluation(
-        [FromForm] string taskIdEncrypted,
-        [FromForm] string workerIdEncrypted,
+        [FromForm] string? taskIdEncrypted,
+        [FromForm] string? workerIdEncrypted,
         [FromForm] int[] skillPositions,
         [FromForm] int[] basePoints,
         [FromServices] ICommandHandler<EvaluateTaskCommand> handler,
         [FromServices] INpgsqlConnectionFactory connFactory,
         [FromServices] IIdEncryptionService enc)
     {
-        if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return BadRequest();
-        if (!enc.TryDecrypt(workerIdEncrypted, out var wid)) return BadRequest();
+        if (!TryResolveId(taskIdEncrypted, Request, "taskId", enc, out var tid)) return BadRequest();
+        if (!TryResolveId(workerIdEncrypted, Request, "workerId", enc, out var wid)) return BadRequest();
 
         var evaluations = skillPositions
             .Select((pos, i) => new SkillEvaluation(pos, basePoints.Length > i ? basePoints[i] / 10000.0 : 0.0))
@@ -343,11 +352,11 @@ public class DashboardController : Controller
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> FinalizeProject(
-        [FromForm] string projectIdEncrypted,
+        [FromForm] string? projectIdEncrypted,
         [FromServices] ICommandHandler<FinalizeProjectCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
-        if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return BadRequest();
+        if (!TryResolveId(projectIdEncrypted, Request, "projectId", enc, out var pid)) return BadRequest();
         try
         {
             await handler.HandleAsync(new FinalizeProjectCommand(pid));
@@ -423,12 +432,12 @@ public class DashboardController : Controller
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AddWorkersToProject(
-        [FromForm] string projectIdEncrypted,
+        [FromForm] string? projectIdEncrypted,
         [FromForm] string[] workerIdEncrypted,
         [FromServices] ICommandHandler<AddWorkersToProjectCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
-        if (!enc.TryDecrypt(projectIdEncrypted, out var pid)) return BadRequest();
+        if (!TryResolveId(projectIdEncrypted, Request, "projectId", enc, out var pid)) return BadRequest();
         var ids = new List<long>();
         foreach (var w in workerIdEncrypted)
         {
@@ -461,11 +470,11 @@ public class DashboardController : Controller
     [HttpPost]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> ArchiveTask(
-        [FromForm] string taskIdEncrypted,
+        [FromForm] string? taskIdEncrypted,
         [FromServices] ICommandHandler<ArchiveTaskCommand> handler,
         [FromServices] IIdEncryptionService enc)
     {
-        if (!enc.TryDecrypt(taskIdEncrypted, out var tid)) return BadRequest();
+        if (!TryResolveId(taskIdEncrypted, Request, "taskId", enc, out var tid)) return BadRequest();
         await handler.HandleAsync(new ArchiveTaskCommand(tid));
         return Ok();
     }
