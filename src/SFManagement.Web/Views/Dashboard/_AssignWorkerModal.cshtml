@@ -58,7 +58,7 @@
             </div>
         }
 
-        <div class="border-t border-gray-200 dark:border-gray-700 my-3 shrink-0"></div>
+        <div class="border-t border-gray-200 dark:border-gray-700 shrink-0"></div>
 
         @{
             void RenderRecCard(WorkerScoreDto worker, string label, string labelBg, string borderColor)
@@ -128,7 +128,7 @@
             }
         }
 
-        <div id="assignWorkerList" class="flex-1 overflow-y-auto min-h-0 space-y-3 pb-4">
+        <div id="assignWorkerList" class="flex-1 overflow-y-auto min-h-0 space-y-3 mt-3 pb-4">
 
             @if (Model.MostEfficient != null || Model.GrowUp != null || Model.FastestToFinish != null)
             {
