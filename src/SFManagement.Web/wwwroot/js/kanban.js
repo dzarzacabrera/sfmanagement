@@ -807,6 +807,10 @@ function openStatusMobileSheet(taskIdEnc, currentStatus) {
     openModal(html);
 
     var content = document.getElementById('modal-content');
+    content.style.height = 'auto';
+    content.style.maxHeight = 'none';
+    var panel = document.getElementById('modal-panel');
+    if (panel) panel.style.maxHeight = 'none';
     content.querySelectorAll('button[data-status]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var s = this.getAttribute('data-status');
