@@ -20,8 +20,9 @@ if (!string.IsNullOrEmpty(rawConnectionString) && rawConnectionString.StartsWith
     var userInfo = databaseUri.UserInfo.Split(':');
     var username = userInfo[0];
     var password = userInfo.Length > 1 ? userInfo[1] : "";
+    var port = databaseUri.Port > 0 ? databaseUri.Port : 5432;
 
-    connectionString = $"Host={databaseUri.Host};Port={databaseUri.Port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=True;";
+    connectionString = $"Host={databaseUri.Host};Port={port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=True;";
 }
 else
 {
