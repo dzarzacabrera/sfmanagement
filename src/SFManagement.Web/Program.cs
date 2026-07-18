@@ -38,8 +38,7 @@ var encryptionKey = Convert.FromBase64String(
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IIdEncryptionService>(new IdEncryptionService(encryptionKey));
 
-builder.Services.AddHealthChecks()
-    .AddCheck<DatabaseHealthCheck>("database");
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
