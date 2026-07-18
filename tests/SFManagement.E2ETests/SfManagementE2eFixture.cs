@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SFManagement.Application.Abstractions;
 using SFManagement.Infrastructure;
+using SFManagement.Infrastructure.Security;
 using Testcontainers.PostgreSql;
 
 namespace SFManagement.E2ETests;
@@ -51,6 +53,8 @@ public sealed class SfManagementE2eFixture : IAsyncLifetime
         builder.Services.AddControllersWithViews()
             .AddApplicationPart(typeof(Program).Assembly);
         builder.Services.AddInfrastructure(_connectionString);
+        builder.Services.AddSingleton<IIdEncryptionService>(
+            new IdEncryptionService(Convert.FromHexString("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F")));
 
         _app = builder.Build();
 

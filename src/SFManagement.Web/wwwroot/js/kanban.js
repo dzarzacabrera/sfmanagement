@@ -25,6 +25,14 @@ function openAssignModal(taskIdEnc, projectIdEnc) {
         .then(function (html) {
             if (skel) skel.remove();
             openModal(html);
+            // Reset scroll to the top of the modal (header/summary), not the bottom,
+            // especially on mobile where the worker list scrolls internally.
+            requestAnimationFrame(function () {
+                var c = document.getElementById('modal-content');
+                if (c) c.scrollTop = 0;
+                var list = document.getElementById('assignWorkerList');
+                if (list) list.scrollTop = 0;
+            });
             // Update button count for pre-selected (already assigned) workers
             updateAssignButton();
             // Store the set of initially selected worker IDs so submitAssignWorkers can detect changes
