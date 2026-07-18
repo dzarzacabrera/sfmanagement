@@ -22,7 +22,7 @@
     <h1 class="text-2xl font-bold pt-2 mb-3 text-brand dark:text-white">@Model.Title</h1>
     <div class="grid grid-cols-2 gap-4 mb-2.5">
         <div class="flex items-center gap-2">
-            <dt class="text-gray-500 dark:text-gray-400 text-sm">Status</dt>
+            <dt class="text-gray-700 dark:text-gray-300 font-medium text-sm">Status:</dt>
             <dd>
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold
                     @(Model.Status == ProjectTaskStatus.InProgress ? "bg-amber-50 text-amber-700 border border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700" :
@@ -35,7 +35,7 @@
             </dd>
         </div>
         <div class="flex items-center gap-2">
-            <dt class="text-gray-500 dark:text-gray-400 text-sm">Priority</dt>
+            <dt class="text-gray-700 dark:text-gray-300 font-medium text-sm">Priority:</dt>
             <dd>
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold
                     @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700" :
@@ -48,7 +48,7 @@
         </div>
     </div>
     <div class="flex items-center gap-2 text-sm">
-        <dt class="text-gray-500 dark:text-gray-400">Project</dt>
+        <dt class="text-gray-700 dark:text-gray-300 font-medium">Project:</dt>
         <dd class="text-gray-700 dark:text-gray-300">@Model.ProjectName</dd>
     </div>
     @if (Model.Description is not null)
@@ -60,7 +60,7 @@
 <div class="space-y-4 mt-4">
     @if (Model.Skills?.Count > 0)
     {
-        <h2 class="text-lg font-semibold dark:text-white px-1">Required Skills</h2>
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white px-1">Required Skills</h2>
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 dark:bg-gray-800 dark:border-gray-700">
             <div class="flex flex-wrap gap-1.5">
                 @foreach (var skill in Model.Skills)
@@ -76,15 +76,15 @@
 
     @if (Model.AssignedWorkers?.Count > 0)
     {
-        <h2 class="text-lg font-semibold dark:text-white px-1">Assigned Workers</h2>
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white px-1">Assigned Workers</h2>
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             @foreach (var w in Model.AssignedWorkers)
             {
                 <div class="worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer"
-                     onclick="window.location='/Worker/Detail?workerId=@w.WorkerIdEncrypted'">
+                     onclick="openWorkerDetailPopup(null, '@w.WorkerIdEncrypted', '@Model.IdEncrypted')">
                     <div>
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">@w.WorkerName</h3>
-                        <p class="text-sm text-gray-400 dark:text-gray-400">@w.Role</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">@w.Role</p>
                     </div>
                 </div>
             }

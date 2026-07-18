@@ -154,6 +154,52 @@ public class ProjectController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> TaskDetailPopup(
+        [FromQuery] string projectId,
+        [FromQuery] string taskId,
+        [FromServices] IGetDashboardTasksQueryHandler tasksHandler,
+        [FromServices] IGetTaskByIdQueryHandler taskByIdHandler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(projectId, out var pid)) return NotFound();
+        if (!enc.TryDecrypt(taskId, out var tid)) return NotFound();
+        var task = await taskByIdHandler.HandleAsync(new GetTaskByIdQuery(tid));
+        if (task is null || task.ProjectId != pid) return NotFound();
+        var taskWithIds = task with
+        {
+            IdEncrypted = enc.Encrypt(tid),
+            ProjectIdEncrypted = enc.Encrypt(pid),
+            AssignedWorkers = task.AssignedWorkers?
+                .Select(w => w with { WorkerIdEncrypted = enc.Encrypt(w.WorkerId) })
+                .ToList()
+        };
+        return PartialView("~/Views/Shared/_TaskDetailPopup.cshtml", taskWithIds);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> WorkerDetailPopup(
+        [FromQuery] string projectId,
+        [FromQuery] string workerId,
+        [FromServices] IGetWorkersByProjectQueryHandler workersHandler,
+        [FromServices] IGetAllSkillsQueryHandler skillsHandler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(projectId, out var pid)) return NotFound();
+        if (!enc.TryDecrypt(workerId, out var wid)) return NotFound();
+        var workers = await workersHandler.HandleAsync(new GetWorkersByProjectQuery(pid));
+        var worker = workers.FirstOrDefault(w => w.Id == wid);
+        if (worker is null) return NotFound();
+        var skills = await skillsHandler.HandleAsync(new GetAllSkillsQuery());
+        var vm = new WorkerDetailPopupViewModel(
+            worker with { IdEncrypted = enc.Encrypt(wid) },
+            skills)
+        {
+            WorkerIdEncrypted = enc.Encrypt(wid)
+        };
+        return PartialView("~/Views/Shared/_WorkerDetailPopup.cshtml", vm);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> AddWorkerPopup(
         [FromQuery] string projectId,
         [FromServices] IGetWorkersNotInProjectQueryHandler handler,

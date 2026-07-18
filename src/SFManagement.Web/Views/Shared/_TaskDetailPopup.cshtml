@@ -1,0 +1,76 @@
+@model SFManagement.Application.DTOs.TaskDto
+@using SFManagement.Domain.Enums
+
+<div class="flex flex-col h-full">
+<div class="shrink-0 px-6 pt-6 pb-3 border-b border-gray-100 dark:border-gray-700 flex items-start justify-between gap-3">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate mb-2">@Model.Title</h2>
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-gray-700 font-medium" style="font-size:13px;">Priority:</span>
+            <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
+                @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-300" :
+                  Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-300" :
+                  Model.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-300" :
+                  "bg-gray-50 text-gray-600 border border-gray-300")">@Model.Criticality</span>
+            <span class="text-gray-700 font-medium" style="font-size:13px;">Status:</span>
+            <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
+                @(Model.Status == ProjectTaskStatus.InProgress ? "bg-amber-50 text-amber-700 border border-amber-300" :
+                  Model.Status == ProjectTaskStatus.InReview ? "bg-purple-50 text-purple-700 border border-purple-300" :
+                  Model.Status == ProjectTaskStatus.Finish ? "bg-green-50 text-green-700 border border-green-300" :
+                  Model.Status == ProjectTaskStatus.Archived ? "bg-gray-50 text-gray-600 border border-gray-300" :
+                  "bg-blue-50 text-blue-700 border border-blue-300")">@Model.Status</span>
+        </div>
+    </div>
+    </div>
+
+<div class="flex-1 overflow-y-auto px-6 py-4">
+    <div class="flex items-center gap-2 text-sm mb-4">
+        <span class="text-gray-700 dark:text-gray-300 font-medium">Project:</span>
+        <span class="text-gray-700 dark:text-gray-300">@Model.ProjectName</span>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <p class="text-sm text-gray-700 dark:text-gray-300 mb-4 leading-relaxed whitespace-pre-wrap">@Model.Description</p>
+    }
+
+    @if (Model.Skills?.Count > 0)
+    {
+        <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Required Skills</h3>
+        <div class="flex flex-wrap gap-1.5 mb-4">
+            @foreach (var skill in Model.Skills)
+            {
+                <span class="inline-flex items-stretch text-sm sm:text-xs font-semibold rounded-md border border-brand-dark overflow-hidden">
+                    <span class="px-2 py-0.5 bg-brand-light text-brand self-center dark:bg-brand-light/20 dark:text-blue-100">@skill.SkillName</span>
+                    <span class="px-1.5 bg-brand-dark text-white font-bold border-l border-brand-dark flex items-center self-stretch">@skill.RequiredLevel.ToString("0.##")</span>
+                </span>
+            }
+        </div>
+    }
+
+    @if (Model.AssignedWorkers?.Count > 0)
+    {
+        <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Assigned Workers</h3>
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            @foreach (var w in Model.AssignedWorkers)
+            {
+                <div class="worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer"
+                     onclick="openWorkerDetailPopup(null, '@w.WorkerIdEncrypted', '@Model.IdEncrypted')">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">@w.WorkerName</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">@w.Role</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<div class="flex justify-end gap-2 px-6 pb-4 pt-4 shrink-0 border-t border-gray-100 dark:border-gray-700">
+    <button type="button" onclick="closeModal()"
+            class="modal-close-btn px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+        Close
+    </button>
+    <a href="/Task/Detail?taskId=@Model.IdEncrypted" onclick="closeModal()" role="button" tabindex="0" class="px-5 py-2 text-sm rounded-lg bg-brand text-white hover:bg-brand-deep font-medium">Open Detail</a>
+</div>
+</div>

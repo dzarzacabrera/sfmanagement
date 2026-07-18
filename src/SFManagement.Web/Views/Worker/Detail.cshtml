@@ -69,11 +69,11 @@
         @for (int i = 0; i < Model.ActiveTasks.Count; i++)
         {
             var t = Model.ActiveTasks[i];
-             <a href="/Dashboard/Index?projectId=@t.ProjectIdEncrypted"
-                class="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700"
-                data-pg-item>
-                 <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 pr-12">@t.TaskTitle</h2>
-                 <p class="text-sm text-gray-400 dark:text-gray-400 truncate mt-1 flex items-center gap-1.5" data-tooltip="@t.ProjectName">
+         <div onclick="openTaskDetailPopup(null, '@t.TaskIdEncrypted')"
+             class="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 cursor-pointer"
+             data-pg-item>
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 pr-12">@t.TaskTitle</h2>
+                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate mt-1 flex items-center gap-1.5" data-tooltip="@t.ProjectName">
                      <span class="project-dot shrink-0" style="background:@(projectDotColors[Math.Abs(t.ProjectId) % 10]);width:10px;height:10px;border-radius:50%;"></span>
                      <span class="truncate">@t.ProjectName</span>
                  </p>
@@ -92,7 +92,7 @@
                           t.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Archived ? "bg-gray-50 text-gray-600 border border-gray-300" :
                           "bg-blue-50 text-blue-700 border border-blue-300")">@t.Status</span>
                 </div>
-            </a>
+            </div>
         }
     </div>
     @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.ActiveTasks.Count, "tasks", PageSize: 10), new ViewDataDictionary(ViewData) { { "PaginationGrid", "worker-tasks" } })
