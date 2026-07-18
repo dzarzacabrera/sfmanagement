@@ -18,8 +18,10 @@ if (!string.IsNullOrEmpty(rawConnectionString) && rawConnectionString.StartsWith
 {
     var databaseUri = new Uri(rawConnectionString);
     var userInfo = databaseUri.UserInfo.Split(':');
+    var username = userInfo[0];
+    var password = userInfo.Length > 1 ? userInfo[1] : "";
 
-    connectionString = $"Host={databaseUri.Host};Port={databaseUri.Port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=True;";
+    connectionString = $"Host={databaseUri.Host};Port={databaseUri.Port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=True;";
 }
 else
 {
@@ -27,12 +29,13 @@ else
         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 }
 
+builder.Services.AddInfrastructure(connectionString);
+
 var encryptionKey = Convert.FromBase64String(
     builder.Configuration["EncryptionKey"]
     ?? throw new InvalidOperationException("EncryptionKey not found in configuration."));
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddInfrastructure(connectionString);
 builder.Services.AddSingleton<IIdEncryptionService>(new IdEncryptionService(encryptionKey));
 
 builder.Services.AddHealthChecks()
