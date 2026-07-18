@@ -50,7 +50,7 @@
 
 | # | Tarea | Archivo / Ruta |
 |---|-------|----------------|
-| 2.1 | Enum `ProjectTaskStatus` (Queued, InProgress, Test, Finish) | `Domain/Enums/ProjectTaskStatus.cs` |
+| 2.1 | Enum `ProjectTaskStatus` (Queued, InProgress, InReview, Finish) | `Domain/Enums/ProjectTaskStatus.cs` |
 | 2.2 | Enum `Criticality` (low, medium, high, critical) | `Domain/Enums/Criticality.cs` |
 | 2.3 | Enum `PerformanceRating` (Poor, Average, Good, Excellent) con método `ToBasePoints()` → -0.5, 0.0, +0.2, +0.5 | `Domain/Enums/PerformanceRating.cs` |
 | 2.4 | Value Object `SkillVector` con: constructor desde `float[]`, clamping `[0.0, 10.0]`, método `ApplyImpact(basePoints, criticalityMultiplier)`, indexador `[position]` | `Domain/ValueObjects/SkillVector.cs` |
@@ -123,7 +123,7 @@
 |---|-------|----------------|--------|
 | 4.1 | Layout principal con Tailwind CSS (CDN v3), meta viewport, fuente sistema | `Web/Views/Shared/_Layout.cshtml` | ✅ |
 | 4.2 | `DashboardController` (Index, AssignPopup, EvaluationPopup, POST actions) | `Web/Controllers/DashboardController.cs` | ✅ |
-| 4.3 | Vista Dashboard Kanban: 4 columnas responsivas (Queued, In Progress, Test, Finish) | `Web/Views/Dashboard/Index.cshtml` | ✅ |
+| 4.3 | Vista Dashboard Kanban: 4 columnas responsivas (Queued, In Progress, In Review, Finish) | `Web/Views/Dashboard/Index.cshtml` | ✅ |
 | 4.4 | `ProjectController` — añadir acción `Detail` GET + vista con info del proyecto y tareas vinculadas | `Web/Controllers/ProjectController.cs`, `Web/Views/Project/Detail.cshtml` | ✅ |
 | 4.5 | `TaskController` (Create GET/POST, ChangeStatus) | `Web/Controllers/TaskController.cs` | ✅ |
 | 4.6 | Vista Create Task — reemplazar inputs numéricos por **Skill Pills Selector** (búsqueda + pills + nivel numérico en zona seleccionadas) | `Web/Views/Task/Create.cshtml`, `Web/Views/Shared/_SkillSelector.cshtml` | ✅ |
@@ -213,15 +213,15 @@
 
 ### Task
 
-| Campo | Queued | In Progress | Test | Finish |
-|-------|--------|-------------|------|--------|
+| Campo | Queued | In Progress | In Review | Finish |
+|-------|--------|-------------|-----------|--------|
 | title, description | ✅ editable | ❌ | ❌ | ❌ inmutable |
 | criticality | ✅ editable | ❌ | ❌ | ❌ inmutable |
 | required_skills_vector | ✅ editable | ❌ | ❌ | ❌ inmutable |
 | assigned_worker | ✅ editable | ❌ | ❌ | ❌ inmutable |
-| status | ✅ any transition | ✅ solo → Test o → Finish | ✅ solo → Queued o → In Progress o → Finish | ❌ terminal |
+| status | ✅ any transition | ✅ solo → In Review o → Finish | ✅ solo → Queued o → In Progress o → Finish | ❌ terminal |
 
-**Regla clave:** Para editar una tarea en *In Progress* o *Test*, debe revertirse a *Queued*. Una tarea *Finish* es **inmutable** porque ya tiene evaluaciones asociadas.
+**Regla clave:** Para editar una tarea en *In Progress* o *In Review*, debe revertirse a *Queued*. Una tarea *Finish* es **inmutable** porque ya tiene evaluaciones asociadas.
 
 ---
 

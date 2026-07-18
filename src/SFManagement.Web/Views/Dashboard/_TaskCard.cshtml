@@ -5,7 +5,7 @@
     {
         ProjectTaskStatus.Queued => "border-l-blue-500",
         ProjectTaskStatus.InProgress => "border-l-amber-500",
-        ProjectTaskStatus.Test => "border-l-purple-500",
+        ProjectTaskStatus.InReview => "border-l-purple-500",
         ProjectTaskStatus.Finish => "border-l-green-500",
         _ => "border-l-gray-500"
     };
@@ -93,7 +93,7 @@
                         </svg>
                         <span>Status</span>
                     </button>
-                    var canForward = Model.Status == ProjectTaskStatus.Queued || Model.Status == ProjectTaskStatus.InProgress || Model.Status == ProjectTaskStatus.Test;
+                    var canForward = Model.Status == ProjectTaskStatus.Queued || Model.Status == ProjectTaskStatus.InProgress || Model.Status == ProjectTaskStatus.InReview;
                     <button type="button" class="hidden sm:inline-flex text-sm font-medium px-2 py-1.5 rounded border @(canForward ? "border-gray-200 text-gray-500 hover:bg-gray-100" : "border-gray-100 text-gray-300") transition-colors @(canForward ? "" : "pointer-events-none")"
                             onclick="@(canForward ? "moveTaskStatus(\'" + Model.IdEncrypted + "\', 1)" : "")"
                             data-tooltip="Move to next status">&gt;</button>

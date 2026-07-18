@@ -4,7 +4,7 @@ public enum ProjectTaskStatus
 {
     Queued,
     InProgress,
-    Test,
+    InReview,
     Finish,
     Archived
 }

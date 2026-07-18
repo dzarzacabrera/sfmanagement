@@ -37,10 +37,10 @@ public class DomainValidationTests
     }
 
     [Fact]
-    public void ProjectTask_UpdateDetails_WhenTest_Throws()
+    public void ProjectTask_UpdateDetails_WhenInReview_Throws()
     {
         var task = CreateQueuedTask();
-        task.ChangeStatus(ProjectTaskStatus.Test);
+        task.ChangeStatus(ProjectTaskStatus.InReview);
 
         Action act = () => task.UpdateDetails("x", null, Criticality.Low, new SkillVector([1.0f]));
 
@@ -59,14 +59,14 @@ public class DomainValidationTests
     }
 
     [Fact]
-    public void ProjectTask_ChangeStatus_InProgressToTest_Succeeds()
+    public void ProjectTask_ChangeStatus_InProgressToInReview_Succeeds()
     {
         var task = CreateQueuedTask();
         task.ChangeStatus(ProjectTaskStatus.InProgress);
 
-        task.ChangeStatus(ProjectTaskStatus.Test);
+        task.ChangeStatus(ProjectTaskStatus.InReview);
 
-        task.Status.Should().Be(ProjectTaskStatus.Test);
+        task.Status.Should().Be(ProjectTaskStatus.InReview);
     }
 
     [Fact]
@@ -81,11 +81,11 @@ public class DomainValidationTests
     }
 
     [Fact]
-    public void ProjectTask_ChangeStatus_TestToQueued_Succeeds()
+    public void ProjectTask_ChangeStatus_InReviewToQueued_Succeeds()
     {
         var task = CreateQueuedTask();
         task.ChangeStatus(ProjectTaskStatus.InProgress);
-        task.ChangeStatus(ProjectTaskStatus.Test);
+        task.ChangeStatus(ProjectTaskStatus.InReview);
 
         task.ChangeStatus(ProjectTaskStatus.Queued);
 
