@@ -11,19 +11,35 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")
 });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var rawConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+string connectionString;
+
+if (!string.IsNullOrEmpty(rawConnectionString) && rawConnectionString.StartsWith("postgresql://"))
+{
+    var databaseUri = new Uri(rawConnectionString);
+    var userInfo = databaseUri.UserInfo.Split(':');
+    var username = userInfo[0];
+    var password = userInfo.Length > 1 ? userInfo[1] : "";
+    var port = databaseUri.Port > 0 ? databaseUri.Port : 5432;
+
+    connectionString = $"Host={databaseUri.Host};Port={port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=True;";
+}
+else
+{
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+}
+
+builder.Services.AddInfrastructure(connectionString);
 
 var encryptionKey = Convert.FromBase64String(
     builder.Configuration["EncryptionKey"]
     ?? throw new InvalidOperationException("EncryptionKey not found in configuration."));
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddInfrastructure(connectionString);
 builder.Services.AddSingleton<IIdEncryptionService>(new IdEncryptionService(encryptionKey));
 
-builder.Services.AddHealthChecks()
-    .AddCheck<DatabaseHealthCheck>("database");
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
