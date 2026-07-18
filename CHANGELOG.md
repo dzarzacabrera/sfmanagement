@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-07-18
+
+### Added
+
+- **Setup / "Modo demo" page:**
+  - New `Setup` nav link under Administration in `_Layout.cshtml` linking to `/Setup/Index`.
+  - `SetupController` with `Index` (GET) and two independent POST actions: `ClearDatabase` and `ImportSeedData` (`[IgnoreAntiforgeryToken]`, returning `Json({ success, message })`).
+  - `ClearDatabaseCommand`/`Handler` (TRUNCATE all tables `RESTART IDENTITY CASCADE`) and `ImportSeedDataCommand`/`Handler` (runs embedded `init.sql`).
+  - `SeedScriptProvider` reads `init.sql` as an embedded resource; registered in `DependencyInjection.cs`.
+  - `Setup/Index.cshtml` with two action cards (destructive red "Borrar Base de Datos", constructive green "Importar Datos Iniciales"), confirmation modals, spinner loading state, and success/error toast feedback.
+  - Build target `CopySeedScript` syncs `database/init.sql` into the embedded resource on each build (single source of truth).
+
+### Changed
+
+- **`init.sql` idempotency:** made seed script safe to run repeatedly — unique constraint creation guarded via `pg_constraint` existence check, and all seed `INSERT`s now use `ON CONFLICT DO NOTHING`. Fixes `42P07: relation "task_assignments_task_worker_key" already exists` on repeated imports.
+- **Empty Directory/Skills lists:** the search box (and view-toggle/filter bar) is now hidden in Projects, Tasks, Workers and Skills catalogue views when there are no items (`@if (Model.Count > 0)`); only the "No ... yet" empty state shows.
+- **Seed data updates:**
+  - Task `Optimize Checkout Core Web Vitals` (E-Commerce Platform Refactor) status changed from `Test` to `Finish`.
+  - Task `Implement Secure Password Hashing Command` (SFManagement Core Platform) reassigned from Oriol Martinez to **Alex Rodriguez Fernandez** and **Maria Castillo Ruiz**.
+  - Task `Refactor Notification System to Use Server-Sent Events Instead of Polling` assigned to **Carlos Moreno Ruiz** and **David Zarza Cabrera**.
+
+### Fixed
+
+- **Mobile status controls:** on small/very small screens the previous/next status arrows (`<` / `>`) are now hidden (`hidden sm:inline-flex`) in `Dashboard/_TaskCard.cshtml`; only the "Status" button (which opens the bottom-sheet selector) remains.
+- **Status bottom sheet height:** the mobile "Change Status" sheet now auto-sizes to its content (small) instead of filling `85vh`, while other modals keep their full height.
+
 ## [0.9.0] - 2026-07-16
 
 ### Changed
