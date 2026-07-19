@@ -5,20 +5,18 @@
 
     string MatchColor(double pct)
     {
-        if (pct < 20) return "#c82323";
-        if (pct < 50) return "#e96e1d";
-        if (pct < 80) return "#137712";
-        if (pct <= 100) return "#2729bc";
-        return "#7c3aed";
+        if (pct < 25) return "#ba2424";
+        if (pct < 50) return "#D97706";
+        if (pct < 75) return "#6B9E00";
+        return "#1B7F3A";
     }
 
     string MatchBg(double pct)
     {
-        if (pct < 20) return "rgba(200,35,35,0.1)";
-        if (pct < 50) return "rgba(233,110,29,0.1)";
-        if (pct < 80) return "rgba(19,119,18,0.1)";
-        if (pct <= 100) return "rgba(39,41,188,0.1)";
-        return "rgba(243,232,255,0.1)";
+        if (pct < 25) return "#FCE7E7";
+        if (pct < 50) return "#FFF0E1";
+        if (pct < 75) return "#EEF7D6";
+        return "#E3F6E8";
     }
 }
 
@@ -65,8 +63,8 @@
             {
                 var pct = worker.CompatibilityScore * 100;
                 var isExpert = worker.Exceeds;
-                var matchColor = isExpert ? "#7C3AED" : MatchColor(pct);
-                var matchBg = isExpert ? "#F3E8FF" : MatchBg(pct);
+                var matchColor = MatchColor(pct);
+                var matchBg = MatchBg(pct);
                 var isAssigned = worker.IsAssigned;
                 var selectedClass = isAssigned ? "selected" : "";
                 var selectedStyle = isAssigned ? "border-color:#21668f;background-color:rgba(33,102,143,0.06)" : "";
@@ -95,7 +93,6 @@
                                 @if (isExpert)
                                 {
                                     <span style="color:#e6a817;">&#9733;</span>
-                                    <span class="text-xs font-medium normal-case" style="color:#7C3AED;">EXCEEDS</span>
                                 }
                                 @pct.ToString("0")%
                             </div>
@@ -111,11 +108,15 @@
                                     var workerLevel = skill.SkillPosition < worker.SkillsVector.Length ? worker.SkillsVector[skill.SkillPosition] : 0;
                                     var skillPct = skill.RequiredLevel > 0 ? workerLevel / skill.RequiredLevel * 100 : 0;
                                     var isExceeding = workerLevel > skill.RequiredLevel;
-                                    var textColor = isExceeding ? "#7C3AED" : MatchColor(skillPct);
-                                    var bgColor = isExceeding ? "#F3E8FF" : MatchBg(skillPct);
+                                    var textColor = isExceeding ? "#1B7F3A" : MatchColor(skillPct);
+                                    var bgColor = isExceeding ? "#E3F6E8" : MatchBg(skillPct);
 
                                     <span class="inline-flex items-center text-sm sm:text-xs font-semibold rounded-md border overflow-hidden" style="border-color:@textColor;">
-                                        <span class="px-2 py-0.5" style="background-color:@bgColor; color:@textColor;">
+                                        <span class="px-2 py-0.5 inline-flex items-center" style="background-color:@bgColor; color:@textColor;">
+                                            @if (isExceeding)
+                                            {
+                                                <span class="text-[12px] leading-none mr-0.5 self-center" style="color:#e6a817;">&#9733;</span>
+                                            }
                                             @skill.SkillName
                                         </span>
                                         <span class="px-1.5 py-0.5 text-white font-bold border-l" style="background-color:@textColor; border-color:@textColor;">@workerLevel.ToString("0.##") / @skill.RequiredLevel.ToString("0.##")</span>
@@ -136,15 +137,15 @@
 
                 @if (Model.MostEfficient != null)
                 {
-                    RenderRecCard(Model.MostEfficient, "Most Efficient", "#22c55e", "#22c55e");
+                    RenderRecCard(Model.MostEfficient, "Most Efficient", "#21668f", "#21668f");
                 }
                 @if (Model.GrowUp != null)
                 {
-                    RenderRecCard(Model.GrowUp, "Grow Up", "#D97706", "#D97706");
+                    RenderRecCard(Model.GrowUp, "Grow Up", "#21668f", "#21668f");
                 }
                 @if (Model.FastestToFinish != null)
                 {
-                    RenderRecCard(Model.FastestToFinish, "Fastest to Finish", "#2563EB", "#2563EB");
+                    RenderRecCard(Model.FastestToFinish, "Fastest to Finish", "#21668f", "#21668f");
                 }
 
                 <div class="border-t border-gray-200 dark:border-gray-700 my-3"></div>
@@ -156,8 +157,8 @@
                 index++;
                 var pct = worker.CompatibilityScore * 100;
                 var isExpert = worker.Exceeds;
-                var matchColor = isExpert ? "#7C3AED" : MatchColor(pct);
-                var matchBg = isExpert ? "#F3E8FF" : MatchBg(pct);
+                var matchColor = MatchColor(pct);
+                var matchBg = MatchBg(pct);
 
                 var isAssigned = worker.IsAssigned;
                 var selectedClass = isAssigned ? "selected" : "";
@@ -185,7 +186,6 @@
                                 @if (isExpert)
                                 {
                                     <span style="color:#e6a817;">&#9733;</span>
-                                    <span class="text-xs font-medium normal-case" style="color:#7C3AED;">EXCEEDS</span>
                                 }
                                 @pct.ToString("0")%
                             </div>
@@ -201,11 +201,15 @@
                                     var workerLevel = skill.SkillPosition < worker.SkillsVector.Length ? worker.SkillsVector[skill.SkillPosition] : 0;
                                     var skillPct = skill.RequiredLevel > 0 ? workerLevel / skill.RequiredLevel * 100 : 0;
                                     var isExceeding = workerLevel > skill.RequiredLevel;
-                                    var textColor = isExceeding ? "#7C3AED" : MatchColor(skillPct);
-                                    var bgColor = isExceeding ? "#F3E8FF" : MatchBg(skillPct);
+                                    var textColor = isExceeding ? "#1B7F3A" : MatchColor(skillPct);
+                                    var bgColor = isExceeding ? "#E3F6E8" : MatchBg(skillPct);
 
                                     <span class="inline-flex items-center text-sm sm:text-xs font-semibold rounded-md border overflow-hidden" style="border-color:@textColor;">
-                                        <span class="px-2 py-0.5" style="background-color:@bgColor; color:@textColor;">
+                                        <span class="px-2 py-0.5 inline-flex items-center" style="background-color:@bgColor; color:@textColor;">
+                                            @if (isExceeding)
+                                            {
+                                                <span class="text-[12px] leading-none mr-0.5 self-center" style="color:#e6a817;">&#9733;</span>
+                                            }
                                             @skill.SkillName
                                         </span>
                                         <span class="px-1.5 py-0.5 text-white font-bold border-l" style="background-color:@textColor; border-color:@textColor;">@workerLevel.ToString("0.##") / @skill.RequiredLevel.ToString("0.##")</span>
