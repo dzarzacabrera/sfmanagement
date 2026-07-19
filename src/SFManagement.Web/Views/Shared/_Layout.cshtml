@@ -90,10 +90,7 @@
         </div>
 
         <nav class="flex flex-col py-3 text-sm flex-1 overflow-y-auto">
-            <span class="px-4 py-1.5 text-sm font-semibold text-gray-400 uppercase tracking-wider dark:text-gray-500">Main</span>
-            <a id="dashboard-link" href="/Dashboard/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Dashboard</a>
-
-            <span class="px-4 py-1.5 mt-2 text-sm font-semibold text-gray-400 uppercase tracking-wider dark:text-gray-500">Directory</span>
+            <span class="px-4 py-1.5 text-sm font-semibold text-gray-400 uppercase tracking-wider dark:text-gray-500">Directory</span>
             <a href="/Project/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Projects</a>
             <a href="/Task/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Tasks</a>
             <a href="/Worker/Index" class="sidebar-link block px-4 py-2 text-gray-700 dark:text-gray-300">Workers</a>
@@ -177,15 +174,6 @@
     <script src="~/js/kanban.js?v=20260718150000"></script>
     <script src="~/js/pagination.js?v=20260717180000"></script>
     <script src="~/js/form-validation.js?v=20260717190000"></script>
-
-    <script>
-        (function () {
-            var link = document.getElementById('dashboard-link');
-            if (!link) return;
-            var saved = localStorage.getItem('lastProjectId');
-            if (saved) link.href = '/Dashboard/Index?projectId=' + saved;
-        })();
-    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
