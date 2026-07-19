@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddTransient<IGetDashboardTasksQueryHandler, GetDashboardTasksQueryHandler>();
         services.AddTransient<IGetRecommendedWorkersQueryHandler, GetRecommendedWorkersQueryHandler>();
         services.AddTransient<IGetWorkerHistoryQueryHandler, GetWorkerHistoryQueryHandler>();
+        services.AddTransient<IGetWorkerHistoryGroupQueryHandler, GetWorkerHistoryGroupQueryHandler>();
         services.AddTransient<IGetWorkersByProjectQueryHandler, GetWorkersByProjectQueryHandler>();
         services.AddTransient<IGetWorkersNotInProjectQueryHandler, GetWorkersNotInProjectQueryHandler>();
         services.AddTransient<IGetAllSkillsQueryHandler, GetAllSkillsQueryHandler>();

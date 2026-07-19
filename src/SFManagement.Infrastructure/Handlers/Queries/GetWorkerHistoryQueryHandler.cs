@@ -14,7 +14,7 @@ internal sealed class GetWorkerHistoryQueryHandler(INpgsqlConnectionFactory conn
     {
         await using var connection = await connectionFactory.GetOpenConnectionAsync();
         await using var cmd = new NpgsqlCommand(
-            "SELECT pe.id, t.title AS task_title, " +
+            "SELECT pe.id, pe.task_id, t.title AS task_title, " +
             "COALESCE(sc.name, 'Skill #' || pe.skill_position) AS skill_name, " +
             "pe.skill_position, pe.rating, pe.criticality, " +
             "pe.base_points, pe.impact, pe.previous_level, pe.new_level, pe.created_at, " +
@@ -45,7 +45,8 @@ internal sealed class GetWorkerHistoryQueryHandler(INpgsqlConnectionFactory conn
                 mapper.GetDouble("previous_level"),
                 mapper.GetDouble("new_level"),
                 mapper.GetDateTime("created_at"),
-                mapper.GetStringOrNull("project_name")));
+                mapper.GetStringOrNull("project_name"),
+                mapper.GetInt32OrNull("task_id")));
         }
 
         return results;

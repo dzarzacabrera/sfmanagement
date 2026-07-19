@@ -39,6 +39,14 @@ internal sealed class DataReaderMapper(NpgsqlDataReader reader)
         return Enum.Parse<TEnum>(raw, ignoreCase: true);
     }
 
+    public TEnum? GetEnumOrNull<TEnum>(string column) where TEnum : struct, Enum
+    {
+        var ordinal = _reader.GetOrdinal(column);
+        if (_reader.IsDBNull(ordinal)) return null;
+        var raw = _reader.GetFieldValue<string>(ordinal);
+        return Enum.Parse<TEnum>(raw, ignoreCase: true);
+    }
+
     public double GetDouble(string column) =>
         _reader.GetFieldValue<double>(_reader.GetOrdinal(column));
 }

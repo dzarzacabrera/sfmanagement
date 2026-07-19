@@ -14,9 +14,25 @@ public record EvaluationHistoryDto(
     double PreviousLevel,
     double NewLevel,
     DateTime CreatedAt,
-    string? ProjectName = null)
+    string? ProjectName = null,
+    long? TaskId = null)
 {
     public const string ManualAdjustmentTitle = "Edit by User";
 
     public string IdEncrypted { get; init; } = "";
+}
+
+public record EvaluationHistoryGroupDto(
+    long? TaskId,
+    string TaskTitle,
+    string ProjectName,
+    DateTime EvaluatedAt,
+    Criticality Criticality,
+    ProjectTaskStatus? Status,
+    double AvgScore,
+    double TotalImpact,
+    int ApprovedSkills,
+    int TotalSkills)
+{
+    public string TaskIdEncrypted { get; init; } = "";
 }

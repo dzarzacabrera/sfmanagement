@@ -94,6 +94,7 @@ public class WorkerController : Controller
         [FromServices] IGetAllWorkersQueryHandler allWorkersHandler,
         [FromServices] IGetAllSkillsQueryHandler skillsHandler,
         [FromServices] IGetWorkerHistoryQueryHandler historyHandler,
+        [FromServices] IGetWorkerHistoryGroupQueryHandler historyGroupHandler,
         [FromServices] IGetWorkerTasksQueryHandler tasksHandler,
         [FromServices] IIdEncryptionService enc)
     {
@@ -107,6 +108,9 @@ public class WorkerController : Controller
         ViewBag.WorkerSkillsVector = worker.SkillsVector;
 
         var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(wid));
+        var groupedEvaluations = (await historyGroupHandler.HandleAsync(new GetWorkerHistoryGroupQuery(wid)))
+            .Select(g => g with { TaskIdEncrypted = g.TaskId.HasValue ? enc.Encrypt(g.TaskId.Value) : "" })
+            .ToList();
         var tasks = (await tasksHandler.HandleAsync(new GetWorkerTasksQuery(wid)))
             .Select(t => t with { TaskIdEncrypted = enc.Encrypt(t.TaskId), ProjectIdEncrypted = enc.Encrypt(t.ProjectId) })
             .ToList();
@@ -115,6 +119,7 @@ public class WorkerController : Controller
             wid,
             worker.Name,
             evaluations,
+            groupedEvaluations,
             tasks)
         {
             WorkerIdEncrypted = enc.Encrypt(wid)
@@ -145,6 +150,42 @@ public class WorkerController : Controller
                 .ToList()
         };
         return PartialView("~/Views/Shared/_TaskDetailPopup.cshtml", taskWithIds);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EvaluationDetailPopup(
+        [FromQuery] string workerId,
+        [FromQuery] string taskId,
+        [FromServices] IGetWorkerHistoryQueryHandler historyHandler,
+        [FromServices] IGetTaskByIdQueryHandler taskHandler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(workerId, out var wid)) return NotFound();
+        if (!enc.TryDecrypt(taskId, out var tid)) return NotFound();
+
+        var task = await taskHandler.HandleAsync(new GetTaskByIdQuery(tid));
+        var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(wid));
+        var taskEvals = evaluations.Where(e => e.TaskId == tid).ToList();
+        if (taskEvals.Count == 0) return NotFound();
+
+        var first = taskEvals[0];
+        var vm = new EvaluationDetailViewModel(
+            first.TaskTitle,
+            first.ProjectName ?? "—",
+            first.CreatedAt,
+            first.Criticality,
+            task?.Status ?? SFManagement.Domain.Enums.ProjectTaskStatus.Finish,
+            taskEvals.Sum(e => e.Impact),
+            taskEvals.Count(e => e.Impact > 0),
+            taskEvals.Count(e => e.Impact < 0),
+            taskEvals.Count(e => Math.Abs(e.Impact) < 0.001),
+            taskEvals.Count,
+            taskEvals)
+        {
+            TaskIdEncrypted = taskId
+        };
+
+        return PartialView("~/Views/Shared/_EvaluationDetailPopup.cshtml", vm);
     }
 
     [HttpGet]

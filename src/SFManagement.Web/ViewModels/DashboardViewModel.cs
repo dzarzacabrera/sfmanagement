@@ -75,7 +75,24 @@ public record WorkerHistoryViewModel(
     long WorkerId,
     string WorkerName,
     IReadOnlyList<EvaluationHistoryDto> Evaluations,
+    IReadOnlyList<EvaluationHistoryGroupDto>? GroupedEvaluations = null,
     IReadOnlyList<WorkerTaskDto>? ActiveTasks = null)
 {
     public string WorkerIdEncrypted { get; init; } = "";
+}
+
+public record EvaluationDetailViewModel(
+    string TaskTitle,
+    string ProjectName,
+    DateTime EvaluatedAt,
+    Criticality Criticality,
+    ProjectTaskStatus Status,
+    double TotalImpact,
+    int Improved,
+    int Decreased,
+    int Unchanged,
+    int TotalSkills,
+    IReadOnlyList<EvaluationHistoryDto> Skills)
+{
+    public string TaskIdEncrypted { get; init; } = "";
 }

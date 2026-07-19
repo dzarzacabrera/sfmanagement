@@ -16,7 +16,7 @@
     };
 }
 
-<h1 class="text-2xl font-bold pt-2 mb-6 text-brand dark:text-white">@Model.WorkerName</h1>
+<h1 class="text-2xl font-bold pt-2 mb-6 text-brand dark:text-white" data-worker-id="@Model.WorkerIdEncrypted">@Model.WorkerName</h1>
 
 @section ActionButtons {
     <div class="flex items-center gap-2">
@@ -48,7 +48,7 @@
 @if (workerSkills.Count > 0)
 {
     <h2 class="text-lg font-semibold mb-3 dark:text-white">Skills</h2>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 min-[1600px]:grid-cols-3 gap-x-6 gap-y-2 mb-6">
         @foreach (var skill in workerSkills)
         {
             <div class="skill-row flex items-center gap-2 text-sm">
@@ -72,18 +72,8 @@
          <div onclick="openTaskDetailPopup(null, '@t.TaskIdEncrypted')"
              class="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 cursor-pointer"
              data-pg-item>
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 pr-12">@t.TaskTitle</h2>
-                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate mt-1 flex items-center gap-1.5" data-tooltip="@t.ProjectName">
-                     <span class="project-dot shrink-0" style="background:@(projectDotColors[Math.Abs(t.ProjectId) % 10]);width:10px;height:10px;border-radius:50%;"></span>
-                     <span class="truncate">@t.ProjectName</span>
-                 </p>
-                 <div class="flex items-center gap-2 flex-wrap mt-3">
-                    <span class="text-gray-700 font-medium" style="font-size:13px;">Priority:</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
-                        @(t.Criticality == SFManagement.Domain.Enums.Criticality.Critical ? "bg-red-50 text-red-700 border border-red-300" :
-                          t.Criticality == SFManagement.Domain.Enums.Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-300" :
-                          t.Criticality == SFManagement.Domain.Enums.Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-300" :
-                          "bg-gray-50 text-gray-600 border border-gray-300")">@t.Criticality</span>
+              <h2 class="text-[16px] font-semibold text-gray-900 dark:text-gray-100 pr-12">@t.TaskTitle</h2>
+                 <div class="flex items-center gap-2 flex-wrap mt-2">
                     <span class="text-gray-700 font-medium" style="font-size:13px;">Status:</span>
                     <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
                         @(t.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InProgress ? "bg-amber-50 text-amber-700 border border-amber-300" :
@@ -91,7 +81,18 @@
                           t.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Finish ? "bg-green-50 text-green-700 border border-green-300" :
                           t.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Archived ? "bg-gray-50 text-gray-600 border border-gray-300" :
                           "bg-blue-50 text-blue-700 border border-blue-300")">@t.Status</span>
-                </div>
+                    <span class="text-gray-700 font-medium" style="font-size:13px;">Priority:</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
+                        @(t.Criticality == SFManagement.Domain.Enums.Criticality.Critical ? "bg-red-50 text-red-700 border border-red-300" :
+                          t.Criticality == SFManagement.Domain.Enums.Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-300" :
+                          t.Criticality == SFManagement.Domain.Enums.Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-300" :
+                          "bg-gray-50 text-gray-600 border border-gray-300")">@t.Criticality</span>
+                 </div>
+                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate mt-2 flex items-center gap-1.5" data-tooltip="@t.ProjectName">
+                     <span class="text-gray-700 font-medium shrink-0" style="font-size:13px;">Project:</span>
+                     <span class="project-dot shrink-0" style="background:@(projectDotColors[Math.Abs(t.ProjectId) % 10]);width:10px;height:10px;border-radius:50%;"></span>
+                     <span class="truncate">@t.ProjectName</span>
+                 </p>
             </div>
         }
     </div>
@@ -100,45 +101,87 @@
 
 <h2 class="text-lg font-semibold mb-3 dark:text-white">Evaluation History</h2>
 
-@if (Model.Evaluations.Count == 0)
+@if (Model.GroupedEvaluations == null || Model.GroupedEvaluations.Count == 0)
 {
     <p class="text-gray-500 dark:text-gray-400">No evaluations recorded yet.</p>
 }
 else
 {
-    <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm dark:border-gray-700">
-        <table class="w-full text-sm dark:text-gray-100">
-            <thead>
-                <tr class="bg-gray-50 text-left dark:bg-gray-800">
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</th>
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Project</th>
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Task</th>
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Skill</th>
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Rating</th>
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Base Pts</th>
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Priority</th>
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Impact</th>
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Previous</th>
-                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">New</th>
-                </tr>
-            </thead>
-            <tbody id="evaluationGrid">
-                @foreach (var eval in Model.Evaluations)
-                {
-                    <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:hover:bg-gray-800/50" data-pg-item>
-                        <td class="px-4 py-2.5 text-gray-500 dark:text-gray-300 whitespace-nowrap">@eval.CreatedAt.ToString("g")</td>
-                        <td class="px-4 py-2.5 dark:text-gray-300">@(eval.ProjectName ?? "—")</td>
-                        <td class="px-4 py-2.5 dark:text-gray-300">@eval.TaskTitle</td>
-                        <td class="px-4 py-2.5 dark:text-gray-300">@eval.SkillName</td>
-                        <td class="px-4 py-2.5 font-mono dark:text-gray-300 tabular-nums">@eval.Rating.ToString("0.00")</td>
-                        <td class="px-4 py-2.5 font-mono dark:text-gray-300 tabular-nums">@eval.BasePoints.ToString("+0.00;-0.00")</td>
-                        <td class="px-4 py-2.5 dark:text-gray-300">@eval.Criticality</td>
-                        <td class="px-4 py-2.5 font-mono tabular-nums @(eval.Impact > 0 ? "text-green-600" : eval.Impact < 0 ? "text-red-600" : "text-gray-400")">
-                            @if (eval.Impact > 0)
+    var evalProjects = Model.GroupedEvaluations
+        .Select(g => g.ProjectName)
+        .Distinct()
+        .OrderBy(p => p)
+        .ToList();
+
+    <!-- Mobile search -->
+    <div class="sm:hidden flex mb-4">
+        <div class="relative flex-1 min-w-0">
+            <input type="text" id="evalSearchMobile"
+                   class="w-full border border-gray-300 rounded-l-lg px-4 py-3 pr-8 text-sm focus-visible:z-20 focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+                   placeholder="Search by task...">
+            <button type="button" id="clearEvalSearchMobile"
+                    class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition-colors"
+                    aria-label="Clear search">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <select id="evalProjectMobile"
+                class="flex-1 min-w-0 border border-gray-300 -ml-px rounded-r-lg px-3 py-2.5 pr-3 text-sm bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9]">
+            <option value="">All projects</option>
+            @foreach (var p in evalProjects)
+            {
+                <option value="@p.ToLower()">@p</option>
+            }
+        </select>
+    </div>
+
+    <!-- Mobile cards -->
+    <div id="evalCardsMobile" class="grid grid-cols-1 gap-3 mb-4 sm:hidden">
+        @foreach (var group in Model.GroupedEvaluations)
+        {
+            <div onclick="openEvaluationDetailPopup('@group.TaskIdEncrypted')"
+                 class="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 cursor-pointer"
+                 data-pg-item data-title="@group.TaskTitle.ToLower()" data-project="@group.ProjectName.ToLower()">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 leading-tight line-clamp-2" data-tooltip="@group.TaskTitle">@group.TaskTitle</h3>
+                <div class="flex items-center gap-2 flex-wrap mt-2">
+                    <span class="text-gray-700 font-medium text-sm">Priority:</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
+                        @(group.Criticality == SFManagement.Domain.Enums.Criticality.Critical ? "bg-red-50 text-red-700 border border-red-300" :
+                          group.Criticality == SFManagement.Domain.Enums.Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-300" :
+                          group.Criticality == SFManagement.Domain.Enums.Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-300" :
+                          "bg-gray-50 text-gray-600 border border-gray-300")">@group.Criticality</span>
+                    @if (group.Status.HasValue)
+                    {
+                        <span class="text-gray-700 font-medium text-sm">Status:</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
+                            @(group.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InProgress ? "bg-amber-50 text-amber-700 border border-amber-300" :
+                              group.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InReview ? "bg-purple-50 text-purple-700 border border-purple-300" :
+                              group.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Finish ? "bg-green-50 text-green-700 border border-green-300" :
+                              group.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Archived ? "bg-gray-50 text-gray-600 border border-gray-300" :
+                              "bg-blue-50 text-blue-700 border border-blue-300")">@group.Status</span>
+                    }
+                    <span class="text-sm text-gray-500 dark:text-gray-400">@group.EvaluatedAt.ToString("dd/MM/yyyy")</span>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-2 truncate" data-tooltip="@group.ProjectName">
+                    <span class="text-gray-700 font-medium">Project:</span>
+                    <span class="project-dot shrink-0" style="background:@(projectDotColors[Math.Abs(group.ProjectName.GetHashCode()) % 10]);width:10px;height:10px;border-radius:50%;"></span>
+                    <span class="truncate">@group.ProjectName</span>
+                </p>
+                <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider">Avg Score</div>
+                        <div class="font-mono text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">@group.AvgScore.ToString("0.00")</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider">Impact</div>
+                        <div class="font-mono text-sm font-semibold tabular-nums @(group.TotalImpact > 0 ? "text-green-600" : group.TotalImpact < 0 ? "text-red-600" : "text-gray-400")">
+                            @if (group.TotalImpact > 0)
                             {
                                 <span>▲</span>
                             }
-                            else if (eval.Impact < 0)
+                            else if (group.TotalImpact < 0)
                             {
                                 <span>▼</span>
                             }
@@ -146,14 +189,326 @@ else
                             {
                                 <span style="font-size:0.6rem">◀▶</span>
                             }
-                            @eval.Impact.ToString("+0.00;-0.00")
+                            @group.TotalImpact.ToString("+0.00;-0.00")
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider">Skills</div>
+                        <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">@group.ApprovedSkills / @group.TotalSkills</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="sm:hidden">
+    @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.GroupedEvaluations.Count, "evaluations"), new ViewDataDictionary(ViewData) { { "PaginationGrid", "evalCardsMobile" } })
+    </div>
+
+    <!-- Desktop search + project + toggle -->
+    <div class="max-sm:hidden flex items-stretch mb-4">
+        <div class="relative flex-1 min-w-0">
+            <input type="text" id="evalSearch"
+                   class="w-full border border-gray-300 rounded-l-lg px-4 py-3 pr-8 text-sm relative focus-visible:z-20 focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+                   placeholder="Search by task...">
+            <button type="button" id="clearEvalSearch"
+                    class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition-colors"
+                    aria-label="Clear search">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <select id="evalProjectDesktop"
+                class="relative z-10 border border-gray-300 -ml-px px-3 py-2.5 pr-3 text-sm rounded-r-lg xl:rounded-none focus-visible:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-[#96c0d9] dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100">
+            <option value="">All projects</option>
+            @foreach (var p in evalProjects)
+            {
+                <option value="@p.ToLower()">@p</option>
+            }
+        </select>
+        <div class="hidden xl:flex border border-gray-300 border-l-0 rounded-r-lg dark:border-gray-600">
+            <button type="button" id="evalViewList"
+                    class="p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9] relative focus-visible:z-20"
+                    title="List view">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <div class="w-px bg-gray-300 dark:bg-gray-600 shrink-0"></div>
+            <button type="button" id="evalViewCards"
+                    class="p-2.5 rounded-r-lg transition-colors bg-blue-50 text-brand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9] relative focus-visible:z-20"
+                    title="Card view">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Desktop cards -->
+    <div id="evalCardsDesktop" class="max-sm:hidden grid grid-cols-1 min-[750px]:grid-cols-2 xl:grid-cols-3 gap-3">
+        @foreach (var group in Model.GroupedEvaluations)
+        {
+            <div onclick="openEvaluationDetailPopup('@group.TaskIdEncrypted')"
+                 class="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700 cursor-pointer"
+                 data-pg-item data-title="@group.TaskTitle.ToLower()" data-project="@group.ProjectName.ToLower()">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 leading-tight line-clamp-2" data-tooltip="@group.TaskTitle">@group.TaskTitle</h3>
+                <div class="flex items-center gap-2 flex-wrap mt-2">
+                    <span class="text-gray-700 font-medium text-sm">Priority:</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
+                        @(group.Criticality == SFManagement.Domain.Enums.Criticality.Critical ? "bg-red-50 text-red-700 border border-red-300" :
+                          group.Criticality == SFManagement.Domain.Enums.Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-300" :
+                          group.Criticality == SFManagement.Domain.Enums.Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-300" :
+                          "bg-gray-50 text-gray-600 border border-gray-300")">@group.Criticality</span>
+                    @if (group.Status.HasValue)
+                    {
+                        <span class="text-gray-700 font-medium text-sm">Status:</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
+                            @(group.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InProgress ? "bg-amber-50 text-amber-700 border border-amber-300" :
+                              group.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InReview ? "bg-purple-50 text-purple-700 border border-purple-300" :
+                              group.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Finish ? "bg-green-50 text-green-700 border border-green-300" :
+                              group.Status == SFManagement.Domain.Enums.ProjectTaskStatus.Archived ? "bg-gray-50 text-gray-600 border border-gray-300" :
+                              "bg-blue-50 text-blue-700 border border-blue-300")">@group.Status</span>
+                    }
+                    <span class="text-sm text-gray-500 dark:text-gray-400">@group.EvaluatedAt.ToString("dd/MM/yyyy")</span>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-2 truncate" data-tooltip="@group.ProjectName">
+                    <span class="text-gray-700 font-medium">Project:</span>
+                    <span class="project-dot shrink-0" style="background:@(projectDotColors[Math.Abs(group.ProjectName.GetHashCode()) % 10]);width:10px;height:10px;border-radius:50%;"></span>
+                    <span class="truncate">@group.ProjectName</span>
+                </p>
+                <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider">Avg Score</div>
+                        <div class="font-mono text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">@group.AvgScore.ToString("0.00")</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider">Impact</div>
+                        <div class="font-mono text-sm font-semibold tabular-nums @(group.TotalImpact > 0 ? "text-green-600" : group.TotalImpact < 0 ? "text-red-600" : "text-gray-400")">
+                            @if (group.TotalImpact > 0)
+                            {
+                                <span>▲</span>
+                            }
+                            else if (group.TotalImpact < 0)
+                            {
+                                <span>▼</span>
+                            }
+                            else
+                            {
+                                <span style="font-size:0.6rem">◀▶</span>
+                            }
+                            @group.TotalImpact.ToString("+0.00;-0.00")
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider">Skills</div>
+                        <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">@group.ApprovedSkills / @group.TotalSkills</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Desktop table -->
+    <div id="evalTableDesktop" class="hidden overflow-x-auto rounded-xl border border-gray-200 shadow-sm dark:border-gray-700">
+        <table class="w-full text-sm dark:text-gray-100">
+            <thead>
+                <tr class="bg-gray-50 text-left dark:bg-gray-800">
+                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</th>
+                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider max-w-[180px]">Project</th>
+                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider max-w-[260px]">Task</th>
+                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">Priority</th>
+                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">AVG Score</th>
+                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">Total Impact</th>
+                    <th class="px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">Skills Approved</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var group in Model.GroupedEvaluations)
+                {
+                    <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:hover:bg-gray-800/50 cursor-pointer"
+                        onclick="openEvaluationDetailPopup('@group.TaskIdEncrypted')"
+                        data-pg-item data-title="@group.TaskTitle.ToLower()" data-project="@group.ProjectName.ToLower()">
+                        <td class="px-4 py-2.5 text-gray-500 dark:text-gray-300 whitespace-nowrap">@group.EvaluatedAt.ToString("dd/MM/yyyy")</td>
+                        <td class="px-4 py-2.5 dark:text-gray-300 max-w-[180px]">
+                            <span class="block truncate" data-tooltip="@group.ProjectName">@group.ProjectName</span>
                         </td>
-                        <td class="px-4 py-2.5 font-mono dark:text-gray-300 tabular-nums">@eval.PreviousLevel.ToString("0.00")</td>
-                        <td class="px-4 py-2.5 font-mono dark:text-gray-300 tabular-nums">@eval.NewLevel.ToString("0.00")</td>
+                        <td class="px-4 py-2.5 dark:text-gray-300 max-w-[260px]">
+                            <span class="block truncate font-medium" data-tooltip="@group.TaskTitle">@group.TaskTitle</span>
+                        </td>
+                        <td class="px-4 py-2.5">
+                            <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
+                                @(group.Criticality == SFManagement.Domain.Enums.Criticality.Critical ? "bg-red-50 text-red-700 border border-red-300" :
+                                  group.Criticality == SFManagement.Domain.Enums.Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-300" :
+                                  group.Criticality == SFManagement.Domain.Enums.Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-300" :
+                                  "bg-gray-50 text-gray-600 border border-gray-300")">@group.Criticality</span>
+                        </td>
+                        <td class="px-4 py-2.5 font-mono dark:text-gray-300 tabular-nums text-center">@group.AvgScore.ToString("0.00")</td>
+                        <td class="px-4 py-2.5 font-mono tabular-nums text-center @(group.TotalImpact > 0 ? "text-green-600" : group.TotalImpact < 0 ? "text-red-600" : "text-gray-400")">
+                            @if (group.TotalImpact > 0)
+                            {
+                                <span>▲</span>
+                            }
+                            else if (group.TotalImpact < 0)
+                            {
+                                <span>▼</span>
+                            }
+                            else
+                            {
+                                <span style="font-size:0.6rem">◀▶</span>
+                            }
+                            @group.TotalImpact.ToString("+0.00;-0.00")
+                        </td>
+                        <td class="px-4 py-2.5 dark:text-gray-300 text-center tabular-nums">@group.ApprovedSkills / @group.TotalSkills</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
-    @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.Evaluations.Count, "evaluations"), new ViewDataDictionary(ViewData) { { "PaginationGrid", "evaluationGrid" } })
+
+    <!-- Empty state -->
+    <div id="evalEmptyState" class="hidden text-center py-8">
+        <p class="text-gray-400 dark:text-gray-500">No evaluations match your search.</p>
+    </div>
+
+    <!-- Desktop pagination -->
+    <div id="evalPaginationCards" class="max-sm:hidden">
+    @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.GroupedEvaluations.Count, "evaluations"), new ViewDataDictionary(ViewData) { { "PaginationGrid", "evalCardsDesktop" } })
+    </div>
+    <div id="evalPaginationTable" class="hidden">
+    @await Html.PartialAsync("_Pagination", new PaginationViewModel(Model.GroupedEvaluations.Count, "evaluations"), new ViewDataDictionary(ViewData) { { "PaginationGrid", "evalTableDesktop" } })
+    </div>
+}
+
+@section Scripts {
+<script>
+function openEvaluationDetailPopup(taskIdEncrypted) {
+    if (!taskIdEncrypted) return;
+    var workerId = document.querySelector('[data-worker-id]').dataset.workerId;
+    fetch('/Worker/EvaluationDetailPopup?workerId=' + encodeURIComponent(workerId) + '&taskId=' + encodeURIComponent(taskIdEncrypted))
+        .then(function(r) { return r.ok ? r.text() : Promise.reject(r); })
+        .then(function(html) { openModal(html, false, '1000px'); })
+        .catch(function() { });
+}
+
+(function () {
+    var searchInput = document.getElementById('evalSearch');
+    var clearBtn = document.getElementById('clearEvalSearch');
+    var projectDesktop = document.getElementById('evalProjectDesktop');
+    var searchMobile = document.getElementById('evalSearchMobile');
+    var clearMobile = document.getElementById('clearEvalSearchMobile');
+    var projectMobile = document.getElementById('evalProjectMobile');
+    var cardsDesktop = document.getElementById('evalCardsDesktop');
+    var tableDesktop = document.getElementById('evalTableDesktop');
+    var emptyState = document.getElementById('evalEmptyState');
+    var viewCardsBtn = document.getElementById('evalViewCards');
+    var viewListBtn = document.getElementById('evalViewList');
+    var pagCards = document.getElementById('evalPaginationCards');
+    var pagTable = document.getElementById('evalPaginationTable');
+
+    function filterDesktop() {
+        if (!cardsDesktop) return;
+        var q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        var proj = projectDesktop ? projectDesktop.value : '';
+        var items = document.querySelectorAll('#evalCardsDesktop [data-pg-item], #evalTableDesktop [data-pg-item]');
+        var visible = 0;
+        items.forEach(function (el) {
+            var match = true;
+            if (q && !el.dataset.title.includes(q)) match = false;
+            if (proj && el.dataset.project !== proj) match = false;
+            el.dataset.pgFiltered = match ? '' : 'true';
+            if (match) visible++;
+        });
+        emptyState.classList.toggle('hidden', visible > 0);
+        if (clearBtn) clearBtn.classList.toggle('hidden', !q);
+    }
+
+    function filterMobile() {
+        var q = searchMobile ? searchMobile.value.toLowerCase().trim() : '';
+        var proj = projectMobile ? projectMobile.value : '';
+        var items = document.querySelectorAll('#evalCardsMobile [data-pg-item]');
+        items.forEach(function (el) {
+            var match = true;
+            if (q && !el.dataset.title.includes(q)) match = false;
+            if (proj && el.dataset.project !== proj) match = false;
+            el.dataset.pgFiltered = match ? '' : 'true';
+        });
+        if (clearMobile) clearMobile.classList.toggle('hidden', !q);
+    }
+
+    function switchToDesktopCards() {
+        cardsDesktop.classList.remove('hidden');
+        tableDesktop.classList.add('hidden');
+        pagCards.classList.remove('hidden');
+        pagTable.classList.add('hidden');
+        viewCardsBtn.className = 'p-2.5 rounded-r-lg transition-colors bg-blue-50 text-brand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9] relative focus-visible:z-20';
+        viewListBtn.className = 'p-2.5 transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9] relative focus-visible:z-20';
+        localStorage.setItem('evalViewMode', 'cards');
+        window.paginationReRender('evalCardsDesktop');
+    }
+
+    function switchToDesktopTable() {
+        cardsDesktop.classList.add('hidden');
+        tableDesktop.classList.remove('hidden');
+        pagCards.classList.add('hidden');
+        pagTable.classList.remove('hidden');
+        viewListBtn.className = 'p-2.5 transition-colors bg-blue-50 text-brand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9] relative focus-visible:z-20';
+        viewCardsBtn.className = 'p-2.5 rounded-r-lg transition-colors text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#96c0d9] relative focus-visible:z-20';
+        localStorage.setItem('evalViewMode', 'table');
+        window.paginationReRender('evalTableDesktop');
+    }
+
+    function refreshDesktop() {
+        var active = cardsDesktop.classList.contains('hidden') ? 'evalTableDesktop' : 'evalCardsDesktop';
+        window.paginationRefresh(active);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () { filterDesktop(); refreshDesktop(); });
+    }
+    if (clearBtn) clearBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        filterDesktop(); refreshDesktop(); searchInput.focus();
+    });
+    if (projectDesktop) {
+        projectDesktop.addEventListener('change', function () { filterDesktop(); refreshDesktop(); });
+    }
+
+    if (searchMobile) {
+        searchMobile.addEventListener('input', function () { filterMobile(); window.paginationRefresh('evalCardsMobile'); });
+    }
+    if (clearMobile) clearMobile.addEventListener('click', function () {
+        searchMobile.value = '';
+        filterMobile(); window.paginationRefresh('evalCardsMobile'); searchMobile.focus();
+    });
+    if (projectMobile) {
+        projectMobile.addEventListener('change', function () { filterMobile(); window.paginationRefresh('evalCardsMobile'); });
+    }
+
+    if (viewCardsBtn) viewCardsBtn.addEventListener('click', function () {
+        if (cardsDesktop.classList.contains('hidden')) switchToDesktopCards();
+    });
+    if (viewListBtn) viewListBtn.addEventListener('click', function () {
+        if (tableDesktop.classList.contains('hidden')) switchToDesktopTable();
+    });
+
+    var mql = window.matchMedia('(max-width: 1279px)');
+    mql.addEventListener('change', function (e) {
+        if (e.matches) {
+            if (tableDesktop && !tableDesktop.classList.contains('hidden')) {
+                switchToDesktopCards();
+            }
+        }
+    });
+
+    if (cardsDesktop) {
+        var savedView = localStorage.getItem('evalViewMode');
+        if (savedView === 'table' && !mql.matches) {
+            switchToDesktopTable();
+        } else if (mql.matches) {
+            switchToDesktopCards();
+        }
+    }
+})();
+</script>
 }

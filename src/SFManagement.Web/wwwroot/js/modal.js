@@ -77,7 +77,7 @@ function removeMobileSheet() {
     if (closeDesktop) closeDesktop.style.display = '';
 }
 
-function openModal(html, small) {
+function openModal(html, small, maxWidth) {
     var root = document.getElementById('modal-root');
     var panel = document.getElementById('modal-panel');
     var content = document.getElementById('modal-content');
@@ -93,6 +93,12 @@ function openModal(html, small) {
         panel.classList.add('modal-sm');
     } else {
         panel.classList.remove('modal-sm');
+    }
+
+    if (maxWidth) {
+        panel.style.maxWidth = maxWidth;
+    } else {
+        panel.style.maxWidth = '';
     }
 
     isMobileModal = window.innerWidth < 640;
@@ -144,6 +150,7 @@ function closeModal() {
         root.classList.add('hidden');
         root.classList.remove('flex', exitClass, exitActiveClass);
         panel.classList.remove('modal-sm');
+        panel.style.maxWidth = '';
         removeMobileSheet();
 
         var scrollY = parseInt(document.body.dataset.scrollY || '0');
