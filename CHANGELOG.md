@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-07-19
+
+### Added
+
+- **Evaluation History grouped by task:**
+  - New `EvaluationHistoryGroupDto` record with `TaskId`, `AvgScore`, `TotalImpact`, `ApprovedSkills`, `TotalSkills`, `Criticality`, `Status` fields.
+  - New `GetWorkerHistoryGroupQuery` + handler: GROUP BY query aggregating evaluations per task with criticality from latest evaluation and task status.
+  - `WorkerHistoryViewModel` extended with `GroupedEvaluations` list.
+  - `WorkerController.Detail` fetches grouped evaluations with encrypted task IDs.
+- **Evaluation detail popup / bottom sheet:**
+  - New `EvaluationDetailViewModel` record with task title, project, criticality, status, date, summary stats, and per-skill evaluation data.
+  - New `WorkerController.EvaluationDetailPopup` action fetching task status and computing summary stats.
+  - New `_EvaluationDetailPopup.cshtml` partial: header with task title, priority/status badges, date/project, stat boxes (Total Impact, Improved, Decreased, Unchanged), and skills table with bar visualization.
+  - Card click opens popup (desktop) or bottom sheet (mobile) via `openEvaluationDetailPopup()` in `kanban.js`.
+- **Evaluation history search and project filter:**
+  - Search input filters evaluations by task title.
+  - Project select dropdown filters evaluations by project name.
+  - Both filters work simultaneously on both mobile and desktop.
+- **View toggle (card/table) for desktop evaluation history:**
+  - Toggle buttons for card view and table view, only visible at `xl:` (1280px+).
+  - Below 1280px forced to card view via `matchMedia` listener.
+  - View mode persisted in `localStorage`.
+- **Worker skills responsive grid:**
+  - Worker detail skills section uses 2-column grid by default, 3 columns at 1600px+ (`min-[1600px]:grid-cols-3`).
+
+### Changed
+
+- **Evaluation history card layout:**
+  - Cards show Priority, Status badges followed by Date on the same line.
+  - Project line below with colored dot indicator.
+  - Stats grid: Avg Score, Impact, Skills.
+  - All non-title card text now 14px (`text-sm`).
+  - Card title remains 16px (`text-base`).
+- **Evaluation history cards responsive columns:**
+  - 1 column below 750px, 2 columns 750px–1279px, 3 columns 1280px+.
+- **Evaluation history mobile layout:**
+  - Mobile-only search bar + project select: both share equal width 50/50 (`flex-1`).
+  - Desktop search bar + project select: same joined visual treatment.
+  - Select elements now have full border (using `-ml-px` instead of `border-l-0`) so blue focus border is visible on all sides.
+- **Evaluation detail popup responsive:**
+  - On small screens (<750px), Date and Project stack vertically; on sm+ they sit side by side.
+  - Popup max-width 1000px on desktop, full width on mobile via bottom sheet.
+  - Skills table scrolls horizontally on small screens.
+- **Section visibility handling:**
+  - Replaced `hidden sm:block` wrapper with `max-sm:hidden` on individual elements to fix `pagination.js` `filteredItems()` ancestor `hidden` class check.
+
+### Fixed
+
+- **Pagination not re-rendering after search:** `pagination.js` `filteredItems()` walks ancestors checking `classList.contains('hidden')` — a literal `hidden` class in DOM filtered out all items even when CSS `sm:block` made them visible. Fixed by using `max-sm:hidden` (CSS-only visibility).
+- **Select focus border not visible:** Selects previously used `border-l-0` to join with search input, causing the left border to be invisible on focus. Fixed with `-ml-px` overlap and `focus-visible:border-blue-500`.
+- **`GetEnumOrNull<TEnum>` added to `DataReaderMapper`:** handles nullable enum columns (task status) from PostgreSQL.
+
 ## [0.11.0] - 2026-07-18
 
 ### Added
