@@ -50,7 +50,7 @@
 
 | # | Tarea | Archivo / Ruta |
 |---|-------|----------------|
-| 2.1 | Enum `ProjectTaskStatus` (Queued, InProgress, InReview, Finish) | `Domain/Enums/ProjectTaskStatus.cs` |
+| 2.1 | Enum `ProjectTaskStatus` (Queued, InProgress, InReview, Finish, Archived) | `Domain/Enums/ProjectTaskStatus.cs` |
 | 2.2 | Enum `Criticality` (low, medium, high, critical) | `Domain/Enums/Criticality.cs` |
 | 2.3 | Enum `PerformanceRating` (Poor, Average, Good, Excellent) con método `ToBasePoints()` → -0.5, 0.0, +0.2, +0.5 | `Domain/Enums/PerformanceRating.cs` |
 | 2.4 | Value Object `SkillVector` con: constructor desde `float[]`, clamping `[0.0, 10.0]`, método `ApplyImpact(basePoints, criticalityMultiplier)`, indexador `[position]` | `Domain/ValueObjects/SkillVector.cs` |
@@ -68,7 +68,7 @@
 | 2.16 | Command `EvaluateTaskCommand` (TaskId, Evaluations: [{SkillPosition, Rating}]) | `Application/Commands/EvaluateTaskCommand.cs` |
 | 2.17 | Command `ChangeTaskStatusCommand` (TaskId, NewStatus) | `Application/Commands/ChangeTaskStatusCommand.cs` |
 | 2.18 | Command `UpdateProjectCommand` (ProjectId, Name, DescriptionMd) | `Application/Commands/UpdateProjectCommand.cs` |
-| 2.19 | Command `UpdateTaskCommand` (TaskId, Title, Description, Criticality, RequiredSkillsVector) — solo válido si status es Queued | `Application/Commands/UpdateTaskCommand.cs` |
+| 2.19 | Command `UpdateTaskCommand` (TaskId, Title, Description, Criticality, RequiredSkillsVector) — válido si status es Queued o InProgress | `Application/Commands/UpdateTaskCommand.cs` |
 | 2.20 | Command `UpdateWorkerCommand` (WorkerId, Name, SkillsVector) — SkillsVector opcional, si se envía se actualiza | `Application/Commands/UpdateWorkerCommand.cs` |
 | 2.21 | Command `UpdateSkillCatalogueCommand` (SkillId, Name) — vector_position inmutable | `Application/Commands/UpdateSkillCatalogueCommand.cs` |
 | 2.22 | Query `GetDashboardTasksQuery` (ProjectId) → List<TaskDto> | `Application/Queries/GetDashboardTasksQuery.cs` |
@@ -98,7 +98,7 @@
 | 3.7 | Handler: `ChangeTaskStatusCommandHandler` (UPDATE status con validación de reglas de transición) | `Infrastructure/Handlers/Commands/ChangeTaskStatusCommandHandler.cs` |
 | 3.8 | Handler: `EvaluateTaskCommandHandler` (INSERT evaluations + UPDATE workers.skills_vector con clamping) | `Infrastructure/Handlers/Commands/EvaluateTaskCommandHandler.cs` |
 | 3.9 | Handler: `UpdateProjectCommandHandler` (UPDATE projects) | `Infrastructure/Handlers/Commands/UpdateProjectCommandHandler.cs` |
-| 3.10 | Handler: `UpdateTaskCommandHandler` (UPDATE tasks — solo si status = Queued) | `Infrastructure/Handlers/Commands/UpdateTaskCommandHandler.cs` |
+| 3.10 | Handler: `UpdateTaskCommandHandler` (UPDATE tasks — válido si status = Queued o InProgress) | `Infrastructure/Handlers/Commands/UpdateTaskCommandHandler.cs` |
 | 3.11 | Handler: `UpdateWorkerCommandHandler` (UPDATE workers) | `Infrastructure/Handlers/Commands/UpdateWorkerCommandHandler.cs` |
 | 3.12 | Handler: `UpdateSkillCatalogueCommandHandler` (UPDATE skills_catalogue — solo name) | `Infrastructure/Handlers/Commands/UpdateSkillCatalogueCommandHandler.cs` |
 | 3.13 | Handler: `GetDashboardTasksQueryHandler` (SELECT tasks con JOIN project_workers) | `Infrastructure/Handlers/Queries/GetDashboardTasksQueryHandler.cs` |
@@ -111,7 +111,7 @@
 | 3.20 | Integration Test: Asignar worker + consultar recomendados (validar `<#>` score) | `tests/Integration/WorkerAssignmentTests.cs` |
 | 3.21 | Integration Test: Evaluar tarea + verificar clamping en BD | `tests/Integration/PerformanceEvaluationTests.cs` |
 | 3.22 | Integration Test: Transición estados Kanban (Queued→InProgress→Finish) | `tests/Integration/TaskStatusTransitionTests.cs` |
-| 3.23 | Integration Test: Editar tarea solo cuando status es Queued | `tests/Integration/TaskEditRestrictionTests.cs` |
+| 3.23 | Integration Test: Editar tarea cuando status es Queued o InProgress | `tests/Integration/TaskEditRestrictionTests.cs` |
 | 3.24 | ADR 004: documentar implementación ADO.NET + pgvector | `docs/004-decision-adonet-pgvector-implementation.md` |
 | 3.25 | Actualizar CHANGELOG.md con v0.2.0 | `CHANGELOG.md` |
 
@@ -213,15 +213,15 @@
 
 ### Task
 
-| Campo | Queued | In Progress | In Review | Finish |
-|-------|--------|-------------|-----------|--------|
-| title, description | ✅ editable | ❌ | ❌ | ❌ inmutable |
-| criticality | ✅ editable | ❌ | ❌ | ❌ inmutable |
-| required_skills_vector | ✅ editable | ❌ | ❌ | ❌ inmutable |
-| assigned_worker | ✅ editable | ❌ | ❌ | ❌ inmutable |
-| status | ✅ any transition | ✅ solo → In Review o → Finish | ✅ solo → Queued o → In Progress o → Finish | ❌ terminal |
+| Campo | Queued | In Progress | In Review | Finish | Archived |
+|-------|--------|-------------|-----------|--------|----------|
+| title, description | ✅ editable | ✅ editable | ❌ | ❌ inmutable | ❌ inmutable |
+| criticality | ✅ editable | ✅ editable | ❌ | ❌ inmutable | ❌ inmutable |
+| required_skills_vector | ✅ editable | ✅ editable | ❌ | ❌ inmutable | ❌ inmutable |
+| assigned_worker | ✅ editable | ✅ editable | ✅ editable | ❌ inmutable | ❌ inmutable |
+| status | ✅ any transition | ✅ any transition | ✅ any transition | ✅ any transition + Archive | ✅ only → Finish |
 
-**Regla clave:** Para editar una tarea en *In Progress* o *In Review*, debe revertirse a *Queued*. Una tarea *Finish* es **inmutable** porque ya tiene evaluaciones asociadas.
+**Regla clave:** Las transiciones entre los 4 estados activos (Queued, InProgress, InReview, Finish) son totalmente libres. La edición de campos (título, descripción, criticidad, skills, asignación) está permitida en **Queued** e **InProgress**. Una tarea **Finish** solo puede archivarse. Una tarea **Archived** solo puede restaurarse a Finish. Una tarea Finish con todos los workers evaluados (AllWorkersEvaluated) oculta los controles de cambio de estado.
 
 ---
 
