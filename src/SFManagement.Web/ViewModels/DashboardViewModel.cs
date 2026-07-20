@@ -95,4 +95,5 @@ public record EvaluationDetailViewModel(
     IReadOnlyList<EvaluationHistoryDto> Skills)
 {
     public string TaskIdEncrypted { get; init; } = "";
+    public bool IsManualAdjustment { get; init; }
 }

@@ -155,26 +155,43 @@ public class WorkerController : Controller
     [HttpGet]
     public async Task<IActionResult> EvaluationDetailPopup(
         [FromQuery] string workerId,
-        [FromQuery] string taskId,
+        [FromQuery] string? taskId,
         [FromServices] IGetWorkerHistoryQueryHandler historyHandler,
         [FromServices] IGetTaskByIdQueryHandler taskHandler,
         [FromServices] IIdEncryptionService enc)
     {
         if (!enc.TryDecrypt(workerId, out var wid)) return NotFound();
-        if (!enc.TryDecrypt(taskId, out var tid)) return NotFound();
 
-        var task = await taskHandler.HandleAsync(new GetTaskByIdQuery(tid));
         var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(wid));
-        var taskEvals = evaluations.Where(e => e.TaskId == tid).ToList();
+
+        bool isManualAdjustment = string.IsNullOrEmpty(taskId);
+        List<EvaluationHistoryDto> taskEvals;
+
+        if (isManualAdjustment)
+        {
+            taskEvals = evaluations.Where(e => e.TaskId == null).ToList();
+        }
+        else
+        {
+            if (!enc.TryDecrypt(taskId!, out var tid)) return NotFound();
+            taskEvals = evaluations.Where(e => e.TaskId == tid).ToList();
+        }
+
         if (taskEvals.Count == 0) return NotFound();
 
         var first = taskEvals[0];
+        var taskStatus = isManualAdjustment
+            ? SFManagement.Domain.Enums.ProjectTaskStatus.Finish
+            : (taskEvals[0].TaskId.HasValue
+                ? (await taskHandler.HandleAsync(new GetTaskByIdQuery(taskEvals[0].TaskId!.Value)))?.Status ?? SFManagement.Domain.Enums.ProjectTaskStatus.Finish
+                : SFManagement.Domain.Enums.ProjectTaskStatus.Finish);
+
         var vm = new EvaluationDetailViewModel(
             first.TaskTitle,
-            first.ProjectName ?? "—",
+            isManualAdjustment ? "Manual Adjustment" : (first.ProjectName ?? "—"),
             first.CreatedAt,
             first.Criticality,
-            task?.Status ?? SFManagement.Domain.Enums.ProjectTaskStatus.Finish,
+            taskStatus,
             taskEvals.Sum(e => e.Impact),
             taskEvals.Count(e => e.Impact > 0),
             taskEvals.Count(e => e.Impact < 0),
@@ -182,7 +199,8 @@ public class WorkerController : Controller
             taskEvals.Count,
             taskEvals)
         {
-            TaskIdEncrypted = taskId
+            TaskIdEncrypted = taskId ?? "",
+            IsManualAdjustment = isManualAdjustment
         };
 
         return PartialView("~/Views/Shared/_EvaluationDetailPopup.cshtml", vm);

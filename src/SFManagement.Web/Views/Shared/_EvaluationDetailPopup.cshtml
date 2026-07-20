@@ -74,7 +74,10 @@
         <thead>
             <tr class="text-left border-b border-gray-200 dark:border-gray-700">
                 <th class="pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Skill</th>
-                <th class="pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Evaluation Score</th>
+                @if (!Model.IsManualAdjustment)
+                {
+                    <th class="pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Evaluation Score</th>
+                }
                 <th class="pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">Previous</th>
                 <th class="pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">New</th>
                 <th class="pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">Impact</th>
@@ -86,15 +89,18 @@
                 var pct = Math.Clamp(skill.Rating / 10.0 * 100, 0, 100);
                 <tr class="border-b border-gray-100 dark:border-gray-700/50 last:border-b-0">
                     <td class="py-2.5 pr-3 text-gray-700 dark:text-gray-300 font-medium whitespace-nowrap">@skill.SkillName</td>
-                    <td class="py-2.5 pr-3">
-                        <div class="flex items-center gap-2">
-                            <div class="flex-1 flex h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                                <div class="h-full bg-brand-dark rounded-l-full" style="width:@pct%"></div>
-                                <div class="h-full bg-gray-200 dark:bg-gray-700 flex-1"></div>
+                    @if (!Model.IsManualAdjustment)
+                    {
+                        <td class="py-2.5 pr-3">
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1 flex h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                    <div class="h-full bg-brand-dark rounded-l-full" style="width:@pct%"></div>
+                                    <div class="h-full bg-gray-200 dark:bg-gray-700 flex-1"></div>
+                                </div>
+                                <span class="font-mono text-xs tabular-nums text-gray-700 dark:text-gray-300 w-10 text-right">@skill.Rating.ToString("0.00")</span>
                             </div>
-                            <span class="font-mono text-xs tabular-nums text-gray-700 dark:text-gray-300 w-10 text-right">@skill.Rating.ToString("0.00")</span>
-                        </div>
-                    </td>
+                        </td>
+                    }
                     <td class="py-2.5 px-2 font-mono text-xs tabular-nums text-center text-gray-500 dark:text-gray-400">@skill.PreviousLevel.ToString("0.00")</td>
                     <td class="py-2.5 px-2 font-mono text-xs tabular-nums text-center text-gray-700 dark:text-gray-300 font-medium">@skill.NewLevel.ToString("0.00")</td>
                     <td class="py-2.5 pl-2 font-mono text-xs tabular-nums text-center @(skill.Impact > 0 ? "text-green-600" : skill.Impact < 0 ? "text-red-600" : "text-gray-400")">

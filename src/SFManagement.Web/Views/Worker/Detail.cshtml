@@ -383,9 +383,10 @@ else
 @section Scripts {
 <script>
 function openEvaluationDetailPopup(taskIdEncrypted) {
-    if (!taskIdEncrypted) return;
     var workerId = document.querySelector('[data-worker-id]').dataset.workerId;
-    fetch('/Worker/EvaluationDetailPopup?workerId=' + encodeURIComponent(workerId) + '&taskId=' + encodeURIComponent(taskIdEncrypted))
+    var url = '/Worker/EvaluationDetailPopup?workerId=' + encodeURIComponent(workerId);
+    if (taskIdEncrypted) url += '&taskId=' + encodeURIComponent(taskIdEncrypted);
+    fetch(url)
         .then(function(r) { return r.ok ? r.text() : Promise.reject(r); })
         .then(function(html) { openModal(html, false, '1000px'); })
         .catch(function() { });
