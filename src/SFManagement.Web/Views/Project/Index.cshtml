@@ -276,13 +276,13 @@ else
         searchInput.addEventListener('input', function () {
             applySearch();
             // Reset to page 1 on new search
-            window.paginationRefresh('projectCards');
+            window.paginationRefresh('projectGridWrapper');
         });
         clearBtn.addEventListener('click', function () {
             searchInput.value = '';
             localStorage.setItem('projectSearchQuery', '');
             applySearch();
-            window.paginationRefresh('projectCards');
+            window.paginationRefresh('projectGridWrapper');
             searchInput.focus();
         });
     }
