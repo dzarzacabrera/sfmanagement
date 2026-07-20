@@ -9,4 +9,11 @@ public class HomeController : Controller
         ViewBag.PageTitle = "Home";
         return View();
     }
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        ViewBag.PageTitle = "Error";
+        return View();
+    }
 }

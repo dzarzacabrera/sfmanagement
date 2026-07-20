@@ -2,6 +2,7 @@ using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
 using SFManagement.Application.DTOs;
 using SFManagement.Application.Queries;
+using Serilog;
 using SFManagement.Web.ViewModels;
 using SFManagement.Domain.Enums;
 using SFManagement.Infrastructure.Data;
@@ -364,6 +365,7 @@ public class DashboardController : Controller
         }
         catch (InvalidOperationException ex)
         {
+            Log.Warning(ex, "Failed to finalize project");
             return Json(new { success = false, message = ex.Message });
         }
     }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
 using SFManagement.Web.Controllers;
+using Serilog;
 
 namespace SFManagement.Web.Controllers;
 
@@ -30,6 +31,7 @@ public class SetupController : Controller
         }
         catch (Exception ex)
         {
+            Log.Warning(ex, "Failed to clear database");
             return Json(new { success = false, message = ex.Message });
         }
     }
@@ -46,6 +48,7 @@ public class SetupController : Controller
         }
         catch (Exception ex)
         {
+            Log.Warning(ex, "Failed to import seed data");
             return Json(new { success = false, message = ex.Message });
         }
     }

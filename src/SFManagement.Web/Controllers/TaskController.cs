@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
 using SFManagement.Application.DTOs;
@@ -217,6 +218,7 @@ public class TaskController : Controller
         }
         catch (InvalidOperationException ex)
         {
+            Log.Warning(ex, "Failed to edit task");
             TempData["ToastError"] = ex.Message;
             return RedirectToAction("Index");
         }

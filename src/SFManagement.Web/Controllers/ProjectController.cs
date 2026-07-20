@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using SFManagement.Application.Abstractions;
 using SFManagement.Application.Commands;
 using SFManagement.Application.DTOs;
@@ -253,6 +254,7 @@ public class ProjectController : Controller
         }
         catch (InvalidOperationException ex)
         {
+            Log.Warning(ex, "Failed to finalize project");
             return Json(new { success = false, message = ex.Message });
         }
     }

@@ -3,6 +3,14 @@ using SFManagement.Infrastructure;
 using SFManagement.Infrastructure.Data;
 using SFManagement.Infrastructure.Security;
 using SFManagement.Web.Health;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true, reloadOnChange: false)
+        .Build())
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -10,6 +18,8 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     ContentRootPath = Directory.GetCurrentDirectory(),
     WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")
 });
+
+builder.Host.UseSerilog();
 
 var rawConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
 string connectionString;
@@ -43,6 +53,8 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
+app.UseSerilogRequestLogging();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -59,4 +71,11 @@ app.MapControllerRoute(
 
 app.MapHealthChecks("/health");
 
-app.Run();
+try
+{
+    app.Run();
+}
+finally
+{
+    Log.CloseAndFlush();
+}
