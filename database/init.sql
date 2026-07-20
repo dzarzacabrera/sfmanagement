@@ -330,6 +330,15 @@ VALUES
 -- Maria (worker 5): MySQL (pos 10), Good → impact +0.4
 (16, 5, 10, 7.5, 'high', 0.25, 0.4, 8.0, 8.4);
 
+-- 3.8 Manual skill edit ("Edit by User") for David Zarza (worker 7)
+-- On 2026-07-19 the manager manually lowered his JavaScript (pos 0) from 9.5 to 9.0.
+-- No task is linked (task_id IS NULL) and criticality is 'low', so it surfaces
+-- in the worker history as a "User Edit" / manual adjustment.
+INSERT INTO performance_evaluations
+    (task_id, worker_id, skill_position, rating, criticality, base_points, impact, previous_level, new_level, created_at)
+VALUES
+    (NULL, 7, 0, 9.0, 'low', -0.5, -0.5, 9.5, 9.0, '2026-07-19 10:00:00+00');
+
 -- Reset sequences to avoid conflicts with identity columns
 ALTER TABLE skills_catalogue ALTER COLUMN id RESTART WITH 23;
 ALTER TABLE projects ALTER COLUMN id RESTART WITH 4;

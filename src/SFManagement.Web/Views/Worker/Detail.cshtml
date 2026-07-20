@@ -47,7 +47,14 @@
 
 @if (workerSkills.Count > 0)
 {
-    <h2 class="text-lg font-semibold mb-3 dark:text-white">Skills</h2>
+    <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold dark:text-white">Skills</h2>
+        <button onclick="openSkillsEvolutionPopup()"
+                class="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors cursor-pointer whitespace-nowrap">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 17h1m0 0a2 2 0 104 0m-4 0a2 2 0 114 0m5-4h1m0 0a2 2 0 104 0m-4 0a2 2 0 114 0M9 7h1m0 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+            Skills Evolution
+        </button>
+    </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 min-[1600px]:grid-cols-3 gap-x-6 gap-y-2 mb-6">
         @foreach (var skill in workerSkills)
         {
@@ -382,6 +389,219 @@ else
 
 @section Scripts {
 <script>
+function openSkillsEvolutionPopup() {
+    var workerId = document.querySelector('[data-worker-id]').dataset.workerId;
+    fetch('/Worker/SkillsEvolutionPopup?workerId=' + encodeURIComponent(workerId))
+        .then(function(r) { return r.ok ? r.text() : Promise.reject(r); })
+        .then(function(html) {
+            openModal(html, false, '1000px');
+            setTimeout(initSkillsEvolutionChart, 50);
+        })
+        .catch(function() { });
+}
+
+function initSkillsEvolutionChart() {
+    var ta = document.getElementById('evoRawData');
+    if (!ta) return;
+    var raw;
+    try { raw = JSON.parse(ta.value); } catch (e) { return; }
+    if (!raw || raw.length === 0) return;
+
+    var PALETTE = [
+        '#1d4ed8','#dc2626','#059669','#d97706','#7c3aed',
+        '#c2410c','#0e7490','#be185d','#4338ca','#16a34a',
+        '#b45309','#6d28d9','#e11d48','#0369a1','#4d7c0f',
+        '#a21caf','#ea4335','#1565c0','#2e7d32','#f59e0b'
+    ];
+
+    var allData = raw.map(function (e) {
+        return { skillName: e.skillName, skillPosition: e.skillPosition, newLevel: e.newLevel, createdAt: e.createdAt };
+    });
+
+    var dateFrom = document.getElementById('evoDateFrom');
+    var dateTo = document.getElementById('evoDateTo');
+    var chartCanvas = document.getElementById('evoChart');
+    var legendContainer = document.getElementById('evoLegend');
+    var chart;
+
+    var skillMeta = {};
+    allData.forEach(function (d) {
+        if (!skillMeta[d.skillPosition]) {
+            skillMeta[d.skillPosition] = { name: d.skillName, color: PALETTE[d.skillPosition % PALETTE.length] };
+        }
+    });
+
+    function fmtDate(iso) {
+        var dt = new Date(iso);
+        return dt.getFullYear() + '-' +
+            String(dt.getMonth() + 1).padStart(2, '0') + '-' +
+            String(dt.getDate()).padStart(2, '0');
+    }
+
+    var minDate = allData.reduce(function (m, d) { return d.createdAt < m ? d.createdAt : m; }, allData[0].createdAt);
+    var maxDate = allData.reduce(function (m, d) { return d.createdAt > m ? d.createdAt : m; }, allData[0].createdAt);
+
+    dateFrom.value = fmtDate(minDate);
+    dateTo.value = fmtDate(maxDate);
+
+    function buildDatasets(fromStr, toStr) {
+        var from = fromStr ? new Date(fromStr + 'T00:00:00') : new Date(minDate);
+        var to = toStr ? new Date(toStr + 'T23:59:59') : new Date(maxDate);
+
+        var grouped = {};
+        allData.forEach(function (d) {
+            var dt = new Date(d.createdAt);
+            if (dt < from || dt > to) return;
+            if (!grouped[d.skillPosition]) grouped[d.skillPosition] = [];
+            grouped[d.skillPosition].push({ x: fmtDate(d.createdAt), y: d.newLevel });
+        });
+
+        Object.keys(grouped).forEach(function (pos) {
+            grouped[pos].sort(function (a, b) { return a.x < b.x ? -1 : a.x > b.x ? 1 : 0; });
+        });
+
+        var datasets = [];
+        Object.keys(grouped).sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (pos) {
+            var meta = skillMeta[pos];
+            datasets.push({
+                label: meta.name,
+                data: grouped[pos],
+                borderColor: meta.color,
+                backgroundColor: meta.color + '22',
+                borderWidth: 3,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: meta.color,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointHoverBackgroundColor: meta.color,
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 3,
+                tension: 0.3,
+                fill: false,
+                skillPosition: Number(pos)
+            });
+        });
+
+        return datasets;
+    }
+
+    function renderChart() {
+        var datasets = buildDatasets(dateFrom.value, dateTo.value);
+        if (chart) { chart.destroy(); chart = null; }
+
+        chart = new Chart(chartCanvas, {
+            type: 'line',
+            data: { datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 400 },
+                interaction: { mode: 'nearest', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function (items) { return items[0].raw.x; },
+                            label: function (ctx) { return ctx.dataset.label + ': ' + ctx.raw.y.toFixed(2); }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'category',
+                        offset: true,
+                        grid: { display: false },
+                        ticks: { maxRotation: 45, font: { size: 11 }, color: '#9ca3af' }
+                    },
+                    y: {
+                        min: 0,
+                        max: 11,
+                        afterBuildTicks: function (axis) {
+                            axis.ticks = [0, 2, 4, 6, 8, 10].map(function (v) { return { value: v }; });
+                        },
+                        ticks: {
+                            stepSize: 2,
+                            font: { size: 11 },
+                            color: '#9ca3af',
+                            callback: function (value) { return value; }
+                        },
+                        grid: { color: '#e5e7eb', drawBorder: false }
+                    }
+                }
+            }
+        });
+
+        renderLegend(datasets);
+    }
+
+    function renderLegend(datasets) {
+        legendContainer.innerHTML = '';
+        datasets.forEach(function (ds, idx) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.dataset.idx = idx;
+            btn.className = 'evo-legend-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer';
+            btn.style.borderColor = ds.borderColor;
+            btn.style.backgroundColor = ds.borderColor + '18';
+            btn.style.color = ds.borderColor;
+            btn.innerHTML = '<span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:' + ds.borderColor + '"></span>' + ds.label;
+
+            btn.addEventListener('click', function () {
+                var i = Number(this.dataset.idx);
+                var meta = chart.getDatasetMeta(i);
+                meta.hidden = !meta.hidden;
+                if (meta.hidden) {
+                    this.style.backgroundColor = '#f3f4f6';
+                    this.style.borderColor = '#d1d5db';
+                    this.style.color = '#9ca3af';
+                    this.querySelector('span').style.background = '#d1d5db';
+                } else {
+                    this.style.backgroundColor = ds.borderColor + '18';
+                    this.style.borderColor = ds.borderColor;
+                    this.style.color = ds.borderColor;
+                    this.querySelector('span').style.background = ds.borderColor;
+                }
+                chart.update();
+            });
+
+            legendContainer.appendChild(btn);
+        });
+    }
+
+    document.getElementById('evoApplyFilter').addEventListener('click', function () {
+        document.querySelectorAll('.evo-quick-btn').forEach(function (b) {
+            b.classList.remove('bg-brand', 'text-white', 'border-brand');
+            b.classList.add('border-gray-300', 'text-gray-700', 'dark:border-gray-600', 'dark:text-gray-300', 'hover:bg-gray-50', 'dark:hover:bg-gray-700');
+            b.style.backgroundColor = '';
+        });
+        renderChart();
+    });
+
+    document.querySelectorAll('.evo-quick-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.evo-quick-btn').forEach(function (b) {
+                b.classList.remove('bg-brand', 'text-white', 'border-brand');
+                b.classList.add('border-gray-300', 'text-gray-700', 'dark:border-gray-600', 'dark:text-gray-300', 'hover:bg-gray-50', 'dark:hover:bg-gray-700');
+                b.style.backgroundColor = '';
+            });
+            this.classList.add('bg-brand', 'text-white', 'border-brand');
+            this.classList.remove('border-gray-300', 'text-gray-700', 'dark:border-gray-600', 'dark:text-gray-300', 'hover:bg-gray-50', 'dark:hover:bg-gray-700');
+            this.style.backgroundColor = '';
+
+            var days = Number(this.dataset.range);
+            var to = new Date();
+            var from = new Date();
+            from.setDate(from.getDate() - days);
+            dateFrom.value = fmtDate(from.toISOString());
+            dateTo.value = fmtDate(to.toISOString());
+            renderChart();
+        });
+    });
+
+    renderChart();
+}
+
 function openEvaluationDetailPopup(taskIdEncrypted) {
     var workerId = document.querySelector('[data-worker-id]').dataset.workerId;
     var url = '/Worker/EvaluationDetailPopup?workerId=' + encodeURIComponent(workerId);

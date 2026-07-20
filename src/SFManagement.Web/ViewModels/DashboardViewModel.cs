@@ -97,3 +97,9 @@ public record EvaluationDetailViewModel(
     public string TaskIdEncrypted { get; init; } = "";
     public bool IsManualAdjustment { get; init; }
 }
+
+public record SkillsEvolutionViewModel
+{
+    public string WorkerName { get; init; } = "";
+    public string EvaluationsJson { get; init; } = "[]";
+}

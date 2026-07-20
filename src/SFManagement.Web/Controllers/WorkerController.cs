@@ -207,6 +207,29 @@ public class WorkerController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> SkillsEvolutionPopup(
+        [FromQuery] string workerId,
+        [FromServices] IGetAllWorkersQueryHandler allWorkersHandler,
+        [FromServices] IGetWorkerHistoryQueryHandler historyHandler,
+        [FromServices] IIdEncryptionService enc)
+    {
+        if (!enc.TryDecrypt(workerId, out var wid)) return NotFound();
+        var workers = await allWorkersHandler.HandleAsync(new GetAllWorkersQuery());
+        var worker = workers.FirstOrDefault(w => w.Id == wid);
+        if (worker is null) return NotFound();
+
+        var evaluations = await historyHandler.HandleAsync(new GetWorkerHistoryQuery(wid));
+
+        var vm = new SkillsEvolutionViewModel
+        {
+            WorkerName = worker.Name,
+            EvaluationsJson = JsonSerializer.Serialize(evaluations, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+        };
+
+        return PartialView("~/Views/Shared/_SkillsEvolutionPopup.cshtml", vm);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Edit(
         [FromQuery] string workerId,
         [FromServices] IGetAllWorkersQueryHandler allWorkersHandler,
