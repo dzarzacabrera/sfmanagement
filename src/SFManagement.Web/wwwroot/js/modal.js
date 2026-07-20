@@ -133,7 +133,8 @@ function openModal(html, small, maxWidth) {
     });
 
     setTimeout(function () {
-        var firstInput = content.querySelector('input:not([type="hidden"]), select, textarea, button:not([aria-label="Close"]):not(.modal-close-btn)');
+        var firstInput = content.querySelector('input:not([type="hidden"]), select, textarea, button:not([aria-label="Close"]):not(.modal-close-btn), [tabindex="0"]');
+        if (!firstInput) firstInput = content.querySelector('[tabindex]');
         if (firstInput) firstInput.focus();
     }, 100);
 }

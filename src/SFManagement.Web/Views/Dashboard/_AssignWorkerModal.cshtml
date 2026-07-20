@@ -37,7 +37,7 @@
         <div class="flex flex-col flex-1 min-h-0 overflow-y-auto px-6 pb-6">
         @if (!string.IsNullOrEmpty(Model.Description))
         {
-            <p class="text-base sm:text-sm text-gray-500 mb-3 sm:line-clamp-4 line-clamp-3 dark:text-gray-400 leading-relaxed shrink-0">@Model.Description</p>
+            <p tabindex="-1" class="text-base sm:text-sm text-gray-500 mb-3 sm:line-clamp-4 line-clamp-3 dark:text-gray-400 leading-relaxed shrink-0 outline-none">@Model.Description</p>
         }
 
         @if (Model.Skills?.Count > 0)
@@ -73,7 +73,9 @@
                 <div class="assign-card worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 cursor-pointer transition-all duration-150 hover:shadow-md dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 relative overflow-visible @selectedClass"
                      style="border-left-color:@borderColor;border-left-width:4px;@selectedStyle"
                      data-worker-id="@worker.IdEncrypted"
-                     onclick="toggleWorkerSelect(this)">
+                     tabindex="0" role="button"
+                     onclick="toggleWorkerSelect(this)"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWorkerSelect(this);}">
                     <span class="absolute text-xs font-bold px-2 py-0.5 rounded" style="background-color:@labelBg;color:white;top:-8px;right:10px;border-radius:6px;z-index:1;">@label</span>
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-center gap-3 min-w-0">
@@ -169,7 +171,9 @@
                 <div class="assign-card worker-card bg-white rounded-xl border border-gray-200 shadow-sm p-4 cursor-pointer transition-all duration-150 hover:shadow-md dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 @selectedClass"
                      data-worker-id="@worker.IdEncrypted"
                      style="@selectedStyle"
-                     onclick="toggleWorkerSelect(this)">
+                     tabindex="0" role="button"
+                     onclick="toggleWorkerSelect(this)"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWorkerSelect(this);}">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-center gap-3 min-w-0">
                             <span class="rank-num shrink-0 w-7 h-7 rounded-full text-white text-sm font-bold flex items-center justify-center @(index == 1 ? "bg-brand" : "") @rankNumHidden" @(index > 1 ? "style=background-color:rgba(33,102,143,0.25);color:#21668f" : "")>@index</span>
