@@ -47,13 +47,17 @@
 
 @if (workerSkills.Count > 0)
 {
+    var hasEvaluations = Model.GroupedEvaluations != null && Model.GroupedEvaluations.Count > 0;
     <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-semibold dark:text-white">Skills</h2>
+        @if (hasEvaluations)
+        {
         <button onclick="openSkillsEvolutionPopup()"
                 class="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors cursor-pointer whitespace-nowrap">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 17h1m0 0a2 2 0 104 0m-4 0a2 2 0 114 0m5-4h1m0 0a2 2 0 104 0m-4 0a2 2 0 114 0M9 7h1m0 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
             Skills Evolution
         </button>
+        }
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 min-[1600px]:grid-cols-3 gap-x-6 gap-y-2 mb-6">
         @foreach (var skill in workerSkills)
@@ -516,7 +520,7 @@ function initSkillsEvolutionChart() {
                     },
                     y: {
                         min: 0,
-                        max: 11,
+                        max: 10,
                         afterBuildTicks: function (axis) {
                             axis.ticks = [0, 2, 4, 6, 8, 10].map(function (v) { return { value: v }; });
                         },
@@ -526,7 +530,12 @@ function initSkillsEvolutionChart() {
                             color: '#9ca3af',
                             callback: function (value) { return value; }
                         },
-                        grid: { color: '#e5e7eb', drawBorder: false }
+                        grid: {
+                            color: function (ctx) {
+                                return (ctx.tick.value % 2 === 1) ? '#e5e7eb' : 'transparent';
+                            },
+                            drawBorder: false
+                        }
                     }
                 }
             }

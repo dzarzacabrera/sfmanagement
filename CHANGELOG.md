@@ -5,11 +5,90 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-07-20
+
+### Added
+
+- **Full deterministic workforce matching engine:** Vector-based skill matching using PostgreSQL pgvector with cosine similarity (Product Scalar operator `<#>`). No external AI/LLM dependency.
+- **Kanban Dashboard:** 4-column board (Queued → In Progress → In Review → Finish) with drag-and-drop, async status changes, and mobile bottom sheet for status transitions.
+- **Intelligent worker recommendation system:** Three badge types — Most Efficient (≥95% match), Grow Up (75–95%), Fastest to Finish (100%+ with least excess) — with colour-coded compatibility scores and skill-level comparison pills.
+- **Evaluation & XP engine:** Per-skill performance evaluation with criticality multipliers (Low 0.5×, Medium 1.0×, High 1.5×, Critical 2.0×), mathematical clamping [0.0–10.0], 0.05 rounding, and real-time recalculation preview.
+- **Task archive/restore system:** Archived state for completed tasks with Finish ↔ Archived transitions; Finish + AllWorkersEvaluated hides status controls.
+- **Skill Catalogue management:** 22 predefined transversal competencies with immutable vector positions, create/edit/toggle active, and stored procedure `sp_add_skill` for safe insertion.
+- **Project lifecycle management:** Create, edit, finalise projects; worker allocation; project-scoped task and team views.
+- **Worker profile management:** CRUD with vector-based skill profiles, manual skill editing via Skill Pills Selector (0–10 scale), and evaluation history grouped by task.
+- **Task CRUD:** Create, edit (Queued + InProgress only), detail view with assigned workers as Team-style cards, skill requirements with levels.
+- **AES-GCM ID encryption:** All IDs in URLs and forms encrypted (12-byte nonce, 16-byte tag, Base64URL no padding) via `IdEncryptionService`.
+- **Setup / Demo mode:** One-click database clear (TRUNCATE) and seed data import (22 skills, 3 projects, 13 workers, 17+ tasks) from `/Setup` page.
+- **Dark mode:** Class-based theme toggle with `prefers-color-scheme` detection and localStorage persistence.
+- **Responsive Mobile-First UI:** Collapsible sidebar (< 1024px), bottom sheets for modals on mobile, auto-switch from list to card view (< 1199px), task card quick-action arrows on desktop, status bottom sheet on mobile.
+- **Accessibility (WCAG 2.1 AA):** Strategic `tabindex` on interactive `<div>` elements, `focus-visible` ring, focus trapping in modals, ARIA attributes, keyboard navigation support.
+- **Smart tooltips:** `data-tooltip` attribute with truncation detection (`scrollWidth > clientWidth`), auto-positioning above/below, 640px max-width.
+- **Toast notification system:** Success/error/info/warning toasts with 3s auto-dismiss and slide animations.
+- **Modal system:** Focus trap, CSS scale+opacity animation, bottom sheet fallback on mobile (< 640px), drag-to-dismiss, backdrop click/Escape close.
+- **Pagination:** Client-side pagination for long lists (Skills, Workers, Tasks).
+- **Landing page:** Minimal layout with hero section, features grid, how-it-works steps, and evaluation mockup.
+- **Breadcrumb navigation:** Home / Section partial on all internal pages.
+- **Serilog structured logging:** Request logging middleware, rolling file sink (`Logs/log-.txt`), environment/thread enrichers.
+- **Error page (`/Home/Error`):** `ResponseCache` disabled, proper exception handler fallback for Production.
+- **Health check endpoint:** `/health` with PostgreSQL ping.
+- **Docker support:** Multi-stage Dockerfile (SDK 10.0 + ASP.NET 10.0 runtime) and docker-compose.yml (pgvector/pgvector:pg16 + app).
+- **CI/CD pipeline:** GitHub Actions on `release/sfmanagement.V*` branches — Unit + Integration tests → Render deploy hook.
+- **Testing suite:** 31 unit tests (xUnit + FluentAssertions + NSubstitute), 14 integration tests (Testcontainers + WebApplicationFactory), 8 E2E tests (Playwright + Chromium headless).
+- **Comprehensive README.md:** Full project documentation with architecture diagrams, tech stack, getting started guide, matching algorithm, and evaluation system.
+- **`plan.md` development roadmap:** 124 tasks across 6 phases with entity editing rules and final project structure.
+
+### Changed
+
+- **Test → InReview enum rename:** `ProjectTaskStatus.Test` renamed to `InReview` across enum, PostgreSQL ALTER TYPE migration, SQL queries, JavaScript STATUS_FLOW/STATUS_LABELS, Razor views, and all test files.
+- **Sidebar simplified:** Removed MAIN section label and Dashboard link; navigation via Project/Index card/row clicks to Dashboard.
+- **Card titles standardised at 16px:** All admin list views (Project, Task, Skill, Worker Detail) use `text-[16px]` instead of `text-lg`.
+- **Modal popup width responsive:** 80% default → 76% at ≥ 1500px → 70% at ≥ 1850px via CSS media queries.
+- **All status/priority pills unified:** Consistent `bg-*-50 text-*-700 border border-*-300 font-semibold` style across all views.
+- **Pull-to-refresh disabled:** `overscroll-behavior-y: contain` on body + `modal-open` class toggled by modal lifecycle.
+- **Task cards reorder:** Status + Priority first, Project below (Task/Index and Worker/Detail Active Tasks).
+- **Project/Index navigation:** Card/row clicks → Dashboard; "Detail" button → Project/Detail; row Dashboard icon removed.
+- **Evaluation popup labels:** Date and Project labels use `text-gray-700 font-medium` matching Priority/Status style.
+- **Worker skills gap tightened:** `space-y-1.5`, removed `py-2` from toggle in Worker/Index.
+- **`RecyclableNpgsqlDataSource`:** Wraps NpgsqlDataSource singleton; `Recycle()` rebuilds after schema-modifying operations to fix stale PostgreSQL type cache (`DataTypeName '-.-'`).
+- **ClearDatabase uses TRUNCATE:** `TRUNCATE TABLE ... RESTART IDENTITY CASCADE` keeps schema intact; app functional immediately after clear without importing.
+- **idempotent init.sql:** All seed INSERTs use `ON CONFLICT DO NOTHING`; constraint creation guarded via `pg_constraint` existence check.
+
+### Fixed
+
+- **`DataTypeName '-.-'` error on import:** RecyclableNpgsqlDataSource.Recycle() invalidates stale NpgsqlDataSource type cache after TRUNCATE + reimport cycle.
+- **Pull-to-refresh interfering with modals:** `overscroll-behavior-y: contain` prevents browser overscroll from triggering page reload on real mobile devices.
+- **Pagination not re-rendering after search:** `pagination.js` `filteredItems()` ancestor `hidden` class check fixed with `max-sm:hidden` CSS-only visibility.
+- **Select focus border not visible:** `-ml-px` overlap replaces `border-l-0` so blue focus border is visible on all sides.
+- **`GetEnumOrNull<TEnum>` missing from `DataReaderMapper`:** Now handles nullable enum columns from PostgreSQL.
+- **Sidebar localStorage persistence removed:** Dashboard link no longer saved as active page in localStorage.
+
 ## [0.13.0] - 2026-07-20
 
 ### Added
 
-- **Serilog structured logging:**
+- **8 new archived tasks with full evaluation seed data (tasks 18-25):**
+  - Added 8 fully evaluated archived tasks spanning 2 months (2026-05-20 to 2026-07-18) with 1-4 workers each and 3-6 skills per task.
+  - Task 20: Critical Auth Integration (critical, 3 workers: Alex, Sarah, David Z — 4 skills each)
+  - Task 21: Dashboard Visualisation (low, 2 workers: Oriol, John — 4 skills each)
+  - Task 22: Security Audit (critical, 2 workers: Sarah, Maria — 3-4 skills each)
+  - Task 18: Landing Page Redesign (high, 2 workers: Alex, John — 4 skills each)
+  - Task 19: Backend API Endpoints (medium, 3 workers: Alex, Maria, Carlos — 4 skills each)
+  - Task 24: Data Migration (medium, 2 workers: David M, Carlos — 3-4 skills each)
+  - Task 23: UI Component Library (medium, 2 workers: Oriol, John — 4 skills each)
+  - Task 25: Performance Optimisation (critical, 2 workers: Oriol, David Z — 5 skills each)
+  - All evaluations chain correctly through worker skill vectors with proper clamping (0.0-10.0) and rounding (0.05).
+  - Total new evaluation records: 71. Grand total across all seeds: 82 evaluations.
+- **6 earlier archived tasks for skill evolution continuity (tasks 26-31):**
+  - Tasks dated 3-4 months ago (2026-03-20 to 2026-05-28) to fill the skill evolution timeline.
+  - Task 26: jQuery Cleanup (low, 1 worker: John — 2 skills)
+  - Task 27: Connection Audit (high, 2 workers: Sarah, Carlos — 3 skills each)
+  - Task 28: Responsive Audit (medium, 2 workers: Oriol, John — 3 skills each)
+  - Task 29: Backend Security Audit (high, 2 workers: Sarah, Carlos — 3 skills each)
+  - Task 30: CSS Accessibility Audit (low, 2 workers: Oriol, John — 3 skills each)
+  - Task 31: DB Performance Optimisation (critical, 2 workers: Carlos, Maria — 3-4 skills each)
+  - Added `created_at` timestamps to existing evaluations for tasks 3, 4, 14, and 16.
+  - 45 additional evaluation records. Grand total across all seeds: 127 evaluations.
   - Added `Serilog.AspNetCore`, `Serilog.Sinks.Console`, `Serilog.Sinks.File`, `Serilog.Enrichers.Environment`, `Serilog.Enrichers.Thread` NuGet packages.
   - Static `Log.Logger` initialized from `appsettings.json` Serilog section via `ReadFrom.Configuration`.
   - `builder.Host.UseSerilog()` for full host integration.

@@ -178,23 +178,17 @@
 
 ---
 
-## 🔷 FASE 6 — Flujo de Evaluación por Tarea Finalizada (Modal Wizard con Sliders)
-
-*(pendiente de iniciar)*
-
----
-
-## 🔷 FASE 7 — Validación Extrema de XP, Auditoría OWASP y Cierre
+## 🔷 FASE 6 — Validación Extrema de XP, Auditoría OWASP y Cierre
 
 | # | Tarea | Archivo / Ruta |
 |---|-------|----------------|
-| 7.1 | Test extremo: worker con skill en 6.0, recibe evaluación "mal" con criticidad "high" (×1.5), debe bajar a 5.25 (6.0 + (-0.5 × 1.5) = 5.25) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
-| 7.2 | Test extremo: worker con skill en 0.0, recibe evaluación "mal" con criticidad "critical" (×2.0), debe quedar en 0.0 (clamping inferior) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
-| 7.3 | Test extremo: worker con skill en 9.5, recibe "muy_bien" con criticidad "critical" (×2.0), debe quedar en 10.0 (clamping superior: 9.5 + 0.5×2.0 = 10.5 → clamp a 10.0) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
-| 7.4 | ADR 005: documentar algoritmo de cálculo de XP con fórmula, multiplicadores y clamping | `docs/005-decision-xp-calculation-algorithm.md` |
-| 7.5 | Auditoría OWASP: revisar inyección SQL (parametrización), XSS en Razor (Html.Encode), cabeceras HTTP security | `docs/006-owasp-security-audit.md` |
-| 7.6 | Actualizar `CHANGELOG.md` con v1.0.0 (Added: todas las fases, Fixed: clamping edge cases, Security: OWASP mitigaciones, UI Polish, ID Encryption) | `CHANGELOG.md` |
-| 7.7 | Actualizar `README.md` con descripción técnica, instrucciones de despliegue (docker-compose up), y enlaces a ADRs | `README.md` |
+| 6.1 | Test extremo: worker con skill en 6.0, recibe evaluación "mal" con criticidad "high" (×1.5), debe bajar a 5.25 (6.0 + (-0.5 × 1.5) = 5.25) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
+| 6.2 | Test extremo: worker con skill en 0.0, recibe evaluación "mal" con criticidad "critical" (×2.0), debe quedar en 0.0 (clamping inferior) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
+| 6.3 | Test extremo: worker con skill en 9.5, recibe "muy_bien" con criticidad "critical" (×2.0), debe quedar en 10.0 (clamping superior: 9.5 + 0.5×2.0 = 10.5 → clamp a 10.0) | `tests/Unit/SkillVectorEdgeCaseTests.cs` |
+| 6.4 | ADR 005: documentar algoritmo de cálculo de XP con fórmula, multiplicadores y clamping | `docs/005-decision-xp-calculation-algorithm.md` |
+| 6.5 | Auditoría OWASP: revisar inyección SQL (parametrización), XSS en Razor (Html.Encode), cabeceras HTTP security | `docs/006-owasp-security-audit.md` |
+| 6.6 | Actualizar `CHANGELOG.md` con v1.0.0 (Added: todas las fases, Fixed: clamping edge cases, Security: OWASP mitigaciones, UI Polish, ID Encryption) | `CHANGELOG.md` |
+| 6.7 | Actualizar `README.md` con descripción técnica, instrucciones de despliegue (docker-compose up), y enlaces a ADRs | `README.md` |
 
 ---
 
@@ -292,4 +286,4 @@ C:\Users\leisa\source\repos\sfmanagement\
 
 ---
 
-**Total: ~125 tareas** distribuidas en 7 fases.
+**Total: 124 tareas** distribuidas en 6 fases.
