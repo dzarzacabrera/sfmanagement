@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-07-20
+
+### Added
+
+- **Serilog structured logging:**
+  - Added `Serilog.AspNetCore`, `Serilog.Sinks.Console`, `Serilog.Sinks.File`, `Serilog.Enrichers.Environment`, `Serilog.Enrichers.Thread` NuGet packages.
+  - Static `Log.Logger` initialized from `appsettings.json` Serilog section via `ReadFrom.Configuration`.
+  - `builder.Host.UseSerilog()` for full host integration.
+  - `app.UseSerilogRequestLogging()` middleware logs every HTTP request with method, path, status code and elapsed time.
+  - Rolling file sink: `Logs/log-.txt` with daily rolling and 15-day retention.
+  - Enrichers: `FromLogContext`, `WithMachineName`, `WithThreadId`.
+  - Production minimum level: `Information`; Development: `Debug`.
+- **Exception logging in controllers:**
+  - `TaskController.POST Edit`: `Log.Warning` on `InvalidOperationException`.
+  - `ProjectController.POST FinalizeProject`: `Log.Warning` on `InvalidOperationException`.
+  - `DashboardController.POST FinalizeProject`: `Log.Warning` on `InvalidOperationException`.
+  - `SetupController.POST ClearDatabase`: `Log.Warning` on `Exception`.
+  - `SetupController.POST ImportSeedData`: `Log.Warning` on `Exception`.
+- **Error page (`/Home/Error`):**
+  - New `HomeController.Error()` action with `[ResponseCache(Duration = 0, NoStore = true)]`.
+  - New `Views/Home/Error.cshtml` view with error message and link to home.
+  - Fixes broken `app.UseExceptionHandler("/Home/Error")` in Production (previously pointed to non-existent action).
+- **Comprehensive README.md:**
+  - Complete rewrite with detailed project description, architecture overview, and feature documentation.
+  - Project origin and development phases (Gemma 4 → Gemini → OpenCode → Big Pickle).
+  - Full tech stack table (Backend, Frontend, Database, Testing, DevOps).
+  - Clean Architecture diagram and CQRS Manual pattern explanation.
+  - Complete project structure tree with all layers and key files.
+  - Getting Started guide with 3 options: Docker Compose, Local Development, and Tests.
+  - Database schema overview, custom types, and stored procedures.
+  - Demo & Seed Data section (22 skills, 3 projects, 13 workers, 17 tasks).
+  - CI/CD Pipeline documentation (GitHub Actions → Render).
+  - Kanban lifecycle and task editing rules table.
+  - Matching Algorithm explanation with score formula and badge criteria.
+  - Evaluation & XP System with criticality multipliers and clamping.
+  - UI/UX Features (dark mode, responsive, accessibility, tooltips).
+  - Testing Strategy pyramid (Unit, Integration, E2E) with test counts.
+  - Development Phases summary (5 phases from concept to deployment).
+
+### Changed
+
+- **`.gitignore`:** added `Logs/` directory exclusion for Serilog file output.
+
 ## [0.12.0] - 2026-07-19
 
 ### Added
