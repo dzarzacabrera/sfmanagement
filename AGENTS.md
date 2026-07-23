@@ -100,3 +100,15 @@ Toda sugerencia de desarrollo debe ir acompañada de su correspondiente suite de
 *   **Propósito:** Validar que el flujo completo de la interfaz de usuario interactúe correctamente con el HTML real renderizado en el servidor por el motor de vistas Razor.
 *   **Qué probar:** El camino crítico del usuario en el Dashboard (ej: El flujo completo desde que el usuario navega al formulario de creación de tareas, selecciona una skill desde el dropdown controlado, asigne un desarrollador recomendado por el algoritmo, y el navegador redirija de forma exitosa visualizando los cambios).
 
+---
+
+## 🚀 6. Checklist de Release / Versionado
+
+Al crear una nueva versión, actualizar **obligatoriamente** los siguientes archivos:
+
+1.  **`src/SFManagement.Web/SFManagement.Web.csproj`** → `<Version>X.Y.Z</Version>`.
+2.  **`src/SFManagement.Web/Views/Shared/_Layout.cshtml`** → `<span>SFManagement vX.Y.Z</span>` (.footer, línea ~104).
+3.  **`README.md`** → Badge `Version-X.Y.Z` (línea 10).
+4.  **`CHANGELOG.md`** → Nueva sección `[X.Y.Z] - YYYY-MM-DD` con los cambios clasificados (Added, Changed, Fixed, etc.).
+5.  Crear rama `release/sfmanagement.VX.Y.Z` desde `main`.
+
