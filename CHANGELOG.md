@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-07-23
+
+### Added
+
+- **Comprehensive `README.md`:** Full project documentation with architecture diagrams, tech stack, matching algorithm explanation, evaluation system, and getting started guide.
+- **Seed example for "User Edit" (manual adjustment):** Added a `performance_evaluations` record for David Zarza (worker 7) with `task_id = NULL` and `criticality = 'low'` dated 2026-07-19, demonstrating the manual skill-edit history path in the worker detail view.
+
+---
+
 ## [1.0.0] - 2026-07-20
 
 ### Added
