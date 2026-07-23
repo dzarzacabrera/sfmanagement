@@ -6,7 +6,7 @@
 
 ---
 
-![Version](https://img.shields.io/badge/Version-1.0.2-blue?style=flat-square)
+![Version](https://img.shields.io/badge/Version-1.0.3-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-Proprietary-green?style=flat-square)
 ![.NET](https://img.shields.io/badge/.NET-10-purple?style=flat-square)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square)
