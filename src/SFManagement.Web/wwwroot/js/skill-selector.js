@@ -48,7 +48,7 @@ window.initSkillSelectors = function (container) {
             skills.forEach(function (s) {
                 if (selected.has(s.vectorPosition)) return;
                 if (filter && !s.name.toLowerCase().includes(filter)) return;
-                unselectedHtml += '<span class="skill-pill cursor-pointer inline-flex items-center px-3 rounded-md text-xs font-medium bg-white border border-gray-300 hover:border-brand hover:text-brand transition-colors h-[40px]" data-pos="' + s.vectorPosition + '" data-name="' + s.name.replace(/'/g, '&apos;') + '">' + s.name + '</span>';
+                unselectedHtml += '<span class="skill-pill cursor-pointer inline-flex items-center px-3 rounded-md text-xs font-medium bg-white border border-gray-300 hover:border-brand hover:text-brand transition-colors h-[40px] dark:bg-[#27546f] dark:border-[#27546f] dark:text-gray-200 dark:hover:border-[#3a7a9e] dark:hover:text-white" data-pos="' + s.vectorPosition + '" data-name="' + s.name.replace(/'/g, '&apos;') + '">' + s.name + '</span>';
             });
             unselectedBox.innerHTML = unselectedHtml;
 
@@ -58,7 +58,7 @@ window.initSkillSelectors = function (container) {
                 var name = skill ? skill.name : 'Skill #' + pos;
                 selectedHtml += '<div class="skill-selected-item flex items-center gap-1 px-2 rounded-lg border border-brand-dark/30 bg-brand-light/20 h-[40px] min-w-0" data-pos="' + pos + '">';
                 selectedHtml += '<span class="skill-selected-pill text-xs font-medium text-brand flex-1 min-w-0 truncate">' + name + '</span>';
-                selectedHtml += '<input type="number" class="skill-level w-14 border border-gray-300 rounded px-1 py-1 text-xs text-center" min="0" max="10" step="any" value="' + level + '">';
+                selectedHtml += '<input type="number" class="skill-level w-14 border border-gray-300 rounded px-1 py-1 text-xs text-center dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500" min="0" max="10" step="any" value="' + level + '">';
                 selectedHtml += '<button type="button" class="skill-remove text-gray-400 hover:text-red-500 text-xl font-bold px-1 flex items-center' + (selected.size <= 1 ? ' hidden' : '') + '">&times;</button>';
                 selectedHtml += '</div>';
             });

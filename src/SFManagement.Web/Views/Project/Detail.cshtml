@@ -72,13 +72,13 @@
                  onclick="openTaskDetailPopup('@Model.IdEncrypted', '@task.IdEncrypted')">
                 <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">@task.Title</div>
                 <div class="flex items-center gap-2 mt-1">
-                    <span class="text-gray-700 font-medium" style="font-size:13px;">Priority:</span>
+                    <span class="text-gray-700 dark:text-gray-400 font-medium" style="font-size:13px;">Priority:</span>
                     <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
                         @(task.Criticality == SFManagement.Domain.Enums.Criticality.Critical ? "bg-red-50 text-red-700 border border-red-300" :
                           task.Criticality == SFManagement.Domain.Enums.Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-300" :
                           task.Criticality == SFManagement.Domain.Enums.Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-300" :
                           "bg-gray-50 text-gray-600 border border-gray-300")">@task.Criticality</span>
-                    <span class="text-gray-700 font-medium" style="font-size:13px;">Status:</span>
+                    <span class="text-gray-700 dark:text-gray-400 font-medium" style="font-size:13px;">Status:</span>
                     <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
                         @(task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InProgress ? "bg-amber-50 text-amber-700 border border-amber-300" :
                           task.Status == SFManagement.Domain.Enums.ProjectTaskStatus.InReview ? "bg-purple-50 text-purple-700 border border-purple-300" :

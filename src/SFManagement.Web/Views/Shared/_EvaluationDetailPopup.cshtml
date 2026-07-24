@@ -11,13 +11,13 @@
 <div class="shrink-0 px-6 pt-6 pb-3 border-b border-gray-100 dark:border-gray-700">
     <h2 class="text-lg font-semibold text-gray-900 dark:text-white leading-tight truncate mb-2">@Model.TaskTitle</h2>
     <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-gray-700 font-medium" style="font-size:13px;">Priority:</span>
+        <span class="text-gray-700 dark:text-gray-400 font-medium" style="font-size:13px;">Priority:</span>
         <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
             @(Model.Criticality == Criticality.Critical ? "bg-red-50 text-red-700 border border-red-300" :
               Model.Criticality == Criticality.High ? "bg-orange-50 text-orange-700 border border-orange-300" :
               Model.Criticality == Criticality.Medium ? "bg-blue-50 text-blue-700 border border-blue-300" :
               "bg-gray-50 text-gray-600 border border-gray-300")">@Model.Criticality</span>
-        <span class="text-gray-700 font-medium" style="font-size:13px;">Status:</span>
+        <span class="text-gray-700 dark:text-gray-400 font-medium" style="font-size:13px;">Status:</span>
         <span class="px-1.5 py-0.5 rounded-full text-xs font-semibold
             @(Model.Status == ProjectTaskStatus.InProgress ? "bg-amber-50 text-amber-700 border border-amber-300" :
               Model.Status == ProjectTaskStatus.InReview ? "bg-purple-50 text-purple-700 border border-purple-300" :
@@ -27,11 +27,11 @@
     </div>
     <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-2">
         <span class="flex items-center gap-1.5">
-            <span class="text-gray-700 font-medium" style="font-size:13px;">Date:</span>
+            <span class="text-gray-700 dark:text-gray-400 font-medium" style="font-size:13px;">Date:</span>
             <span class="text-sm text-gray-500 dark:text-gray-400">@Model.EvaluatedAt.ToString("dd/MM/yyyy HH:mm")</span>
         </span>
         <span class="flex items-center gap-1.5">
-            <span class="text-gray-700 font-medium" style="font-size:13px;">Project:</span>
+            <span class="text-gray-700 dark:text-gray-400 font-medium" style="font-size:13px;">Project:</span>
             <span class="text-sm text-gray-500 dark:text-gray-400">@Model.ProjectName</span>
         </span>
     </div>
