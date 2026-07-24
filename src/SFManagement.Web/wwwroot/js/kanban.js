@@ -366,6 +366,10 @@ function refreshTaskCard(taskIdEnc, newStatus, insertBefore) {
                     }
                 }
                 updateColumnCounts();
+                setTimeout(function () {
+                    var rect = newCard.getBoundingClientRect();
+                    window.scrollTo({ top: rect.top + window.pageYOffset - 80, behavior: 'smooth' });
+                }, 300);
                 return;
             }
 
@@ -390,6 +394,10 @@ function refreshTaskCard(taskIdEnc, newStatus, insertBefore) {
             }
 
             updateColumnCounts();
+            setTimeout(function () {
+                var rect = card.getBoundingClientRect();
+                window.scrollTo({ top: rect.top + window.pageYOffset - 80, behavior: 'smooth' });
+            }, 300);
         })
         .catch(function (err) {
             showToast('Card refresh failed: ' + err.message, 'error');
